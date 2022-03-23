@@ -27,7 +27,7 @@ def main():
     """
 
     print('Starting web scraping......')
-    scrapers_ids = ['fotocasa', 'pisos.com', 'kasaz']
+    scrapers_ids = ['idealista', 'fotocasa', 'pisos.com', 'kasaz']
     scraper_threads = list()
     for id in scrapers_ids:
         scraper_thread = threading.Thread(target=scrape_web, args=(ScraperFactory.create_scraper(id),))
