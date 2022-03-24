@@ -1,8 +1,4 @@
-from scrapers.scraper_base import HouseScraper
-
-from urllib.request import urlopen
-from urllib.error import HTTPError
-from urllib.error import URLError
+from .scraper_base import HouseScraper
 
 class FotocasaScraper(HouseScraper):
     pass

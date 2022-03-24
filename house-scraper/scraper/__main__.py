@@ -1,8 +1,13 @@
+from misc import config, utils
 from scrapers.scraper_base import HouseScraper
 from scrapers.scraper_factory import ScraperFactory
 
 from time import time, gmtime, strftime, sleep
 import threading
+
+def init_tmp():
+    utils.create_directory(config.TMP_DIR)
+
 
 def scrape_web(scraper : HouseScraper):
     """
@@ -27,6 +32,7 @@ def main():
     """
 
     print('Starting web scraping......')
+    init_tmp()
     scrapers_ids = ['idealista', 'fotocasa', 'pisos.com', 'kasaz']
     scraper_threads = list()
     for id in scrapers_ids:
@@ -43,4 +49,6 @@ def main():
     print('.....Created final CSV file')
 
 if __name__ == '__main__':
-     main()
+     #main()
+     init_tmp()
+     ScraperFactory.create_scraper('idealista').scrape()
