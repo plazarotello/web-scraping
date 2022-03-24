@@ -6,6 +6,9 @@ from time import time, gmtime, strftime, sleep
 import threading
 
 def init_tmp():
+    """
+    Initializes the temporary folder to dump the data on
+    """
     utils.create_directory(config.TMP_DIR)
 
 
