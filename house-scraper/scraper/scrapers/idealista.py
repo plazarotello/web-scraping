@@ -1,13 +1,182 @@
 from .scraper_base import HouseScraper
+from misc import config
 from time import sleep
+from random import uniform
 from misc import utils
 from concurrent.futures import ThreadPoolExecutor
 import re
+import csv
+import pickle
+import os
 from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.common.by import By
 
 class IdealistaScraper(HouseScraper):
-    BASE_URL = 'https://www.idealista.com'
+    __cookies = pickle.load(open(os.path.join(config.ROOT_DIR, config.IDEALISTA_COOKIE), 'rb'))
+    
+    def _set_cookies(self, driver):
+        driver.get(config.IDEALISTA_URL)
+        for cookie in self.__cookies:
+            driver.add_cookie(cookie)
+        sleep(5)
+        driver.refresh()
+        return driver
 
+    def _scrape_navigation(self, driver, starting_url : str) -> list:
+        """
+        Scrapes the navigation pages for a location (given in the starting url).
+
+        Parameters
+        ----------
+        driver : WebDriver
+            Selenium webdriver to use
+        starting_url : str
+            relative url to start the scraping
+        
+        Returns
+        -------
+        List of the relative URL of the houses that are present in the navigation pages
+        """
+        driver.get(config.IDEALISTA_URL+starting_url)
+        houses_to_visit = list()
+        
+        while True:
+            # browse all pages
+            main_content = driver.find_element(by=By.CSS_SELECTOR, value='main#main-content > section.items-container')
+            articles = main_content.find_elements(by=By.CSS_SELECTOR, value='article.item')
+            for article in articles:
+                # get each article url
+                article_url = article.find_element(by=By.CSS_SELECTOR, 
+                    value='div.item-info-container > a.item-link').get_attribute('href')
+                houses_to_visit.append(article_url)
+            try:
+                next_page = main_content.find_element(by=By.CSS_SELECTOR, value='div.pagination > ul > li.next > a')
+                sleep(uniform(config.RANDOM_MIN_WAIT, config.RANDOM_MAX_WAIT))
+                next_page.click()
+            except NoSuchElementException as e:
+                print(f'[{self.id}] {e}')
+                break   # no more pages to navigate to
+        return houses_to_visit
+
+    def _get_house_features(self, anchors, features, extended_features, house : dict) -> dict:
+        photos = 0
+        try:
+            photos_text = anchors.find_element(by=By.CSS_SELECTOR, value='button.icon-no-pics > span').text
+            photos = int(re.search(r'\d+', photos_text).group(0))   # '10 fotos' -> 10
+        except NoSuchElementException as e:
+            pass    # no photos
+        house['photos'] = photos
+
+        map = False
+        try: 
+            anchors.find_element(by=By.CSS_SELECTOR, value='button.icon-plan')
+            map = True  # checks if map button exists
+        except NoSuchElementException as e: 
+            pass    # map button does not exist
+        house['map'] = 1 if map else 0
+
+        view3d = False
+        try: 
+            anchors.find_element(by=By.CSS_SELECTOR, value='button.icon-3d-tour-outline')
+            view3d = True  # checks if view3d button exists
+        except NoSuchElementException as e: 
+            pass    # view3d button does not exist
+        house['view3d'] = 1 if view3d else 0
+
+        video = False
+        try: 
+            anchors.find_element(by=By.CSS_SELECTOR, value='button.icon-videos')
+            video = True  # checks if video button exists
+        except NoSuchElementException as e: 
+            pass    # video button does not exist
+        house['video'] = 1 if video else 0
+
+        staging = False
+        try: 
+            anchors.find_element(by=By.CSS_SELECTOR, value='button.icon-homestaging')
+            staging = True  # checks if staging button exists
+        except NoSuchElementException as e: 
+            pass    # staging button does not exist
+        house['home-staging'] = 1 if staging else 0
+
+        house['m2'] = features.find_elements(by=By.CSS_SELECTOR, value='span')[0].find_element(
+            by=By.CSS_SELECTOR, value='span').text
+        house['rooms'] = features.find_elements(by=By.CSS_SELECTOR, value='span')[1].find_element(
+            by=By.CSS_SELECTOR, value='span').text
+        house['floor'] = features.find_elements(by=By.CSS_SELECTOR, value='span')[2].find_element(
+            by=By.CSS_SELECTOR, value='span').text + features.find_elements(
+                by=By.CSS_SELECTOR, value='span')[2].text
+        if not re.search(r'Planta', house['floor']):
+            house['floor'] = 'Sin planta'
+        
+        # TODO maybe?
+        try:
+            basic_features = extended_features.find_element(by=By.XPATH, 
+                value='// h3[contains(text(), "Características básicas")]/following-sibling::div/child::ul')
+        except NoSuchElementException as e:
+            pass    # no basic features
+        try:
+            building_features = extended_features.find_element(by=By.XPATH, 
+            value='// h3[contains(text(), "Edificio")]/following-sibling::div/child::ul')
+        except NoSuchElementException as e:
+            pass    # no building features
+        try:
+            equipment_features = extended_features.find_element(by=By.XPATH, 
+            value='// h3[contains(text(), "Equipamiento")]/following-sibling::div/child::ul')
+        except NoSuchElementException as e:
+            pass    # no equipment features
+        try:
+            energy_features = extended_features.find_element(by=By.XPATH, 
+            value='// h3[contains(text(), "Certificado energético")]/following-sibling::div/child::ul')
+        except NoSuchElementException as e:
+            pass    # no energy features
+
+        return house
+
+    def _scrape_house_page(self, driver, location: str, url : str) -> dict:
+        """
+        Scrapes a certain house detail page
+
+        Parameters
+        ----------
+        driver : WebDriver
+            Selenium webdriver to use
+        location: str
+            Location the house in in
+        url : str
+            Relative url to scrap
+        
+        Returns
+        -------
+        Dictionary with all the info on the house
+        """
+        try:
+            house = {'id': None, 'url': None, 'title': None, 'location': None, 'sublocation': None,
+                'price': None, 'm2': None, 'rooms': None, 'floor': None, 'photos': None, 'map': None,
+                'view3d': None, 'video': None, 'home-staging': None, 'description': None}
+            driver.get(url)
+            main_content = driver.find_element(by=By.CSS_SELECTOR, value='main.detail-container > section.detail-info')
+
+            house['id'] = int(re.search(r'\d+', url).group(0))
+            house['url'] = driver.current_url
+            house['title'] = main_content.find_element(by=By.CSS_SELECTOR, value='div.main-info__title > h1 > span').text
+            house['location'] = location
+            house['sublocation'] = main_content.find_element(by=By.CSS_SELECTOR, value='div.main-info__title > span > span').text
+            house['price'] = main_content.find_element(by= By.CSS_SELECTOR, value='div.info-data > span.info-data-price > span').text
+            
+            anchors = main_content.find_element(by=By.CSS_SELECTOR, value='div.fake-anchors')
+            features = main_content.find_element(by=By.CSS_SELECTOR, value='div.info-features')
+            extended_features = main_content.find_element(by=By.CSS_SELECTOR, value='section#details > div.details-property')
+            house = self._get_house_features(anchors, features, extended_features, house)
+            
+            house['description'] = main_content.find_element(by=By.CSS_SELECTOR, 
+            value='div.commentsContainer > div.comment > div.adCommentsLanguage > p').text
+
+            return house
+        except NoSuchElementException as e:
+            print(f'[{self.id}] Something broke; the scraper has probably been detected')
+            raise Exception('Scraper detected and blocked!')
+        
     def _scrape_location(self, location : str, url : str):
         """
         Scrapes a location in idealista and puts all the info in the TMP folder
@@ -18,39 +187,29 @@ class IdealistaScraper(HouseScraper):
         location : str
             Name of the location to scrape
         url : str
-            URL to be attached to the BASE_URL in order to scrape
+            URL to be attached to the IDEALISTA_URL in order to scrape
         """
-        _file = HouseScraper._create_tmp_file(self.id, file_name=location+'.txt')
+        _file = HouseScraper._create_tmp_file(self.id, file_name=location+'.csv')
+        house_fields = ['id', 'url', 'title', 'location', 'sublocation',
+            'price', 'm2', 'rooms', 'floor', 'photos', 'map', 'view3d', 
+            'video', 'home-staging', 'description']
+        _writer = csv.DictWriter(_file, fieldnames=house_fields)
+        _writer.writeheader()
         with utils.get_selenium() as driver:
-            driver.get(self.BASE_URL+url)
-            while True:
-                main_content = driver.find_element_by_css_selector('main#main-content > section.items-container')
-                articles = main_content.find_elements_by_css_selector('article.item')
-                for article in articles:
-                    # browse all articles
-                    sleep(0.5)
-                    article.find_element_by_css_selector('div.item-info-container > a.item-link').click()
-                    sleep(1.0)
-                    
-                    house = dict()
-                    house['url'] = driver.current_url
-                    article_section = driver.find_element_by_css_selector('div#wrapper > div#main naub')
-                    # more info TODO
-                    driver.back()
-                try:
-                    next_page = main_content.find_element_by_css_selector('div.pagination > ul > li.next > a')
-                    next_page.click()
-                except NoSuchElementException as e:
-                    print(f'[{self.id}] {e}')
-                    break   # no more pages to navigate to
-            
+            driver = self._set_cookies(driver)
 
+            # browse all houses and get their info
+            for house_url in self._scrape_navigation(driver, url):
+                sleep(uniform(config.RANDOM_MIN_WAIT, config.RANDOM_MAX_WAIT))
+                _writer.writerow(self._scrape_house_page(driver, location, house_url))
+        
+        _file.close()
 
     def scrape(self):
         HouseScraper._create_tmp_dir(self.id)
 
         try:
-            soup = HouseScraper._get_url(url=self.BASE_URL)
+            soup = HouseScraper._get_url(url=config.IDEALISTA_URL, cookies=self.__cookies)  # TODO
             section = soup.find_all('section', id='municipality-search')[0]
             # gets all top level locations
             locations_list = section.find_all('div', {'class': 'locations-list'})[0].ul.find_all('li', recursive=False)

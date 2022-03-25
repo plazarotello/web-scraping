@@ -58,7 +58,7 @@ class HouseScraper():
         """
         utils.create_directory(os.path.join(config.TMP_DIR, *dir_names))
 
-    def _get_url(url : str, retries=5) -> BeautifulSoup:
+    def _get_url(url : str, cookies = None, retries=5) -> BeautifulSoup:
         """
         Tries to get a Beautiful Soup from a url. If it fails, makes multiple
         attempts before giving up
@@ -79,7 +79,7 @@ class HouseScraper():
         # tries to open the url multiple times before giving up
         for retry in range(retries+1):
             try:
-                r = requests.get(url, headers=config.HEADERS)
+                r = requests.get(url, headers=config.HEADERS, cookies=cookies)
                 r.raise_for_status()    # if returned code is unsuccesful, raise error
                 html = r.content
             except (requests.HTTPError, requests.ConnectionError) as e:

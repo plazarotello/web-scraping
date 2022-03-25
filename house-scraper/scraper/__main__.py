@@ -53,5 +53,6 @@ def main():
 
 if __name__ == '__main__':
      #main()
-     init_tmp()
-     ScraperFactory.create_scraper('idealista').scrape()
+    init_tmp()
+    with utils.get_selenium() as driver:
+        ScraperFactory.create_scraper('idealista').scrape()
