@@ -33,7 +33,7 @@ def get_user_agent():
 
 def reset_user_agent() -> Options:
     options = Options()
-    #options.headless = True    
+    #options.headless = True
     return options
 
 # https://stackoverflow.com/a/40628176
@@ -56,6 +56,7 @@ def get_selenium():
     
     profile = FirefoxProfile()
     profile.set_preference('general.useragent.override', get_user_agent())
+    profile.set_preference('javascript.enabled', True)
     driver = webdriver.Firefox(executable_path=driver_path, options=reset_user_agent(),
         firefox_profile=profile)
     driver.implicitly_wait(15)

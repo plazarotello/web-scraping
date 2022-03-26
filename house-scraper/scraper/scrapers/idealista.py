@@ -19,7 +19,6 @@ class IdealistaScraper(HouseScraper):
         for cookie in self.__cookies:
             driver.add_cookie(cookie)
         sleep(5)
-        driver.refresh()
         return driver
 
     def _scrape_navigation(self, driver, starting_url : str) -> list:
@@ -207,19 +206,21 @@ class IdealistaScraper(HouseScraper):
 
     def scrape(self):
         HouseScraper._create_tmp_dir(self.id)
+        locations_urls = dict()
 
         try:
-            soup = HouseScraper._get_url(url=config.IDEALISTA_URL, cookies=self.__cookies)  # TODO
-            section = soup.find_all('section', id='municipality-search')[0]
-            # gets all top level locations
-            locations_list = section.find_all('div', {'class': 'locations-list'})[0].ul.find_all('li', recursive=False)
-            
-            # gets a pair of (province, url) for each location
-            locations_urls = dict()
-            for location in locations_list:
-                loc = location.a
-                # bypass choosing a sublocation
-                locations_urls[loc.string] = re.sub(r'municipios$', '', loc['href'])
+            with utils.get_selenium() as driver:
+                driver = self._set_cookies(driver)
+                driver.get(config.IDEALISTA_URL)
+                sleep(2.5)
+                driver.execute_script('window.scrollTo(0, document.body.scrollHeight);')
+                locations_list = driver.find_elements(by=By.CSS_SELECTOR, 
+                    value='section#municipality-search > div.locations-list > ul > li')
+                # gets a pair of (province, url) for each location
+                for location in locations_list:
+                    loc_link = location.find_element(by=By.CSS_SELECTOR, value='a')
+                    # bypass choosing a sublocation
+                    locations_urls[loc_link.getText()] = re.sub(r'municipios$', '', loc_link.get_attribute('href'))
         except Exception as e: 
             print(f'[{self.id}]: {e}')
         
