@@ -1,45 +1,98 @@
-import os, shutil, uuid
+import os, shutil, uuid, logging
 from random import randint, uniform
 from time import sleep
-from . import config, proxy_list
+from xmlrpc.client import Boolean
+from . import config, network
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 
-from random_user_agent.user_agent import UserAgent
-from random_user_agent.params import SoftwareName, OperatingSystem
+# =========================================================
+# FILE UTILITIES
+# =========================================================
 
 def delete_directory(dir_name : str):
+    """
+    Deletes the directory
+
+    Parameters
+    ----------
+    dir_name : str
+        Absolute path
+    """
     if os.path.exists(dir_name) and os.path.isdir(dir_name):
         shutil.rmtree(dir_name)
+        log(f'{dir_name} has been deleted')
 
 def create_directory(dir_name : str):
+    """
+    Deletes the directory and creates it again
+
+    Parameters
+    ----------
+    dir_name : str
+        Absolute path
+    """
     delete_directory()
     os.mkdir(dir_name)
+    log(f'{dir_name} has been created')
 
 def create_file(dir : str, file_name : str):
+    """
+    Creates a file in a directory and opens it for writing in UTF-8
+
+    Parameters
+    ----------
+    dir : str
+        Absolute path of the directory
+    file_name : str
+        Name of the file
+    
+    Returns
+    -------
+    File handler ready to be written into
+    """
+    log(f'{os.path.join(dir, file_name)} created')
     return open(os.path.join(dir, file_name), 'w+', encoding='UTF8')
 
 def duplicate_folder(dir : str, dest : str):
-    shutil.copytree(dir, dest)
+    """
+    Copy-pastes a folder
 
-def directory_exists(dir_name : str):
+    Parameters
+    ----------
+    dir : str
+        Absolute folder path to duplicate
+    dest : str
+        Absolute folder path in which to paste the folder
+    """
+    shutil.copytree(dir, dest)
+    log(f'{dir} has been copy-pasted into {dest}')
+
+def directory_exists(dir_name : str) -> Boolean:
+    """
+    Checks if the directory exists and if it is a directory
+
+    Parameters
+    ----------
+    dir_name : str
+        Absolute folder path to check
+    
+    Returns
+    -------
+    True if the path exists and is a folder
+    """
     return os.path.exists(dir_name) and os.path.isdir(dir_name)
 
-# https://medium.com/analytics-vidhya/the-art-of-not-getting-blocked-how-i-used-selenium-python-to-scrape-facebook-and-tiktok-fd6b31dbe85f
-def get_user_agent():
-    sw_names = [SoftwareName.FIREFOX.value, SoftwareName.BRAVE.value,
-        SoftwareName.CHROME.value, SoftwareName.CHROMIUM.value,
-        SoftwareName.EDGE.value, SoftwareName.OPERA.value,
-        SoftwareName.SAFARI.value]
-    os_names = [OperatingSystem.LINUX.value, 
-        OperatingSystem.MAC_OS_X.value, 
-        OperatingSystem.WINDOWS.value]
-    user_agent_rotator = UserAgent(software_names=sw_names, operating_systems=os_names, 
-        limit=100)
-    return user_agent_rotator.get_random_user_agent()
+
+# =========================================================
+# SELENIUM UTILITIES
+# =========================================================
 
 def set_human_options() -> Options:
+    """
+    Create the options for the selenium web driver. Makes it look like a human
+    """
     options = webdriver.ChromeOptions()
 
     og_session = os.path.join(config.ROOT_DIR, config.CHROME_SESSION)
@@ -49,6 +102,7 @@ def set_human_options() -> Options:
         duplicate_folder(og_session, dup_session)
         session = dup_session
         options.add_argument('--headless')
+        log('The driver is not human')
 
     options.add_argument(f'user-data-dir={session}')
     options.add_argument('no-sandbox')
@@ -58,7 +112,10 @@ def set_human_options() -> Options:
 
 # https://stackoverflow.com/a/40628176
 def proxify():
-    available_proxies = proxy_list.get_proxies()
+    """
+    Configures a proxy for a selenium web driver
+    """
+    available_proxies = network.get_proxies()
     selected = available_proxies[randint(0, len(available_proxies)-1)]
     
     capabilities = webdriver.DesiredCapabilities.FIREFOX
@@ -69,16 +126,53 @@ def proxify():
         'ftpProxy': f'{selected["ip"]}:{selected["port"]}',
         'sslProxy': f'{selected["ip"]}:{selected["port"]}'
     }
+    log(f'Setting the driver`s proxy to {selected["ip"]}:{selected["port"]}')
     return capabilities
 
 def get_selenium():
+    """
+    Creates a new selenium web driver that looks like a human
+    """
+    log('Creating new driver')
     driver_path = os.path.join(config.ROOT_DIR, 'chromedriver.exe')
     driver = webdriver.Chrome(executable_path=driver_path, options=set_human_options())
     driver.implicitly_wait(15)
     return driver
+
+
+# =========================================================
+# WAITING UTILITIES
+# =========================================================
+
+"""
+Utilities waiting a big chunk of time or only a small amount of it
+"""
 
 def wait():
     sleep(uniform(config.RANDOM_MIN_WAIT, config.RANDOM_MAX_WAIT))
 
 def mini_wait():
     sleep(uniform(config.RANDOM_SMALL_MIN_WAIT, config.RANDOM_SMALL_MAX_WAIT))
+
+
+# =========================================================
+# LOGGING UTILITIES
+# =========================================================
+
+"""
+Starts a log file. The utilities log messages in the file with each correspondent
+priority level
+"""
+
+# starts a log to file
+logging.basicConfig(filename=os.path.join(config.ROOT_DIR, 'house-scraper.log'),
+    encoding='utf-8', level=logging.INFO)
+
+def log(msg : str):
+    logging.info(msg)
+
+def warn(msg : str):
+    logging.warn(msg)
+
+def error(msg : str):
+    logging.error(msg)

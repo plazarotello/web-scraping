@@ -4,8 +4,9 @@ from scrapers.scraper_factory import ScraperFactory
 
 from time import time, gmtime, strftime, sleep
 import threading
+import argparse
 
-def init_tmp():
+def init_tmp_folder():
     """
     Initializes the temporary folder to dump the data on
     """
@@ -14,7 +15,7 @@ def init_tmp():
 
 def scrape_web(scraper : HouseScraper):
     """
-    Monitors the elapsed time needed to scrape a real state listing web
+    Monitors the elapsed time needed to scrape a real estate listing web
 
     Parameters
     ----------
@@ -22,21 +23,25 @@ def scrape_web(scraper : HouseScraper):
         The scraper object that is going to scrape the web
     """
     start_time = time()
-    sleep(2)
+    scraper.scrape()
     end_time = time()
     elapsed_seconds = end_time - start_time
-    print(f'[{scraper.id}] Elapsed time: {strftime("%H:%M:%S", gmtime(elapsed_seconds))}')
+    utils.log(f'[{scraper.id}] Elapsed time: {strftime("%H:%M:%S", gmtime(elapsed_seconds))}')
 
 
-def main():
+def main(scrapers_ids : list):
     """
-    Launches several threads to scrape multiple real state listing webs; then joins 
+    Launches several threads to scrape multiple real estate listing webs; then joins 
     the results in a single CSV file
+
+    Parameters
+    ----------
+    scrapers_ids : list
+        List of the selected pages' IDs to scrape
     """
 
-    print('Starting web scraping......')
-    init_tmp()
-    scrapers_ids = ['idealista', 'fotocasa', 'pisos.com', 'kasaz']
+    utils.log('Starting web-scraping')
+    init_tmp_folder()
     scraper_threads = list()
     for id in scrapers_ids:
         scraper_thread = threading.Thread(target=scrape_web, args=(ScraperFactory.create_scraper(id),))
@@ -45,13 +50,28 @@ def main():
     
     for scraper_thread in scraper_threads:
         scraper_thread.join()
-    print('......Finished web scraping')
-    print('...........................')
-    print('Joining results............')
-    # join results
-    print('.....Created final CSV file')
-
+    utils.log('Finished web-scraping')
+    utils.log('Joining results...')
+    # TODO join results and create final dataset in CSV
+    utils.log('... Results joined')
+    
 if __name__ == '__main__':
-    #main()
-    init_tmp()
-    ScraperFactory.create_scraper('idealista').scrape()
+    argparser = argparse.ArgumentParser(description='Will scrape the selected pages. If no pages selected, then it will scrape every page')
+    argparser.add_argument('-i', '--idealista', help='launches the idealista scraper')
+    argparser.add_argument('-f', '--fotocasa', help='launches the fotocasa scraper')
+    argparser.add_argument('-p', '--pisoscom', help='launches the pisos.com scraper')
+    argparser.add_argument('-k', '--kasaz', help='launches the kasaz scraper')
+    args = argparser.parse_args()
+
+    scraper_ids = list()
+    if args.idealista: scraper_ids.append(config.IDEALISTA_ID)
+    if args.fotocasa: scraper_ids.append(config.FOTOCASA_ID)
+    if args.pisoscom: scraper_ids.append(config.PISOSCOM_ID)
+    if args.kasaz: scraper_ids.append(config.KASAZ_ID)
+
+    if not scraper_ids:
+        scraper_ids = [config.IDEALISTA_ID, config.FOTOCASA_ID, 
+            config.PISOSCOM_ID, config.KASAZ_ID]
+
+    utils.log(f'Scraping {scraper_ids}')
+    main(scrapers_ids=scraper_ids)

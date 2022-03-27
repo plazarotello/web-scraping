@@ -1,15 +1,13 @@
 from .scraper_base import HouseScraper
-from misc import config
-from misc import utils
+from misc import config, utils
+import re, csv, os
 from concurrent.futures import ThreadPoolExecutor
-import re
-import csv
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 
 class IdealistaScraper(HouseScraper):
 
-    def _scrape_navigation(self, driver, starting_url : str) -> list:
+    def _scrape_navigation(self, driver, url : str) -> list:
         """
         Scrapes the navigation pages for a location (given in the starting url).
 
@@ -17,14 +15,14 @@ class IdealistaScraper(HouseScraper):
         ----------
         driver : WebDriver
             Selenium webdriver to use
-        starting_url : str
-            relative url to start the scraping
+        url : str
+            URL to start the scraping
         
         Returns
         -------
         List of the relative URL of the houses that are present in the navigation pages
         """
-        driver.get(starting_url)
+        driver.get(url)
         utils.mini_wait()
         houses_to_visit = list()
         
@@ -45,11 +43,33 @@ class IdealistaScraper(HouseScraper):
                 utils.mini_wait()
                 next_page.click()
             except NoSuchElementException as e:
-                print(f'[{self.id}] {e}')
+                utils.warn(f'[{self.id}] {e}')
+                utils.log(f'[{self.id}] No more pages to visit')
                 break   # no more pages to navigate to
         return houses_to_visit
 
     def _get_house_features(self, anchors, features, extended_features, house : dict) -> dict:
+        """
+        Gets some features from the house: number of photos, if there is a map, video and 3D view 
+        available in the web, if there exists a home staging feature, the m2, number of rooms and
+        the floor the house is in.
+
+        Parameters
+        ----------
+        anchors : WebElement
+            the div where the photos, view3D, etc are located
+        features : WebElement
+            the div where the main (basic) features are located
+        extended_features : WebElement
+            the div where the extended features are located
+        house : dict
+            Dictionary to append the information to
+        
+        Returns
+        -------
+        Updated house dictionary
+        """
+
         photos = 0
         try:
             photos_text = anchors.find_element(by=By.CSS_SELECTOR, value='button.icon-no-pics > span').text
@@ -100,7 +120,7 @@ class IdealistaScraper(HouseScraper):
         if not re.search(r'Planta', house['floor']):
             house['floor'] = 'Sin planta'
         
-        # TODO maybe?
+        # TODO Get info on house, building, equipment and energy features
         try:
             basic_features = extended_features.find_element(by=By.XPATH, 
                 value='// h3[contains(text(), "Características básicas")]/following-sibling::div/child::ul')
@@ -135,7 +155,7 @@ class IdealistaScraper(HouseScraper):
         location: str
             Location the house in in
         url : str
-            Relative url to scrap
+            URL to scrap
         
         Returns
         -------
@@ -166,13 +186,13 @@ class IdealistaScraper(HouseScraper):
 
             return house
         except NoSuchElementException as e:
-            print(f'[{self.id}] Something broke; the scraper has probably been detected')
+            utils.error(f'[{self.id}] Something broke; the scraper has probably been detected')
             raise Exception('Scraper detected and blocked!')
         
     def _scrape_location(self, location : str, url : str):
         """
         Scrapes a location in idealista and puts all the info in the TMP folder
-        of the project, under idealista/location.txt
+        of the project, under idealista/{location}.txt
 
         Parameters
         ----------
@@ -181,7 +201,7 @@ class IdealistaScraper(HouseScraper):
         url : str
             URL to be attached to the IDEALISTA_URL in order to scrape
         """
-        _file = HouseScraper._create_tmp_file(self.id, file_name=location+'.csv')
+        _file = utils.create_file(os.path.join(config.TMP_DIR, self.id, location+'.csv'))
         house_fields = ['id', 'url', 'title', 'location', 'sublocation',
             'price', 'm2', 'rooms', 'floor', 'photos', 'map', 'view3d', 
             'video', 'home-staging', 'description']
@@ -196,7 +216,11 @@ class IdealistaScraper(HouseScraper):
         _file.close()
 
     def scrape(self):
-        HouseScraper._create_tmp_dir(self.id)
+        """
+        Scrapes the entire idealista website
+        """
+        
+        utils.create_directory(os.path.join(config.TMP_DIR, self.id))
         locations_urls = dict()
 
         try:
@@ -214,7 +238,7 @@ class IdealistaScraper(HouseScraper):
                     locations_urls[loc_link.text] = re.sub(r'municipios$', '', loc_link.get_attribute('href'))
                 utils.mini_wait()
         except Exception as e: 
-            print(f'[{self.id}]: {e}')
+            utils.error(f'[{self.id}]: {e}')
         
         # concurrent scrape of all provinces, using 5 threads
         with ThreadPoolExecutor(max_workers=5) as executor:

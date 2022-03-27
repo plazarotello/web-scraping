@@ -1,6 +1,26 @@
-from . import config
 import requests
 from bs4 import BeautifulSoup
+from random_user_agent.user_agent import UserAgent
+from random_user_agent.params import SoftwareName, OperatingSystem
+
+
+# https://medium.com/analytics-vidhya/the-art-of-not-getting-blocked-how-i-used-selenium-python-to-scrape-facebook-and-tiktok-fd6b31dbe85f
+def get_user_agent():
+    """
+    Generates a random user agent
+    """
+    sw_names = [SoftwareName.FIREFOX.value, SoftwareName.BRAVE.value,
+        SoftwareName.CHROME.value, SoftwareName.CHROMIUM.value,
+        SoftwareName.EDGE.value, SoftwareName.OPERA.value,
+        SoftwareName.SAFARI.value]
+    os_names = [OperatingSystem.LINUX.value, 
+        OperatingSystem.MAC_OS_X.value, 
+        OperatingSystem.WINDOWS.value]
+    user_agent_rotator = UserAgent(software_names=sw_names, operating_systems=os_names, 
+        limit=100)
+    return user_agent_rotator.get_random_user_agent()
+
+# ---------------------------------------------------------
 
 PROXIES = 'https://hidemy.name/es/proxy-list/?maxtime=1000&type=hs&anon=4'
 
@@ -16,7 +36,8 @@ def get_proxies() -> list:
     if not __proxy_list:
         __proxy_list = list()
         try:
-            r = requests.get(PROXIES, headers=config.HEADERS)
+            r_headers = {'User-Agent': get_user_agent()}
+            r = requests.get(PROXIES, headers=r_headers)
             r.raise_for_status()    # if returned code is unsuccesful, raise error
             html = r.content
         except (requests.HTTPError, requests.ConnectionError) as e:
