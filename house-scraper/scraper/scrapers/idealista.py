@@ -142,9 +142,9 @@ class IdealistaScraper(HouseScraper):
         Dictionary with all the info on the house
         """
         try:
-            house = {'id': None, 'url': None, 'title': None, 'location': None, 'sublocation': None,
-                'price': None, 'm2': None, 'rooms': None, 'floor': None, 'photos': None, 'map': None,
-                'view3d': None, 'video': None, 'home-staging': None, 'description': None}
+            house = {'id': '', 'url': '', 'title': '', 'location': '', 'sublocation': '',
+                'price': '', 'm2': '', 'rooms': '', 'floor': '', 'photos': '', 'map': '',
+                'view3d': '', 'video': '', 'home-staging': '', 'description': ''}
             driver.get(url)
             utils.mini_wait()
             main_content = driver.find_element(by=By.CSS_SELECTOR, value='main.detail-container > section.detail-info')
