@@ -1,25 +1,13 @@
 from .scraper_base import HouseScraper
 from misc import config
-from time import sleep
-from random import uniform
 from misc import utils
 from concurrent.futures import ThreadPoolExecutor
 import re
 import csv
-import pickle
-import os
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 
 class IdealistaScraper(HouseScraper):
-    __cookies = pickle.load(open(os.path.join(config.ROOT_DIR, config.IDEALISTA_COOKIE), 'rb'))
-    
-    def _set_cookies(self, driver):
-        driver.get(config.IDEALISTA_URL)
-        for cookie in self.__cookies:
-            driver.add_cookie(cookie)
-        sleep(5)
-        return driver
 
     def _scrape_navigation(self, driver, starting_url : str) -> list:
         """
@@ -36,13 +24,15 @@ class IdealistaScraper(HouseScraper):
         -------
         List of the relative URL of the houses that are present in the navigation pages
         """
-        driver.get(config.IDEALISTA_URL+starting_url)
+        driver.get(starting_url)
+        utils.mini_wait()
         houses_to_visit = list()
         
         while True:
             # browse all pages
             main_content = driver.find_element(by=By.CSS_SELECTOR, value='main#main-content > section.items-container')
             articles = main_content.find_elements(by=By.CSS_SELECTOR, value='article.item')
+            driver.execute_script('arguments[0].scrollIntoView();', articles[0])
             for article in articles:
                 # get each article url
                 article_url = article.find_element(by=By.CSS_SELECTOR, 
@@ -50,7 +40,9 @@ class IdealistaScraper(HouseScraper):
                 houses_to_visit.append(article_url)
             try:
                 next_page = main_content.find_element(by=By.CSS_SELECTOR, value='div.pagination > ul > li.next > a')
-                sleep(uniform(config.RANDOM_MIN_WAIT, config.RANDOM_MAX_WAIT))
+                utils.mini_wait()
+                driver.execute_script('arguments[0].scrollIntoView();', next_page)
+                utils.mini_wait()
                 next_page.click()
             except NoSuchElementException as e:
                 print(f'[{self.id}] {e}')
@@ -154,6 +146,7 @@ class IdealistaScraper(HouseScraper):
                 'price': None, 'm2': None, 'rooms': None, 'floor': None, 'photos': None, 'map': None,
                 'view3d': None, 'video': None, 'home-staging': None, 'description': None}
             driver.get(url)
+            utils.mini_wait()
             main_content = driver.find_element(by=By.CSS_SELECTOR, value='main.detail-container > section.detail-info')
 
             house['id'] = int(re.search(r'\d+', url).group(0))
@@ -195,11 +188,9 @@ class IdealistaScraper(HouseScraper):
         _writer = csv.DictWriter(_file, fieldnames=house_fields)
         _writer.writeheader()
         with utils.get_selenium() as driver:
-            driver = self._set_cookies(driver)
-
             # browse all houses and get their info
             for house_url in self._scrape_navigation(driver, url):
-                sleep(uniform(config.RANDOM_MIN_WAIT, config.RANDOM_MAX_WAIT))
+                utils.wait()
                 _writer.writerow(self._scrape_house_page(driver, location, house_url))
         
         _file.close()
@@ -210,17 +201,18 @@ class IdealistaScraper(HouseScraper):
 
         try:
             with utils.get_selenium() as driver:
-                driver = self._set_cookies(driver)
+                utils.mini_wait()
                 driver.get(config.IDEALISTA_URL)
-                sleep(2.5)
-                driver.execute_script('window.scrollTo(0, document.body.scrollHeight);')
+                utils.wait()
                 locations_list = driver.find_elements(by=By.CSS_SELECTOR, 
                     value='section#municipality-search > div.locations-list > ul > li')
+                driver.execute_script('arguments[0].scrollIntoView();', locations_list[0])
                 # gets a pair of (province, url) for each location
                 for location in locations_list:
                     loc_link = location.find_element(by=By.CSS_SELECTOR, value='a')
                     # bypass choosing a sublocation
-                    locations_urls[loc_link.getText()] = re.sub(r'municipios$', '', loc_link.get_attribute('href'))
+                    locations_urls[loc_link.text] = re.sub(r'municipios$', '', loc_link.get_attribute('href'))
+                utils.mini_wait()
         except Exception as e: 
             print(f'[{self.id}]: {e}')
         

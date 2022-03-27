@@ -51,12 +51,7 @@ def main():
     # join results
     print('.....Created final CSV file')
 
-def refresh_cookies():
-    from misc import cookie_refresh
-    cookie_refresh.refresh_idealista()
-
 if __name__ == '__main__':
-    #refresh_cookies()
     #main()
     init_tmp()
     ScraperFactory.create_scraper('idealista').scrape()

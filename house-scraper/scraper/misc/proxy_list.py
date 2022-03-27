@@ -1,9 +1,8 @@
 from . import config
 import requests
-import re
 from bs4 import BeautifulSoup
 
-PROXIES = 'https://free-proxy-list.net/'
+PROXIES = 'https://hidemy.name/es/proxy-list/?maxtime=1000&type=hs&anon=4'
 
 __proxy_list = list()
 
@@ -25,9 +24,8 @@ def get_proxies() -> list:
 
         # if there are no errors opening the URL, returns the soup
         soup = BeautifulSoup(html, 'html.parser')
-        table = soup.find('section', {'id' : 'list'}).select('div.container > div.table-responsive > div > table > tbody')[0]
+        table = soup.body.select('div.wrap > div.services_proxylist.services > div.inner > div.table_block > table > tbody')[0]
         for proxy in table.find_all('tr'):
             features = proxy.find_all('td')
-            if features[6].getText() == 'yes':
-                __proxy_list.append({'ip': features[0].getText(), 'port': features[1].getText()})
+            __proxy_list.append({'ip': features[0].getText(), 'port': features[1].getText()})
     return __proxy_list

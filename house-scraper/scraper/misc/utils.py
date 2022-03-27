@@ -1,11 +1,10 @@
-import os, shutil
-from random import randint
+import os, shutil, uuid
+from random import randint, uniform
+from time import sleep
 from . import config, proxy_list
 
 from selenium import webdriver
-from selenium.webdriver.firefox.options import Options
-from selenium.webdriver.firefox.firefox_profile import FirefoxProfile
-from selenium.webdriver.common.proxy import Proxy, ProxyType
+from selenium.webdriver.chrome.options import Options
 
 from random_user_agent.user_agent import UserAgent
 from random_user_agent.params import SoftwareName, OperatingSystem
@@ -17,6 +16,9 @@ def create_directory(dir_name : str):
 
 def create_file(dir : str, file_name : str):
     return open(os.path.join(dir, file_name), 'w+', encoding='UTF8')
+
+def duplicate_folder(dir : str, dest : str):
+    shutil.copytree(dir, dest)
 
 # https://medium.com/analytics-vidhya/the-art-of-not-getting-blocked-how-i-used-selenium-python-to-scrape-facebook-and-tiktok-fd6b31dbe85f
 def get_user_agent():
@@ -31,33 +33,43 @@ def get_user_agent():
         limit=100)
     return user_agent_rotator.get_random_user_agent()
 
-def reset_user_agent() -> Options:
-    options = Options()
-    #options.headless = True
+def set_human_options() -> Options:
+    options = webdriver.ChromeOptions()
+
+    og_session = os.path.join(config.ROOT_DIR, 'chrome-session')
+    dup_session = os.path.join(config.TMP_DIR, 'chrome-session', str(uuid.uuid4()))
+    duplicate_folder(og_session, dup_session)
+
+    options.add_argument(f'user-data-dir={dup_session}')
+    options.add_argument('no-sandbox')
+    options.add_argument('--disable-gpu')
+    options.add_argument('--window-size=800,600')
+    options.add_argument('--headless')
     return options
 
 # https://stackoverflow.com/a/40628176
 def proxify():
     available_proxies = proxy_list.get_proxies()
     selected = available_proxies[randint(0, len(available_proxies)-1)]
-
-    proxy = Proxy()
-    proxy.proxy_type = ProxyType.MANUAL
-    proxy.http_proxy = f'{selected["ip"]}:{selected["port"]}'
-    proxy.socks_proxy = f'{selected["ip"]}:{selected["port"]}'
-    proxy.ssl_proxy = f'{selected["ip"]}:{selected["port"]}'
-
+    
     capabilities = webdriver.DesiredCapabilities.FIREFOX
-    proxy.add_to_capabilities(capabilities)
+    capabilities['marionette'] = True
+    capabilities['proxy'] = {
+        'proxyType': 'MANUAL',
+        'httpProxy': f'{selected["ip"]}:{selected["port"]}',
+        'ftpProxy': f'{selected["ip"]}:{selected["port"]}',
+        'sslProxy': f'{selected["ip"]}:{selected["port"]}'
+    }
     return capabilities
 
 def get_selenium():
-    driver_path = os.path.join(config.ROOT_DIR, 'geckodriver.exe')
-    
-    profile = FirefoxProfile()
-    profile.set_preference('general.useragent.override', get_user_agent())
-    profile.set_preference('javascript.enabled', True)
-    driver = webdriver.Firefox(executable_path=driver_path, options=reset_user_agent(),
-        firefox_profile=profile)
+    driver_path = os.path.join(config.ROOT_DIR, 'chromedriver.exe')
+    driver = webdriver.Chrome(executable_path=driver_path, options=set_human_options())
     driver.implicitly_wait(15)
     return driver
+
+def wait():
+    sleep(uniform(config.RANDOM_MIN_WAIT, config.RANDOM_MAX_WAIT))
+
+def mini_wait():
+    sleep(uniform(config.RANDOM_SMALL_MIN_WAIT, config.RANDOM_SMALL_MAX_WAIT))

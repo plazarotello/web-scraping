@@ -57,38 +57,3 @@ class HouseScraper():
             Directories to concatenate
         """
         utils.create_directory(os.path.join(config.TMP_DIR, *dir_names))
-
-    def _get_url(url : str, cookies = None, retries=5) -> BeautifulSoup:
-        """
-        Tries to get a Beautiful Soup from a url. If it fails, makes multiple
-        attempts before giving up
-
-        Parameters
-        ----------
-        url : str
-            URL to get
-        retries : int, optional
-            Number of retries before giving up
-
-        Raises
-        ------
-        Exception
-            If it can't get the URL after multiple attempts
-        """
-
-        # tries to open the url multiple times before giving up
-        for retry in range(retries+1):
-            try:
-                r = requests.get(url, headers=config.HEADERS, cookies=cookies)
-                r.raise_for_status()    # if returned code is unsuccesful, raise error
-                html = r.content
-            except (requests.HTTPError, requests.ConnectionError) as e:
-                print(f'Error in {url}: {e}')
-                # sleeps an increasing number of seconds between attempts
-                sleep(0.5 + 0.5*retry)
-                continue
-
-            # if there are no errors opening the URL, returns the soup
-            return BeautifulSoup(html, 'html.parser')
-        
-        raise Exception(f'Unable to reach {url}')
