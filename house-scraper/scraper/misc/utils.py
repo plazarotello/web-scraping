@@ -9,9 +9,12 @@ from selenium.webdriver.chrome.options import Options
 from random_user_agent.user_agent import UserAgent
 from random_user_agent.params import SoftwareName, OperatingSystem
 
-def create_directory(dir_name : str):
+def delete_directory(dir_name : str):
     if os.path.exists(dir_name) and os.path.isdir(dir_name):
         shutil.rmtree(dir_name)
+
+def create_directory(dir_name : str):
+    delete_directory()
     os.mkdir(dir_name)
 
 def create_file(dir : str, file_name : str):
@@ -19,6 +22,9 @@ def create_file(dir : str, file_name : str):
 
 def duplicate_folder(dir : str, dest : str):
     shutil.copytree(dir, dest)
+
+def directory_exists(dir_name : str):
+    return os.path.exists(dir_name) and os.path.isdir(dir_name)
 
 # https://medium.com/analytics-vidhya/the-art-of-not-getting-blocked-how-i-used-selenium-python-to-scrape-facebook-and-tiktok-fd6b31dbe85f
 def get_user_agent():
@@ -36,15 +42,18 @@ def get_user_agent():
 def set_human_options() -> Options:
     options = webdriver.ChromeOptions()
 
-    og_session = os.path.join(config.ROOT_DIR, 'chrome-session')
-    dup_session = os.path.join(config.TMP_DIR, 'chrome-session', str(uuid.uuid4()))
-    duplicate_folder(og_session, dup_session)
+    og_session = os.path.join(config.ROOT_DIR, config.CHROME_SESSION)
+    session = og_session
+    if directory_exists(og_session):
+        dup_session = os.path.join(config.TMP_DIR, config.CHROME_SESSION, str(uuid.uuid4()))
+        duplicate_folder(og_session, dup_session)
+        session = dup_session
+        options.add_argument('--headless')
 
-    options.add_argument(f'user-data-dir={dup_session}')
+    options.add_argument(f'user-data-dir={session}')
     options.add_argument('no-sandbox')
     options.add_argument('--disable-gpu')
     options.add_argument('--window-size=800,600')
-    options.add_argument('--headless')
     return options
 
 # https://stackoverflow.com/a/40628176
