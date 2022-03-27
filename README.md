@@ -1,6 +1,6 @@
 # Título provisional
 
-![Maintainer](https://img.shields.io/badge/maintainer-plazarotello-blue)(https://github.com/plazarotello) ![Maintainer](https://img.shields.io/badge/maintainer-alba620-blue)(https://github.com/alba620) [![Python 3.6](https://img.shields.io/badge/python-3.9-blue.svg)](https://www.python.org/downloads/release/python-3910/)
+[![Maintainer](https://img.shields.io/badge/maintainer-plazarotello-blue)](https://github.com/plazarotello) [![Maintainer](https://img.shields.io/badge/maintainer-alba620-blue)](https://github.com/alba620) [![Python 3.6](https://img.shields.io/badge/python-3.9-blue.svg)](https://www.python.org/downloads/release/python-3910/)
 
 ## Contexto
 
