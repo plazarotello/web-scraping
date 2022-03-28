@@ -147,7 +147,7 @@ def get_selenium():
     log('Creating new driver')
     driver_path = os.path.join(config.ROOT_DIR, 'chromedriver.exe')
     driver = webdriver.Chrome(executable_path=driver_path, options=set_human_options())
-    driver.implicitly_wait(15)
+    driver.implicitly_wait(60)
     return driver
 
 
