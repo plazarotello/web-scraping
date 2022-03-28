@@ -185,7 +185,8 @@ priority level
 
 # starts a log to file
 logging.basicConfig(filename=os.path.join(config.ROOT_DIR, 'house-scraper.log'), 
-    filemode='w', encoding='utf-8', level=logging.INFO)
+    filemode='w', encoding='utf-8', level=logging.INFO,
+    format='%(asctime)s | %(levelname)s | %(message)s', datefmt='%Y-%m-%d %H:%M%S')
 
 def log(msg : str):
     logging.info(msg)
