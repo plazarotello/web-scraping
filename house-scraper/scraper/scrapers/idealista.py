@@ -1,7 +1,7 @@
 import csv
 import os
 import re
-from concurrent.futures import ThreadPoolExecutor, wait
+from concurrent.futures import ThreadPoolExecutor
 
 import pandas as pd
 from misc import config, utils
@@ -34,6 +34,7 @@ class IdealistaScraper(HouseScraper):
         
         while True:
             # browse all pages
+            utils.log('[idealista]Scraping page...')
             main_content = driver.find_element(by=By.CSS_SELECTOR, value='main#main-content > section.items-container')
             articles = main_content.find_elements(by=By.CSS_SELECTOR, value='article.item')
             driver.execute_script('arguments[0].scrollIntoView();', articles[0])
@@ -47,6 +48,7 @@ class IdealistaScraper(HouseScraper):
                 utils.mini_wait()
                 driver.execute_script('arguments[0].scrollIntoView();', next_page)
                 utils.mini_wait()
+                utils.log('[idealista]Page scraped.')
                 next_page.click()
             except NoSuchElementException as e:
                 utils.warn(f'[{self.id}] {e}')
@@ -207,12 +209,13 @@ class IdealistaScraper(HouseScraper):
         url : str
             URL to be attached to the IDEALISTA_URL in order to scrape
         """
-        _file = utils.create_file(os.path.join(config.TMP_DIR, self.id, location+'.csv'))
+        _file = utils.create_file(os.path.join(config.TMP_DIR, self.id), location+'.csv')
         house_fields = ['id', 'url', 'title', 'location', 'sublocation',
             'price', 'm2', 'rooms', 'floor', 'photos', 'map', 'view3d', 
             'video', 'home-staging', 'description']
         _writer = csv.DictWriter(_file, fieldnames=house_fields)
         _writer.writeheader()
+        utils.log(f'[idealista] Scraping {location}')
         with utils.get_selenium() as driver:
             # browse all houses and get their info
             for house_url in self._scrape_navigation(driver, url):
@@ -252,7 +255,6 @@ class IdealistaScraper(HouseScraper):
             threads = []
             for location, url in locations_urls.items():
                 threads.append(executor.submit(self._scrape_location, location, url))
-            wait(threads)
         
         # mix all the files, keep unique IDs
         utils.log('Merging the data')

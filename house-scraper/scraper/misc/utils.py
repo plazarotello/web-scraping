@@ -118,7 +118,7 @@ def set_human_options() -> Options:
     options.add_argument(f'user-data-dir={session}')
     options.add_argument('no-sandbox')
     options.add_argument('--disable-gpu')
-    options.add_argument('--window-size=800,600')
+    options.add_argument('--window-size=1920,1080')
     return options
 
 # https://stackoverflow.com/a/40628176
