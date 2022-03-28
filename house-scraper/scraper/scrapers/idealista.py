@@ -15,14 +15,12 @@ class IdealistaScraper(HouseScraper):
 
     __urls = dict()
 
-    def _scrape_navigation(self, driver, url : str) -> list:
+    def _scrape_navigation(self, url : str, location : str) -> list:
         """
         Scrapes the navigation pages for a location (given in the starting url).
 
         Parameters
         ----------
-        driver : WebDriver
-            Selenium webdriver to use
         url : str
             URL to start the scraping
         
@@ -30,6 +28,8 @@ class IdealistaScraper(HouseScraper):
         -------
         List of the relative URL of the houses that are present in the navigation pages
         """
+        last_visited_url = url
+        driver = utils.get_selenium()
         utils.mini_wait()
         driver.get(url)
         houses_to_visit = list()
@@ -39,7 +39,16 @@ class IdealistaScraper(HouseScraper):
             utils.mega_wait() if utils.flip_coin() else utils.wait()
 
             # browse all pages
-            main_content = driver.find_element(by=By.CSS_SELECTOR, value='main#main-content > section.items-container')
+            try:
+                main_content = driver.find_element(by=By.CSS_SELECTOR, value='main#main-content > section.items-container')
+            except NoSuchElementException as e:
+                utils.error(f'[{self.id}][{location}]: error 403! Retrying...')
+                driver.quit()
+                driver = utils.get_selenium()
+                utils.mini_wait()
+                driver.get(last_visited_url)
+                continue
+
             articles = main_content.find_elements(by=By.CSS_SELECTOR, value='article.item')
             # driver.execute_script('arguments[0].scrollIntoView();', articles[0])
             for article in articles:
@@ -49,6 +58,7 @@ class IdealistaScraper(HouseScraper):
                 houses_to_visit.append(article_url)
             try:
                 next_page = main_content.find_element(by=By.CSS_SELECTOR, value='div.pagination > ul > li.next > a')
+                last_visited_url = next_page.get_attribute('href')
                 driver.execute_script('arguments[0].scrollIntoView();', next_page)
                 utils.mini_wait()
                 next_page.click()
@@ -56,6 +66,7 @@ class IdealistaScraper(HouseScraper):
                 utils.log(f'[{self.id}] No more pages to visit')
                 utils.warn(f'[{self.id}] {e.msg}')
                 break   # no more pages to navigate to
+        driver.quit()
         return houses_to_visit
 
     def _get_house_features(self, anchors, features, extended_features, house : dict) -> dict:
@@ -167,37 +178,38 @@ class IdealistaScraper(HouseScraper):
         -------
         Dictionary with all the info on the house
         """
-        with utils.get_selenium() as driver:
-            try:
-                house = {'id': '', 'url': '', 'title': '', 'location': '', 'sublocation': '',
-                    'price': '', 'm2': '', 'rooms': '', 'floor': '', 'photos': '', 'map': '',
-                    'view3d': '', 'video': '', 'home-staging': '', 'description': ''}
-                utils.log(f'[idealista:{location}] Scraping {url}')
-                utils.mini_wait()
-                driver.get(url)
-                main_content = driver.find_element(by=By.CSS_SELECTOR, value='main.detail-container > section.detail-info')
+        while True: # so it tries time and time again to access the page
+            with utils.get_selenium() as driver:
+                try:
+                    house = {'id': '', 'url': '', 'title': '', 'location': '', 'sublocation': '',
+                        'price': '', 'm2': '', 'rooms': '', 'floor': '', 'photos': '', 'map': '',
+                        'view3d': '', 'video': '', 'home-staging': '', 'description': ''}
+                    utils.log(f'[idealista:{location}] Scraping {url}')
+                    utils.mini_wait()
+                    driver.get(url)
+                    main_content = driver.find_element(by=By.CSS_SELECTOR, value='main.detail-container > section.detail-info')
 
-                house['id'] = int(re.search(r'\d+', url).group(0))
-                house['url'] = driver.current_url
-                house['title'] = main_content.find_element(by=By.CSS_SELECTOR, value='div.main-info__title > h1 > span').text
-                house['location'] = location
-                house['sublocation'] = main_content.find_element(by=By.CSS_SELECTOR, value='div.main-info__title > span > span').text
-                house['price'] = int(main_content.find_element(by= By.CSS_SELECTOR, 
-                    value='div.info-data > span.info-data-price > span').text.replace('.', ''))
-                
-                anchors = main_content.find_element(by=By.CSS_SELECTOR, value='div.fake-anchors')
-                features = main_content.find_element(by=By.CSS_SELECTOR, value='div.info-features')
-                extended_features = main_content.find_element(by=By.CSS_SELECTOR, value='section#details > div.details-property')
-                house = self._get_house_features(anchors, features, extended_features, house)
-                
-                house['description'] = main_content.find_element(by=By.CSS_SELECTOR, 
-                value='div.commentsContainer > div.comment > div.adCommentsLanguage > p').text.strip()
+                    house['id'] = int(re.search(r'\d+', url).group(0))
+                    house['url'] = driver.current_url
+                    house['title'] = main_content.find_element(by=By.CSS_SELECTOR, value='div.main-info__title > h1 > span').text
+                    house['location'] = location
+                    house['sublocation'] = main_content.find_element(by=By.CSS_SELECTOR, value='div.main-info__title > span > span').text
+                    house['price'] = int(main_content.find_element(by= By.CSS_SELECTOR, 
+                        value='div.info-data > span.info-data-price > span').text.replace('.', ''))
+                    
+                    anchors = main_content.find_element(by=By.CSS_SELECTOR, value='div.fake-anchors')
+                    features = main_content.find_element(by=By.CSS_SELECTOR, value='div.info-features')
+                    extended_features = main_content.find_element(by=By.CSS_SELECTOR, value='section#details > div.details-property')
+                    house = self._get_house_features(anchors, features, extended_features, house)
+                    
+                    house['description'] = main_content.find_element(by=By.CSS_SELECTOR, 
+                    value='div.commentsContainer > div.comment > div.adCommentsLanguage > p').text.strip()
 
-                return house
-            except NoSuchElementException as e:
-                utils.error(f'[{self.id}] Something broke; the scraper has probably been detected')
-                utils.error(f'Exception: {e.msg}')
-        return None
+                    return house
+                except NoSuchElementException as e:
+                    utils.error(f'[{self.id}] Something broke; the scraper has probably been detected')
+                    utils.error(f'Exception: {e.msg}')
+                    utils.mega_wait() if utils.flip_coin() else utils.wait()
         
     def _scrape_location(self, location : str, url : str):
         """
@@ -213,11 +225,10 @@ class IdealistaScraper(HouseScraper):
         """
         utils.wait()
         utils.log(f'[idealista] Scraping {location}')
-        with utils.get_selenium() as driver:
-            # browse all houses and get their info
-            house_urls = self._scrape_navigation(driver, url)
-            self.__urls.update(dict.fromkeys(house_urls, location))
-            utils.log(f'[idealista] {location} navigation scraped: found {len(house_urls)} houses')
+        # browse all houses and get their info
+        house_urls = self._scrape_navigation(url, location)
+        self.__urls.update(dict.fromkeys(house_urls, location))
+        utils.log(f'[idealista] {location} navigation scraped: found {len(house_urls)} houses')
     
     def _scrape_houses_urls(self):
         locations_urls = dict()
