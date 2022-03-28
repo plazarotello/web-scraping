@@ -1,9 +1,11 @@
-from .scraper_base import HouseScraper
-from .kasaz import KasazScraper
-from .idealista import IdealistaScraper
-from .fotocasa import FotocasaScraper
-from .pisoscom import PisosComScraper
 from misc import config
+
+from .fotocasa import FotocasaScraper
+from .idealista import IdealistaScraper
+from .kasaz import KasazScraper
+from .pisoscom import PisosComScraper
+from .scraper_base import HouseScraper
+
 
 class ScraperFactory():
 

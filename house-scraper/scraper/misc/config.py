@@ -2,7 +2,8 @@
 Configuration variables required in multiple files
 '''
 
-import os, sys
+import os
+import sys
 
 # ---------------------------------------------------------
 
@@ -19,6 +20,8 @@ KASAZ_ID = 'kasaz'
 
 ROOT_DIR = os.path.dirname(os.path.abspath(os.path.join(sys.argv[0], '..')))
 TMP_DIR = os.path.join(ROOT_DIR, 'tmp')
+DATASET_DIR = os.path.join(ROOT_DIR, 'dataset')
+IDEALISTA_FILE = os.path.join(DATASET_DIR, IDEALISTA_ID + '.csv')
 CHROME_SESSION = 'chrome-session'
 
 # ---------------------------------------------------------

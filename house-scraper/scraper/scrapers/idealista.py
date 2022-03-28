@@ -1,9 +1,15 @@
-from .scraper_base import HouseScraper
-from misc import config, utils
-import re, csv, os
+import csv
+import os
+import re
 from concurrent.futures import ThreadPoolExecutor
+
+import pandas as pd
+from misc import config, utils
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
+
+from .scraper_base import HouseScraper
+
 
 class IdealistaScraper(HouseScraper):
 
@@ -220,7 +226,8 @@ class IdealistaScraper(HouseScraper):
         Scrapes the entire idealista website
         """
         
-        utils.create_directory(os.path.join(config.TMP_DIR, self.id))
+        tmp_dir = os.path.join(config.TMP_DIR, self.id)
+        utils.create_directory(tmp_dir)
         locations_urls = dict()
 
         try:
@@ -244,3 +251,16 @@ class IdealistaScraper(HouseScraper):
         with ThreadPoolExecutor(max_workers=5) as executor:
             for location, url in locations_urls.items():
                 executor.submit(self._scrape_location, location, url)
+        
+        # mix all the files, keep unique IDs
+        utils.log('Merging the data')
+        dataframes = []
+        for file in utils.get_files_in_directory(tmp_dir):
+            dataframes.append(pd.read_csv(file))
+        df = pd.concat(dataframes).drop_duplicates('id')
+
+        if not utils.directory_exists(config.DATASET_DIR):
+            utils.create_directory(config.DATASET_DIR)
+        utils.log(f'Dumping dataset into {config.IDEALISTA_FILE}')
+        df.to_csv(config.IDEALISTA_FILE)
+        utils.log(f'Dumped dataset into {config.IDEALISTA_FILE}')

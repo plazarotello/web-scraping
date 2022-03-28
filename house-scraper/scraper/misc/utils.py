@@ -1,11 +1,15 @@
-import os, shutil, uuid, logging
+import logging
+import os
+import shutil
+import uuid
 from random import randint, uniform
 from time import sleep
 from xmlrpc.client import Boolean
-from . import config, network
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+
+from . import config, network
 
 # =========================================================
 # FILE UTILITIES
@@ -84,6 +88,13 @@ def directory_exists(dir_name : str) -> Boolean:
     """
     return os.path.exists(dir_name) and os.path.isdir(dir_name)
 
+def get_files_in_directory(dir_name : str, extension : str = '') -> list:
+    log.log(f'Getting files ending with "{extension}" in {dir_name}')
+    if directory_exists(dir_name):
+        return [os.path.join(dir_name, file) for file in os.listdir(dir_name) 
+            if os.path.isfile(os.path.join(dir_name, file))
+                and file.endsWith(extension)]
+    else: return []
 
 # =========================================================
 # SELENIUM UTILITIES

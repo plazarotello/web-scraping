@@ -1,10 +1,11 @@
+import argparse
+import threading
+from time import gmtime, strftime, time
+
 from misc import config, utils
 from scrapers.scraper_base import HouseScraper
 from scrapers.scraper_factory import ScraperFactory
 
-from time import time, gmtime, strftime, sleep
-import threading
-import argparse
 
 def init_tmp_folder():
     """
