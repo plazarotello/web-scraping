@@ -8,9 +8,18 @@
             "name": "Web Scraping",
             "type": "python",
             "request": "launch",
-            "program": "${file}",
+            "program": "${workspaceFolder}/scraper/__main__.py",
             "console": "integratedTerminal",
             "justMyCode": true
-        }
+        },
+        {
+            "name": "Idealista",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/scraper/__main__.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": ["-i"]
+        },
     ]
 }
