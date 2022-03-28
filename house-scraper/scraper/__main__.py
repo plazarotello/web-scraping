@@ -58,10 +58,10 @@ def main(scrapers_ids : list):
     
 if __name__ == '__main__':
     argparser = argparse.ArgumentParser(description='Will scrape the selected pages. If no pages selected, then it will scrape every page')
-    argparser.add_argument('-i', '--idealista', help='launches the idealista scraper')
-    argparser.add_argument('-f', '--fotocasa', help='launches the fotocasa scraper')
-    argparser.add_argument('-p', '--pisoscom', help='launches the pisos.com scraper')
-    argparser.add_argument('-k', '--kasaz', help='launches the kasaz scraper')
+    argparser.add_argument('-i', '--idealista', help='launches the idealista scraper', action='store_true')
+    argparser.add_argument('-f', '--fotocasa', help='launches the fotocasa scraper', action='store_true')
+    argparser.add_argument('-p', '--pisoscom', help='launches the pisos.com scraper', action='store_true')
+    argparser.add_argument('-k', '--kasaz', help='launches the kasaz scraper', action='store_true')
     args = argparser.parse_args()
 
     scraper_ids = list()

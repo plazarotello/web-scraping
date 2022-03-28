@@ -37,7 +37,7 @@ def create_directory(dir_name : str):
     dir_name : str
         Absolute path
     """
-    delete_directory()
+    delete_directory(dir_name)
     os.mkdir(dir_name)
     log(f'{dir_name} has been created')
 
@@ -71,7 +71,7 @@ def duplicate_folder(dir : str, dest : str):
         Absolute folder path in which to paste the folder
     """
     shutil.copytree(dir, dest)
-    log(f'{dir} has been copy-pasted into {dest}')
+    log(f'{dir} has been copy-pasted to {dest}')
 
 def directory_exists(dir_name : str) -> Boolean:
     """
@@ -89,7 +89,7 @@ def directory_exists(dir_name : str) -> Boolean:
     return os.path.exists(dir_name) and os.path.isdir(dir_name)
 
 def get_files_in_directory(dir_name : str, extension : str = '') -> list:
-    log.log(f'Getting files ending with "{extension}" in {dir_name}')
+    log(f'Getting files ending with "{extension}" in {dir_name}')
     if directory_exists(dir_name):
         return [os.path.join(dir_name, file) for file in os.listdir(dir_name) 
             if os.path.isfile(os.path.join(dir_name, file))
@@ -112,7 +112,7 @@ def set_human_options() -> Options:
         dup_session = os.path.join(config.TMP_DIR, config.CHROME_SESSION, str(uuid.uuid4()))
         duplicate_folder(og_session, dup_session)
         session = dup_session
-        options.add_argument('--headless')
+        # options.add_argument('--headless')
         log('The driver is not human')
 
     options.add_argument(f'user-data-dir={session}')

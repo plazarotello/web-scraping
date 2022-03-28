@@ -1,7 +1,7 @@
 import csv
 import os
 import re
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, wait
 
 import pandas as pd
 from misc import config, utils
@@ -249,8 +249,10 @@ class IdealistaScraper(HouseScraper):
         
         # concurrent scrape of all provinces, using 5 threads
         with ThreadPoolExecutor(max_workers=5) as executor:
+            threads = []
             for location, url in locations_urls.items():
-                executor.submit(self._scrape_location, location, url)
+                threads.append(executor.submit(self._scrape_location, location, url))
+            wait(threads)
         
         # mix all the files, keep unique IDs
         utils.log('Merging the data')
