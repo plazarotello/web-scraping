@@ -1,7 +1,7 @@
 import csv
 import os
 import re
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import pandas as pd
 from misc import config, utils
@@ -12,6 +12,8 @@ from .scraper_base import HouseScraper
 
 
 class IdealistaScraper(HouseScraper):
+
+    __urls = dict()
 
     def _scrape_navigation(self, driver, url : str) -> list:
         """
@@ -33,11 +35,13 @@ class IdealistaScraper(HouseScraper):
         houses_to_visit = list()
         
         while True:
-            utils.wait()
+            # see how much we have to wait
+            utils.mega_wait() if utils.flip_coin() else utils.wait()
+
             # browse all pages
             main_content = driver.find_element(by=By.CSS_SELECTOR, value='main#main-content > section.items-container')
             articles = main_content.find_elements(by=By.CSS_SELECTOR, value='article.item')
-            driver.execute_script('arguments[0].scrollIntoView();', articles[0])
+            # driver.execute_script('arguments[0].scrollIntoView();', articles[0])
             for article in articles:
                 # get each article url
                 article_url = article.find_element(by=By.CSS_SELECTOR, 
@@ -45,13 +49,12 @@ class IdealistaScraper(HouseScraper):
                 houses_to_visit.append(article_url)
             try:
                 next_page = main_content.find_element(by=By.CSS_SELECTOR, value='div.pagination > ul > li.next > a')
-                utils.mini_wait()
                 driver.execute_script('arguments[0].scrollIntoView();', next_page)
                 utils.mini_wait()
                 next_page.click()
             except NoSuchElementException as e:
-                utils.warn(f'[{self.id}] {e}')
                 utils.log(f'[{self.id}] No more pages to visit')
+                utils.warn(f'[{self.id}] {e.msg}')
                 break   # no more pages to navigate to
         return houses_to_visit
 
@@ -149,14 +152,12 @@ class IdealistaScraper(HouseScraper):
 
         return house
 
-    def _scrape_house_page(self, driver, location: str, url : str) -> dict:
+    def _scrape_house_page(self, location: str, url : str) -> dict:
         """
         Scrapes a certain house detail page
 
         Parameters
         ----------
-        driver : WebDriver
-            Selenium webdriver to use
         location: str
             Location the house in in
         url : str
@@ -166,37 +167,37 @@ class IdealistaScraper(HouseScraper):
         -------
         Dictionary with all the info on the house
         """
-        try:
-            house = {'id': '', 'url': '', 'title': '', 'location': '', 'sublocation': '',
-                'price': '', 'm2': '', 'rooms': '', 'floor': '', 'photos': '', 'map': '',
-                'view3d': '', 'video': '', 'home-staging': '', 'description': ''}
-            utils.log(f'[idealista:{location}] Scraping {url}')
-            utils.mini_wait()
-            driver.get(url)
-            utils.mini_wait()
-            main_content = driver.find_element(by=By.CSS_SELECTOR, value='main.detail-container > section.detail-info')
+        with utils.get_selenium() as driver:
+            try:
+                house = {'id': '', 'url': '', 'title': '', 'location': '', 'sublocation': '',
+                    'price': '', 'm2': '', 'rooms': '', 'floor': '', 'photos': '', 'map': '',
+                    'view3d': '', 'video': '', 'home-staging': '', 'description': ''}
+                utils.log(f'[idealista:{location}] Scraping {url}')
+                utils.mini_wait()
+                driver.get(url)
+                main_content = driver.find_element(by=By.CSS_SELECTOR, value='main.detail-container > section.detail-info')
 
-            house['id'] = int(re.search(r'\d+', url).group(0))
-            house['url'] = driver.current_url
-            house['title'] = main_content.find_element(by=By.CSS_SELECTOR, value='div.main-info__title > h1 > span').text
-            house['location'] = location
-            house['sublocation'] = main_content.find_element(by=By.CSS_SELECTOR, value='div.main-info__title > span > span').text
-            house['price'] = int(main_content.find_element(by= By.CSS_SELECTOR, 
-                value='div.info-data > span.info-data-price > span').text.replace('.', ''))
-            
-            anchors = main_content.find_element(by=By.CSS_SELECTOR, value='div.fake-anchors')
-            features = main_content.find_element(by=By.CSS_SELECTOR, value='div.info-features')
-            extended_features = main_content.find_element(by=By.CSS_SELECTOR, value='section#details > div.details-property')
-            house = self._get_house_features(anchors, features, extended_features, house)
-            
-            house['description'] = main_content.find_element(by=By.CSS_SELECTOR, 
-            value='div.commentsContainer > div.comment > div.adCommentsLanguage > p').text
+                house['id'] = int(re.search(r'\d+', url).group(0))
+                house['url'] = driver.current_url
+                house['title'] = main_content.find_element(by=By.CSS_SELECTOR, value='div.main-info__title > h1 > span').text
+                house['location'] = location
+                house['sublocation'] = main_content.find_element(by=By.CSS_SELECTOR, value='div.main-info__title > span > span').text
+                house['price'] = int(main_content.find_element(by= By.CSS_SELECTOR, 
+                    value='div.info-data > span.info-data-price > span').text.replace('.', ''))
+                
+                anchors = main_content.find_element(by=By.CSS_SELECTOR, value='div.fake-anchors')
+                features = main_content.find_element(by=By.CSS_SELECTOR, value='div.info-features')
+                extended_features = main_content.find_element(by=By.CSS_SELECTOR, value='section#details > div.details-property')
+                house = self._get_house_features(anchors, features, extended_features, house)
+                
+                house['description'] = main_content.find_element(by=By.CSS_SELECTOR, 
+                value='div.commentsContainer > div.comment > div.adCommentsLanguage > p').text.strip()
 
-            return house
-        except NoSuchElementException as e:
-            utils.error(f'[{self.id}] Something broke; the scraper has probably been detected')
-            utils.error(f'Exception: {e.msg}')
-            raise Exception('Scraper detected and blocked!')
+                return house
+            except NoSuchElementException as e:
+                utils.error(f'[{self.id}] Something broke; the scraper has probably been detected')
+                utils.error(f'Exception: {e.msg}')
+        return None
         
     def _scrape_location(self, location : str, url : str):
         """
@@ -210,34 +211,16 @@ class IdealistaScraper(HouseScraper):
         url : str
             URL to be attached to the IDEALISTA_URL in order to scrape
         """
-        _file = utils.create_file(os.path.join(config.TMP_DIR, self.id), location+'.csv')
-        house_fields = ['id', 'url', 'title', 'location', 'sublocation',
-            'price', 'm2', 'rooms', 'floor', 'photos', 'map', 'view3d', 
-            'video', 'home-staging', 'description']
-        _writer = csv.DictWriter(_file, fieldnames=house_fields)
-        _writer.writeheader()
+        utils.wait()
         utils.log(f'[idealista] Scraping {location}')
         with utils.get_selenium() as driver:
-            utils.mini_wait()
             # browse all houses and get their info
             house_urls = self._scrape_navigation(driver, url)
+            self.__urls.update(dict.fromkeys(house_urls, location))
             utils.log(f'[idealista] {location} navigation scraped: found {len(house_urls)} houses')
-            for house_url in house_urls:
-                utils.wait()
-                house = self._scrape_house_page(driver, location, house_url)
-                _writer.writerow(house)
-        
-        _file.close()
-
-    def scrape(self):
-        """
-        Scrapes the entire idealista website
-        """
-        
-        tmp_dir = os.path.join(config.TMP_DIR, self.id)
-        utils.create_directory(tmp_dir)
+    
+    def _scrape_houses_urls(self):
         locations_urls = dict()
-
         try:
             with utils.get_selenium() as driver:
                 utils.mini_wait()
@@ -253,7 +236,7 @@ class IdealistaScraper(HouseScraper):
                     # bypass choosing a sublocation
                     locations_urls[loc_number] = { 'url': re.sub(r'municipios$', '', loc_link.get_attribute('href')),
                         'location': loc_link.text}
-        except Exception as e: 
+        except Exception as e:
             utils.error(f'[{self.id}]: {e.msg}')
         
         # concurrent scrape of all provinces, using 5 threads
@@ -262,14 +245,37 @@ class IdealistaScraper(HouseScraper):
                 location = value['location']
                 url = value['url']
                 executor.submit(self._scrape_location, location, url)
-                utils.mini_wait()
-        
-        # mix all the files, keep unique IDs
+
+    def _scrape_houses_details(self) -> list:
+        houses = list()
+        with ThreadPoolExecutor(max_workers=config.MAX_WORKERS) as executor:
+            futures = []
+            for url, location in self.__urls.items():
+                futures.append(executor.submit(self._scrape_house_page, location, url))
+            for future in as_completed(futures):
+                house = future.result()
+                houses.append(house)    # can append None values
+        return list(filter(None, houses))
+
+    def scrape(self):
+        """
+        Scrapes the entire idealista website
+        """
+        with utils.create_file(config.TMP_DIR, self.id + '.csv') as _file:
+            writer = csv.DictWriter(_file,fieldnames=['url', 'location'])
+            self._scrape_houses_urls()
+            writer.writeheader()
+            for url, location in self.__urls.items():
+                writer.writerow([url, location])
+
+        houses = self._scrape_houses_details()
+
+        # mix all the data, keep unique IDs
         utils.log('Merging the data')
-        dataframes = []
-        for file in utils.get_files_in_directory(tmp_dir):
-            dataframes.append(pd.read_csv(file))
-        df = pd.concat(dataframes).drop_duplicates('id')
+        house_fields = ['id', 'url', 'title', 'location', 'sublocation',
+            'price', 'm2', 'rooms', 'floor', 'photos', 'map', 'view3d', 
+            'video', 'home-staging', 'description']
+        df = pd.DataFrame(houses, columns=house_fields).drop_duplicates('id')
 
         if not utils.directory_exists(config.DATASET_DIR):
             utils.create_directory(config.DATASET_DIR)

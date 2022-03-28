@@ -2,7 +2,7 @@ import logging
 import os
 import shutil
 import uuid
-from random import randint, uniform
+from random import randint, uniform, random
 from time import sleep
 from xmlrpc.client import Boolean
 
@@ -93,7 +93,7 @@ def get_files_in_directory(dir_name : str, extension : str = '') -> list:
     if directory_exists(dir_name):
         return [os.path.join(dir_name, file) for file in os.listdir(dir_name) 
             if os.path.isfile(os.path.join(dir_name, file))
-                and file.endsWith(extension)]
+                and file.endswith(extension)]
     else: return []
 
 # =========================================================
@@ -157,7 +157,15 @@ def get_selenium():
 
 """
 Utilities waiting a big chunk of time or only a small amount of it
+Also includes a flipping coin to see if we have to wait a mega big
+chunk of time
 """
+
+def flip_coin() -> Boolean:
+    return random() < config.CHANCE_MEGA_WAIT
+
+def mega_wait():
+    sleep(uniform(config.MEGA_MIN_WAIT, config.MEGA_MAX_WAIT))
 
 def wait():
     sleep(uniform(config.RANDOM_MIN_WAIT, config.RANDOM_MAX_WAIT))
