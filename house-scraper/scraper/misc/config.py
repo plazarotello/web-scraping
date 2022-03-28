@@ -7,8 +7,16 @@ import sys
 
 # ---------------------------------------------------------
 
+ROOT_DIR = os.path.dirname(os.path.abspath(os.path.join(sys.argv[0], '..')))
+TMP_DIR = os.path.join(ROOT_DIR, 'tmp')
+DATASET_DIR = os.path.join(ROOT_DIR, 'dataset')
+CHROME_SESSION = 'chrome-session'
+
+# ---------------------------------------------------------
+
 IDEALISTA_ID = 'idealista'
 IDEALISTA_URL = 'https://www.idealista.com'
+IDEALISTA_FILE = os.path.join(DATASET_DIR, IDEALISTA_ID + '.csv')
 
 FOTOCASA_ID = 'fotocasa'
 
@@ -18,16 +26,10 @@ KASAZ_ID = 'kasaz'
 
 # ---------------------------------------------------------
 
-ROOT_DIR = os.path.dirname(os.path.abspath(os.path.join(sys.argv[0], '..')))
-TMP_DIR = os.path.join(ROOT_DIR, 'tmp')
-DATASET_DIR = os.path.join(ROOT_DIR, 'dataset')
-IDEALISTA_FILE = os.path.join(DATASET_DIR, IDEALISTA_ID + '.csv')
-CHROME_SESSION = 'chrome-session'
+RANDOM_MIN_WAIT = 20
+RANDOM_MAX_WAIT = 40
 
-# ---------------------------------------------------------
+RANDOM_SMALL_MIN_WAIT = 10
+RANDOM_SMALL_MAX_WAIT = 30
 
-RANDOM_MIN_WAIT = 30.2
-RANDOM_MAX_WAIT = 56.7
-
-RANDOM_SMALL_MIN_WAIT = 5.0
-RANDOM_SMALL_MAX_WAIT = 15.0
+MAX_WORKERS = 6

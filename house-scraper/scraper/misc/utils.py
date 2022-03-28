@@ -176,8 +176,8 @@ priority level
 """
 
 # starts a log to file
-logging.basicConfig(filename=os.path.join(config.ROOT_DIR, 'house-scraper.log'),
-    encoding='utf-8', level=logging.INFO)
+logging.basicConfig(filename=os.path.join(config.ROOT_DIR, 'house-scraper.log'), 
+    filemode='w', encoding='utf-8', level=logging.INFO)
 
 def log(msg : str):
     logging.info(msg)

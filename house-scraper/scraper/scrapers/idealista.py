@@ -28,13 +28,13 @@ class IdealistaScraper(HouseScraper):
         -------
         List of the relative URL of the houses that are present in the navigation pages
         """
-        driver.get(url)
         utils.mini_wait()
+        driver.get(url)
         houses_to_visit = list()
         
         while True:
+            utils.wait()
             # browse all pages
-            utils.log('[idealista]Scraping page...')
             main_content = driver.find_element(by=By.CSS_SELECTOR, value='main#main-content > section.items-container')
             articles = main_content.find_elements(by=By.CSS_SELECTOR, value='article.item')
             driver.execute_script('arguments[0].scrollIntoView();', articles[0])
@@ -48,7 +48,6 @@ class IdealistaScraper(HouseScraper):
                 utils.mini_wait()
                 driver.execute_script('arguments[0].scrollIntoView();', next_page)
                 utils.mini_wait()
-                utils.log('[idealista]Page scraped.')
                 next_page.click()
             except NoSuchElementException as e:
                 utils.warn(f'[{self.id}] {e}')
@@ -118,13 +117,11 @@ class IdealistaScraper(HouseScraper):
             pass    # staging button does not exist
         house['home-staging'] = 1 if staging else 0
 
-        house['m2'] = features.find_elements(by=By.CSS_SELECTOR, value='span')[0].find_element(
-            by=By.CSS_SELECTOR, value='span').text
-        house['rooms'] = features.find_elements(by=By.CSS_SELECTOR, value='span')[1].find_element(
-            by=By.CSS_SELECTOR, value='span').text
-        house['floor'] = features.find_elements(by=By.CSS_SELECTOR, value='span')[2].find_element(
-            by=By.CSS_SELECTOR, value='span').text + features.find_elements(
-                by=By.CSS_SELECTOR, value='span')[2].text
+        house_features = features.find_elements(by=By.XPATH, value='./span')
+        house['m2'] = house_features[0].find_element(by=By.CSS_SELECTOR, value='span').text
+        house['rooms'] = house_features[1].find_element(by=By.CSS_SELECTOR, value='span').text
+        house['floor'] = house_features[2].find_element(by=By.CSS_SELECTOR, value='span'
+        ).text + house_features[2].text
         if not re.search(r'Planta', house['floor']):
             house['floor'] = 'Sin planta'
         
@@ -173,6 +170,8 @@ class IdealistaScraper(HouseScraper):
             house = {'id': '', 'url': '', 'title': '', 'location': '', 'sublocation': '',
                 'price': '', 'm2': '', 'rooms': '', 'floor': '', 'photos': '', 'map': '',
                 'view3d': '', 'video': '', 'home-staging': '', 'description': ''}
+            utils.log(f'[idealista:{location}] Scraping {url}')
+            utils.mini_wait()
             driver.get(url)
             utils.mini_wait()
             main_content = driver.find_element(by=By.CSS_SELECTOR, value='main.detail-container > section.detail-info')
@@ -182,7 +181,8 @@ class IdealistaScraper(HouseScraper):
             house['title'] = main_content.find_element(by=By.CSS_SELECTOR, value='div.main-info__title > h1 > span').text
             house['location'] = location
             house['sublocation'] = main_content.find_element(by=By.CSS_SELECTOR, value='div.main-info__title > span > span').text
-            house['price'] = main_content.find_element(by= By.CSS_SELECTOR, value='div.info-data > span.info-data-price > span').text
+            house['price'] = int(main_content.find_element(by= By.CSS_SELECTOR, 
+                value='div.info-data > span.info-data-price > span').text.replace('.', ''))
             
             anchors = main_content.find_element(by=By.CSS_SELECTOR, value='div.fake-anchors')
             features = main_content.find_element(by=By.CSS_SELECTOR, value='div.info-features')
@@ -195,6 +195,7 @@ class IdealistaScraper(HouseScraper):
             return house
         except NoSuchElementException as e:
             utils.error(f'[{self.id}] Something broke; the scraper has probably been detected')
+            utils.error(f'Exception: {e.msg}')
             raise Exception('Scraper detected and blocked!')
         
     def _scrape_location(self, location : str, url : str):
@@ -217,10 +218,14 @@ class IdealistaScraper(HouseScraper):
         _writer.writeheader()
         utils.log(f'[idealista] Scraping {location}')
         with utils.get_selenium() as driver:
+            utils.mini_wait()
             # browse all houses and get their info
-            for house_url in self._scrape_navigation(driver, url):
+            house_urls = self._scrape_navigation(driver, url)
+            utils.log(f'[idealista] {location} navigation scraped: found {len(house_urls)} houses')
+            for house_url in house_urls:
                 utils.wait()
-                _writer.writerow(self._scrape_house_page(driver, location, house_url))
+                house = self._scrape_house_page(driver, location, house_url)
+                _writer.writerow(house)
         
         _file.close()
 
@@ -237,24 +242,27 @@ class IdealistaScraper(HouseScraper):
             with utils.get_selenium() as driver:
                 utils.mini_wait()
                 driver.get(config.IDEALISTA_URL)
-                utils.wait()
+                utils.mini_wait()
                 locations_list = driver.find_elements(by=By.CSS_SELECTOR, 
                     value='section#municipality-search > div.locations-list > ul > li')
                 driver.execute_script('arguments[0].scrollIntoView();', locations_list[0])
                 # gets a pair of (province, url) for each location
                 for location in locations_list:
                     loc_link = location.find_element(by=By.CSS_SELECTOR, value='a')
+                    loc_number = int(location.find_element(by=By.CSS_SELECTOR, value='p').text.replace('.', ''))
                     # bypass choosing a sublocation
-                    locations_urls[loc_link.text] = re.sub(r'municipios$', '', loc_link.get_attribute('href'))
-                utils.mini_wait()
+                    locations_urls[loc_number] = { 'url': re.sub(r'municipios$', '', loc_link.get_attribute('href')),
+                        'location': loc_link.text}
         except Exception as e: 
-            utils.error(f'[{self.id}]: {e}')
+            utils.error(f'[{self.id}]: {e.msg}')
         
         # concurrent scrape of all provinces, using 5 threads
-        with ThreadPoolExecutor(max_workers=5) as executor:
-            threads = []
-            for location, url in locations_urls.items():
-                threads.append(executor.submit(self._scrape_location, location, url))
+        with ThreadPoolExecutor(max_workers=config.MAX_WORKERS) as executor:
+            for _, value in sorted(locations_urls.items()):
+                location = value['location']
+                url = value['url']
+                executor.submit(self._scrape_location, location, url)
+                utils.mini_wait()
         
         # mix all the files, keep unique IDs
         utils.log('Merging the data')
