@@ -19,6 +19,8 @@ IDEALISTA_URL = 'https://www.idealista.com'
 IDEALISTA_FILE = os.path.join(DATASET_DIR, IDEALISTA_ID + '.csv')
 
 FOTOCASA_ID = 'fotocasa'
+FOTOCASA_URL = 'https://www.fotocasa.es/es/'
+FOTOCASA_FILE = os.path.join(DATASET_DIR, FOTOCASA_ID + '.csv')
 
 PISOSCOM_ID = 'pisos.com'
 
