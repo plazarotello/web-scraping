@@ -4,8 +4,8 @@ import shutil
 import uuid
 from random import randint, uniform, random
 from time import sleep
-from xmlrpc.client import Boolean
 
+import requests
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 
@@ -73,7 +73,7 @@ def duplicate_folder(dir : str, dest : str):
     shutil.copytree(dir, dest)
     log(f'{dir} has been copy-pasted to {dest}')
 
-def directory_exists(dir_name : str) -> Boolean:
+def directory_exists(dir_name : str) -> bool:
     """
     Checks if the directory exists and if it is a directory
 
@@ -97,6 +97,18 @@ def get_files_in_directory(dir_name : str, extension : str = '') -> list:
     else: return []
 
 # =========================================================
+# INTERNET CAPABILITIES
+# =========================================================
+
+def get_http_code(url) -> int:
+    try:
+        r_headers = {'User-Agent': config.get_user_agent()}
+        r = requests.get(url, headers=r_headers)
+        return r.status_code
+    except (requests.HTTPError, requests.ConnectionError) as e:
+        print(f'Error trying to get status code for {url}: {e.msg}')
+
+# =========================================================
 # SELENIUM UTILITIES
 # =========================================================
 
@@ -105,6 +117,7 @@ def set_human_options() -> Options:
     Create the options for the selenium web driver. Makes it look like a human
     """
     options = webdriver.ChromeOptions()
+    options.add_extension(config.BUSTER)
 
     og_session = os.path.join(config.ROOT_DIR, config.CHROME_SESSION)
     session = og_session
@@ -129,7 +142,7 @@ def proxify():
     available_proxies = network.get_proxies()
     selected = available_proxies[randint(0, len(available_proxies)-1)]
     
-    capabilities = webdriver.DesiredCapabilities.FIREFOX
+    capabilities = webdriver.DesiredCapabilities.CHROME
     capabilities['marionette'] = True
     capabilities['proxy'] = {
         'proxyType': 'MANUAL',
@@ -140,14 +153,15 @@ def proxify():
     log(f'Setting the driver`s proxy to {selected["ip"]}:{selected["port"]}')
     return capabilities
 
-def get_selenium():
+def get_selenium(use_proxy : bool = False):
     """
     Creates a new selenium web driver that looks like a human
     """
     log('Creating new driver')
     driver_path = os.path.join(config.ROOT_DIR, 'chromedriver.exe')
-    driver = webdriver.Chrome(executable_path=driver_path, options=set_human_options())
-    driver.implicitly_wait(60)
+    driver = webdriver.Chrome(executable_path=driver_path, options=set_human_options(),
+        desired_capabilities=proxify() if use_proxy else webdriver.DesiredCapabilities.CHROME)
+    driver.implicitly_wait(15)
     return driver
 
 
@@ -161,7 +175,7 @@ Also includes a flipping coin to see if we have to wait a mega big
 chunk of time
 """
 
-def flip_coin() -> Boolean:
+def flip_coin() -> bool:
     return random() < config.CHANCE_MEGA_WAIT
 
 def mega_wait():

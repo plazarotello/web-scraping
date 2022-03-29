@@ -11,6 +11,7 @@ ROOT_DIR = os.path.dirname(os.path.abspath(os.path.join(sys.argv[0], '..')))
 TMP_DIR = os.path.join(ROOT_DIR, 'tmp')
 DATASET_DIR = os.path.join(ROOT_DIR, 'dataset')
 CHROME_SESSION = 'chrome-session'
+BUSTER = os.path.join(ROOT_DIR, 'buster_1.3.crx')
 
 # ---------------------------------------------------------
 
@@ -26,14 +27,14 @@ KASAZ_ID = 'kasaz'
 
 # ---------------------------------------------------------
 
-RANDOM_MIN_WAIT = 20
-RANDOM_MAX_WAIT = 40
+RANDOM_MIN_WAIT = 15
+RANDOM_MAX_WAIT = 30
 
 RANDOM_SMALL_MIN_WAIT = 10
-RANDOM_SMALL_MAX_WAIT = 25
+RANDOM_SMALL_MAX_WAIT = 15
 
 CHANCE_MEGA_WAIT = 0.2
 MEGA_MIN_WAIT = 60
-MEGA_MAX_WAIT = 100
+MEGA_MAX_WAIT = 240
 
-MAX_WORKERS = 6
+MAX_WORKERS = 3
