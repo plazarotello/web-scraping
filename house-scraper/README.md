@@ -2,7 +2,7 @@
 
 ## Technologies used
 
-- Python (made with 3.9.10)
+- Python (3.9.10 requiered)
 - Selenium 4.1.3
 - Requests 2.27.1
 - Beautiful Soup 0.0.1
