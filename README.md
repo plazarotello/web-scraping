@@ -8,4 +8,6 @@ Este trabajo corresponde con la práctica 1 de la asignatura **M2.851** Tipolog�
 
 ## Descripción
 
+Descripción provisional.
+
 ## Instrucciones de uso
