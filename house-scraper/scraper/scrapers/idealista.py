@@ -1,3 +1,4 @@
+import os
 import csv
 import re
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -21,10 +22,14 @@ class IdealistaScraper(HouseScraper):
                 result = fn()
                 madeit = True
             except NoSuchElementException:
-                #utils.wait() if utils.flip_coin() else utils.mega_wait()
-                utils.warn(f'[{self.id}] Error 403, trying to solve it...')
-                if captcha_solver.check(driver): captcha_solver.solve(driver)
-                elif not utils.get_http_code(driver.current_url) in [200, 403]:
+                try:
+                    #utils.wait() if utils.flip_coin() else utils.mega_wait()
+                    utils.warn(f'[{self.id}] Error 403, trying to solve it...')
+                    if captcha_solver.check(driver): captcha_solver.solve(driver)
+                    elif not utils.get_http_code(driver.current_url) in [200, 403]:
+                        utils.mega_wait()
+                        driver.refresh()
+                except Exception:
                     utils.mega_wait()
                     driver.refresh()
                 madeit=False
@@ -85,7 +90,7 @@ class IdealistaScraper(HouseScraper):
         driver.quit()
         return houses_to_visit
 
-    def _get_house_features(self, anchors, features, extended_features, house : dict) -> dict:
+    def _get_house_features(self, driver, anchors, features, extended_features, house : dict) -> dict:
         """
         Gets some features from the house: number of photos, if there is a map, video and 3D view 
         available in the web, if there exists a home staging feature, the m2, number of rooms and
@@ -117,7 +122,25 @@ class IdealistaScraper(HouseScraper):
 
         map = False
         try: 
-            anchors.find_element(by=By.CSS_SELECTOR, value='button.icon-plan')
+            map_button = anchors.find_element(by=By.CSS_SELECTOR, value='button.icon-plan')
+            
+            # get image
+            utils.mini_wait()
+            map_button.click()
+            utils.mini_wait()
+            
+            close_button = driver.find_element(by=By.CSS_SELECTOR, value='div#gallery '+
+                'div.rs-gallery-hud > header.rs-gallery-header > span.icon-close')
+            map_img = driver.find_element(by=By.CSS_SELECTOR, 
+                value='div#gallery > main.rs-gallery-container div.image-gallery-content' +
+                    ' div.image-gallery-slide.center > figure.item-gallery > img')
+            
+            map_url = map_img.get_attribute('src')
+            utils.download_image(map_url, os.path.join(config.IDEALISTA_MAPS, house['id'] + '.jpg'))
+
+            close_button.click()
+            utils.mini_wait()
+
             map = True  # checks if map button exists
         except NoSuchElementException as e: 
             pass    # map button does not exist
@@ -215,7 +238,7 @@ class IdealistaScraper(HouseScraper):
                 anchors = main_content.find_element(by=By.CSS_SELECTOR, value='div.fake-anchors')
                 features = main_content.find_element(by=By.CSS_SELECTOR, value='div.info-features')
                 extended_features = main_content.find_element(by=By.CSS_SELECTOR, value='section#details > div.details-property')
-                house = self._get_house_features(anchors, features, extended_features, house)
+                house = self._get_house_features(driver, anchors, features, extended_features, house)
                 
                 house['description'] = main_content.find_element(by=By.CSS_SELECTOR, 
                 value='div.commentsContainer > div.comment > div.adCommentsLanguage > p').text.strip()
@@ -310,6 +333,7 @@ class IdealistaScraper(HouseScraper):
             for url, location in self.__urls.items():
                 writer.writerow([url, location])
 
+        utils.create_directory(config.IDEALISTA_MAPS)
         houses = self._scrape_houses_details()
 
         # mix all the data, keep unique IDs
