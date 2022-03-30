@@ -12,7 +12,7 @@ def init_tmp_folder(scrapers : list, delete_all : bool = False):
     """
     Initializes the temporary folder to dump the data on
     """
-    if delete_all: 
+    if delete_all:
         utils.create_directory(config.TMP_DIR)
         return
     elif not utils.directory_exists(config.TMP_DIR):
@@ -66,6 +66,8 @@ def main(scrapers_ids : list):
     
     for scraper_thread in scraper_threads:
         scraper_thread.join()
+    
+    utils.delete_directory(os.path.join(config.TMP_DIR, config.CHROME_SESSION))
     utils.log('Finished web-scraping')
     utils.log('Joining results...')
     # TODO join results and create final dataset in CSV

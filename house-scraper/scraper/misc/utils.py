@@ -125,7 +125,7 @@ def download_image(url : str, img_file : str) -> bool:
         with open(img_file, 'wb') as handler:
             handler.write(r.content)
     except Exception as e:
-        warn(f'Error trying to download image from {url}')
+        warn(f'Error {r.status_code} trying to download image from {url}')
 
 # =========================================================
 # SELENIUM UTILITIES

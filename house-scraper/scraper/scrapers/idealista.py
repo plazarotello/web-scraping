@@ -1,10 +1,10 @@
 import os
 import atexit
 import re
-from queue import Queue
+from queue import PriorityQueue, Queue
 import pickle
 import threading
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor
 
 import pandas as pd
 from selenium.common.exceptions import NoSuchElementException
@@ -18,7 +18,7 @@ class IdealistaScraper(HouseScraper):
 
     __scrape_navigation = True
     __scrape_houses = True
-    __navigations_to_visit = Queue()
+    __navigations_to_visit = PriorityQueue()
     __houses_to_visit = Queue()
     __houses_visited = list()
 
@@ -27,24 +27,29 @@ class IdealistaScraper(HouseScraper):
         atexit.register(self.cleanup)
         if not utils.directory_exists(config.IDEALISTA_TMP):
             utils.create_directory(config.IDEALISTA_TMP)
-        if utils.file_exists(os.path.join(config.IDEALISTA_TMP, 'state.pkl')):
-            with open(os.path.join(config.IDEALISTA_TMP, 'state.pkl'), 'rb') as file:
-                state_data = pickle.load(file)
-            self.__scrape_navigation = state_data['scrape-nav']
-            self.__scrape_houses = state_data['scrape-houses']
-            self.__navigations_to_visit = state_data['nav-to-scrap']
-            self.__houses_to_visit = state_data['houses-to-scrap']
-            self.__houses_visited = state_data['houses-scraped']
+        if utils.file_exists(os.path.join(config.IDEALISTA_TMP, 'navigations-to-scrap.pkl')):
+            with open(os.path.join(config.IDEALISTA_TMP, 'navigations-to-scrap.pkl'), 'rb') as file:
+                for nav in pickle.load(file): self.__navigations_to_visit.put(nav)
+                utils.log(f'{list(self.__navigations_to_visit.queue)}')
+                self.__scrape_navigation = not self.__navigations_to_visit.empty()
+        if utils.file_exists(os.path.join(config.IDEALISTA_TMP, 'houses-to-scrap.pkl')):
+            with open(os.path.join(config.IDEALISTA_TMP, 'houses-to-scrap.pkl'), 'rb') as file:
+                for house in pickle.load(file): self.__houses_to_visit.put(house)
+                self.__scrape_houses = not self.__houses_to_visit.empty()
+        if utils.file_exists(os.path.join(config.IDEALISTA_TMP, 'visited-houses.pkl')):
+            with open(os.path.join(config.IDEALISTA_TMP, 'visited-houses.pkl'), 'rb') as file:
+                self.__houses_visited = pickle.load(file)
         
     def cleanup(self):
-        state_data = dict()
-        state_data['houses-scraped'] = self.__houses_visited
-        state_data['nav-to-scrap'] = self.__navigations_to_visit
-        state_data['houses-to-scrap'] = self.__houses_to_visit
-        state_data['scrape-nav'] = not self.__navigations_to_visit.empty()
-        state_data['scrape-houses'] = not self.__houses_to_visit.empty()
-        with open(os.path.join(config.IDEALISTA_TMP, 'state.pkl'), 'wb') as file:
-            pickle.dump(state_data, file, pickle.HIGHEST_PROTOCOL)
+        utils.log(f'Back-upping data')
+        with open(os.path.join(config.IDEALISTA_TMP, 'navigations-to-scrap.pkl'), 'wb') as file:
+            pickle.dump(list(self.__navigations_to_visit.queue), file, pickle.HIGHEST_PROTOCOL)
+        with open(os.path.join(config.IDEALISTA_TMP, 'houses-to-scrap.pkl'), 'wb') as file:
+            pickle.dump(list(self.__houses_to_visit.queue), file, pickle.HIGHEST_PROTOCOL)
+        with open(os.path.join(config.IDEALISTA_TMP, 'visited-houses.pkl'), 'wb') as file:
+            pickle.dump(self.__houses_visited, file, pickle.HIGHEST_PROTOCOL)
+        
+        
 
     def try_page(self, driver, fn):
         madeit = False
@@ -66,7 +71,7 @@ class IdealistaScraper(HouseScraper):
                 madeit=False
         return result
 
-    def _scrape_navigation(self, url : str):
+    def _scrape_navigation(self, url : str, priority : int = 0):
         """
         Scrapes the navigation pages for a location (given in the starting url).
 
@@ -99,7 +104,7 @@ class IdealistaScraper(HouseScraper):
         try:
             next_page = main_content.find_element(by=By.CSS_SELECTOR, value='div.pagination > ul > li.next > a')
             next_page_link = next_page.get_attribute('href')
-            self.__navigations_to_visit.put(next_page_link)
+            self.__navigations_to_visit.put((priority, next_page_link))
         except NoSuchElementException as e:
             utils.log(f'[{self.id}] No more pages to visit')
             utils.warn(f'[{self.id}] {e.msg}')
@@ -281,34 +286,39 @@ class IdealistaScraper(HouseScraper):
                 # gets a pair of (province, url) for each location
                 for location in locations_list:
                     loc_link = location.find_element(by=By.CSS_SELECTOR, value='a')
-                    # loc_number = int(location.find_element(by=By.CSS_SELECTOR, value='p').text.replace('.', ''))
+                    loc_number = int(location.find_element(by=By.CSS_SELECTOR, value='p').text.replace('.', ''))
                     # bypass choosing a sublocation
-                    self.__navigations_to_visit.put(re.sub(r'municipios$', '', loc_link.get_attribute('href')))
+                    self.__navigations_to_visit.put((loc_number, re.sub(r'municipios$', '', loc_link.get_attribute('href'))))
                 utils.mini_wait()
         except Exception as e:
             utils.error(f'[{self.id}]: {e.msg}')
 
     def start_navigating(self):
-        # concurrent scrape of all provinces, using multiple threads
-        with ThreadPoolExecutor(max_workers=config.MAX_WORKERS) as executor:
-            # max_locations_before_wait = 20
-            # loc_number = 0
-            futures = []
-            while self.__scrape_navigation:
-                try:
-                    navigation = self.__navigations_to_visit.get(timeout=500)
-                except Exception:
-                    # everything has been scraped
-                    if all(scrap.done() for scrap in futures):
-                        self.__scrape_navigation = False
-                        continue
+        while not self.__navigations_to_visit.empty():
+            navigation = self.__navigations_to_visit.get()
+            self._scrape_navigation(navigation[1], navigation[0])
+        self.__scrape_navigation = False
 
-                futures.append(executor.submit(self._scrape_navigation, navigation))
-                # loc_number = loc_number+1
-                # if loc_number >= max_locations_before_wait:
-                #     loc_number = 0
-                #     for _ in range(config.MAX_WORKERS):
-                #         executor.submit(lambda: utils.mega_wait())
+        # # concurrent scrape of all provinces, using multiple threads
+        # with ThreadPoolExecutor(max_workers=config.MAX_WORKERS) as executor:
+        #     # max_locations_before_wait = 20
+        #     # loc_number = 0
+        #     futures = []
+        #     while self.__scrape_navigation:
+        #         try:
+        #             navigation = self.__navigations_to_visit.get(timeout=500)
+        #         except Exception:
+        #             # everything has been scraped
+        #             if all(scrap.done() for scrap in futures):
+        #                 self.__scrape_navigation = False
+        #                 continue
+
+        #         futures.append(executor.submit(self._scrape_navigation, navigation[1], navigation[0]))
+        #         # loc_number = loc_number+1
+        #         # if loc_number >= max_locations_before_wait:
+        #         #     loc_number = 0
+        #         #     for _ in range(config.MAX_WORKERS):
+        #         #         executor.submit(lambda: utils.mega_wait())
 
     def start_house_scraping(self) -> list:
         with ThreadPoolExecutor(max_workers=config.MAX_WORKERS) as executor:
@@ -331,29 +341,9 @@ class IdealistaScraper(HouseScraper):
                     for _ in range(config.MAX_WORKERS):
                         executor.submit(lambda : utils.mega_wait())
 
-    def scrape(self):
-        """
-        Scrapes the entire idealista website
-        """
-        utils.create_directory(config.IDEALISTA_MAPS)
-        nav_thread = None
-        if self.__scrape_navigation:
-            if self.__navigations_to_visit.empty():
-                self._scrape_first_time_nav()
-            nav_thread = threading.Thread(target=self.start_navigating)
-        
-        houses_thread = None
-        if self.__scrape_houses:
-            houses_thread = threading.Thread(target=self.start_house_scraping)
-        
-        if nav_thread: nav_thread.start()
-        if houses_thread: houses_thread.start()
-
-        if nav_thread: nav_thread.join()
-        if houses_thread: houses_thread.join()
-
+    def dump_houses(self):
         # mix all the data, keep unique IDs
-        utils.log('Merging the data')
+        utils.log(f'Dumping houses CSV')
         house_fields = ['id', 'url', 'title', 'location', 'price', 
         'm2', 'rooms', 'floor', 'num-photos', 'floor-plan', 'view3d', 'video', 
         'home-staging', 'description']
@@ -363,4 +353,41 @@ class IdealistaScraper(HouseScraper):
             utils.create_directory(config.DATASET_DIR)
         utils.log(f'Dumping dataset into {config.IDEALISTA_FILE}')
         df.to_csv(config.IDEALISTA_FILE)
-        utils.log(f'Dumped dataset into {config.IDEALISTA_FILE}')
+        utils.log(f'Dumped dataset of {df.shape} into {config.IDEALISTA_FILE}')
+
+    def scrape(self):
+        """
+        Scrapes the entire idealista website
+        """
+        try:
+            utils.create_directory(config.IDEALISTA_MAPS)
+            nav_thread = None
+            if self.__scrape_navigation:
+                if self.__navigations_to_visit.empty():
+                    self._scrape_first_time_nav()
+                nav_thread = threading.Thread(target=self.start_navigating)
+            
+            houses_thread = None
+            if self.__scrape_houses:
+                houses_thread = threading.Thread(target=self.start_house_scraping)
+            
+            if nav_thread: nav_thread.start()
+            if houses_thread: houses_thread.start()
+
+            # waits at most 1.5 minutes in each thread, then backs up
+            wait_time = 100/2 #seconds
+            while ((nav_thread.is_alive() if nav_thread else True) and 
+                    (houses_thread.is_alive() if houses_thread else True)):
+                if nav_thread: nav_thread.join(timeout=wait_time)
+                if houses_thread: houses_thread.join(timeout=wait_time)
+
+                self.dump_houses()
+                self.cleanup()
+        except Exception as e:
+            utils.error(f'[idealista] Something went wrong (?)')
+            utils.error(e)
+        finally:
+            # whatever happens, backup and dump!
+            # final backup and dump
+            self.cleanup()
+            self.dump_houses()
