@@ -49,18 +49,10 @@ class FotocasaScraper(HouseScraper):
                 house['rooms'] = main_content.find_element(by=By.CSS_SELECTOR, value='div > section:nth-child(1) > div > div.re-DetailHeader-header > div.re-DetailHeader-propertyTitleContainer > ul > li:nth-child(1) > span:nth-child(2) > span').text
                 house['floor'] = main_content.find_element(by=By.CSS_SELECTOR, value='div > section:nth-child(1) > div > div.re-DetailHeader-header > div.re-DetailHeader-propertyTitleContainer > ul > li:nth-child(4) > span:nth-child(2) > span').text
                 house['baths'] = main_content.find_element(by=By.CSS_SELECTOR, value='div > section:nth-child(1) > div > div.re-DetailHeader-header > div.re-DetailHeader-propertyTitleContainer > ul > li:nth-child(2) > span:nth-child(2) > span').text
-                #house['others'] = main_content.find_element(by=By.CSS_SELECTOR, value='div > section:nth-child(1) > div > div.re-DetailHeader-header > div.re-DetailHeader-propertyTitleContainer > ul > li:nth-child(2) > span:nth-child(2) > span')
                 
-
-
-                '''
-                anchors = main_content.find_element(by=By.CSS_SELECTOR, value='div.fake-anchors')
-                features = main_content.find_element(by=By.CSS_SELECTOR, value='div.info-features')
-                extended_features = main_content.find_element(by=By.CSS_SELECTOR, value='section#details > div.details-property')
-                house = self._get_house_features(driver, anchors, features, extended_features, house)
+                house['num_photos'] = driver.find_element(by=By.CSS_SELECTOR, value='#App > div.re-Page > main > ul > li > button > span > span.sui-AtomButton-text')
+ 
                 
-                
-                '''
                 utils.mini_wait()
                 return house
             except NoSuchElementException as e:
