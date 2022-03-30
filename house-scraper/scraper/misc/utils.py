@@ -88,6 +88,15 @@ def directory_exists(dir_name : str) -> bool:
     """
     return os.path.exists(dir_name) and os.path.isdir(dir_name)
 
+def file_exists(file_name : str) -> bool:
+    return os.path.exists(file_name) and os.path.isfile(file_name)
+
+def get_directories(src_dir : str) -> list:
+    if directory_exists(src_dir):
+        return [os.path.join(src_dir, file) for file in os.listdir(src_dir) 
+            if os.path.isdir(os.path.join(src_dir, file))]
+    else: return []
+
 def get_files_in_directory(dir_name : str, extension : str = '') -> list:
     log(f'Getting files ending with "{extension}" in {dir_name}')
     if directory_exists(dir_name):

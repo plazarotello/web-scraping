@@ -1,3 +1,4 @@
+import os
 import argparse
 import threading
 from time import gmtime, strftime, time
@@ -7,11 +8,25 @@ from scrapers.scraper_base import HouseScraper
 from scrapers.scraper_factory import ScraperFactory
 
 
-def init_tmp_folder():
+def init_tmp_folder(scrapers : list, delete_all : bool = False):
     """
     Initializes the temporary folder to dump the data on
     """
-    utils.create_directory(config.TMP_DIR)
+    if delete_all: 
+        utils.create_directory(config.TMP_DIR)
+        return
+    elif not utils.directory_exists(config.TMP_DIR):
+        utils.create_directory(config.TMP_DIR)
+        return
+    else:
+        directories = utils.get_directories(config.TMP_DIR)
+        for id in scrapers:
+            if os.path.join(config.TMP_DIR, id) in directories:
+                # don't delete the scrapers we want to keep
+                directories.remove(os.path.join(config.TMP_DIR, id))
+        for directory in directories:
+            utils.delete_directory(directory)
+
 
 
 def scrape_web(scraper : HouseScraper):
@@ -42,7 +57,7 @@ def main(scrapers_ids : list):
     """
 
     utils.log('Starting web-scraping')
-    init_tmp_folder()
+    init_tmp_folder(scraper_ids)
     scraper_threads = list()
     for id in scrapers_ids:
         scraper_thread = threading.Thread(target=scrape_web, args=(ScraperFactory.create_scraper(id),))

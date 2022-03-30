@@ -1,6 +1,9 @@
 import os
-import csv
+import atexit
 import re
+from queue import Queue
+import pickle
+import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import pandas as pd
@@ -13,7 +16,35 @@ from .scraper_base import HouseScraper
 
 class IdealistaScraper(HouseScraper):
 
-    __urls = dict()
+    __scrape_navigation = True
+    __scrape_houses = True
+    __navigations_to_visit = Queue()
+    __houses_to_visit = Queue()
+    __houses_visited = list()
+
+    def __init__(self, id: str):
+        super().__init__(id)
+        atexit.register(self.cleanup)
+        if not utils.directory_exists(config.IDEALISTA_TMP):
+            utils.create_directory(config.IDEALISTA_TMP)
+        if utils.file_exists(os.path.join(config.IDEALISTA_TMP, 'state.pkl')):
+            with open(os.path.join(config.IDEALISTA_TMP, 'state.pkl'), 'rb') as file:
+                state_data = pickle.load(file)
+            self.__scrape_navigation = state_data['scrape-nav']
+            self.__scrape_houses = state_data['scrape-houses']
+            self.__navigations_to_visit = state_data['nav-to-scrap']
+            self.__houses_to_visit = state_data['houses-to-scrap']
+            self.__houses_visited = state_data['houses-scraped']
+        
+    def cleanup(self):
+        state_data = dict()
+        state_data['houses-scraped'] = self.__houses_visited
+        state_data['nav-to-scrap'] = self.__navigations_to_visit
+        state_data['houses-to-scrap'] = self.__houses_to_visit
+        state_data['scrape-nav'] = not self.__navigations_to_visit.empty()
+        state_data['scrape-houses'] = not self.__houses_to_visit.empty()
+        with open(os.path.join(config.IDEALISTA_TMP, 'state.pkl'), 'wb') as file:
+            pickle.dump(state_data, file, pickle.HIGHEST_PROTOCOL)
 
     def try_page(self, driver, fn):
         madeit = False
@@ -35,8 +66,7 @@ class IdealistaScraper(HouseScraper):
                 madeit=False
         return result
 
-
-    def _scrape_navigation(self, url : str, location : str) -> list:
+    def _scrape_navigation(self, url : str):
         """
         Scrapes the navigation pages for a location (given in the starting url).
 
@@ -52,43 +82,30 @@ class IdealistaScraper(HouseScraper):
         driver = utils.get_selenium()
         utils.mini_wait()
         driver.get(url)
-        houses_to_visit = list()
-        max_pages_before_wait = 5
-        page_number = 0
 
-        while True:
-            # see how much we have to wait
-            utils.mini_wait() if utils.flip_coin() else utils.wait()
+        # see how much we have to wait
+        utils.mini_wait() if utils.flip_coin() else utils.wait()
 
-            # browse all pages
-            main_content = self.try_page(driver, lambda : driver.find_element(by=By.CSS_SELECTOR, 
-                    value='main#main-content > section.items-container'))
+        # browse all pages
+        main_content = self.try_page(driver, lambda : driver.find_element(by=By.CSS_SELECTOR, 
+                value='main#main-content > section.items-container'))
 
-            articles = main_content.find_elements(by=By.CSS_SELECTOR, value='article.item')
-            for article in articles:
-                # get each article url
-                article_url = article.find_element(by=By.CSS_SELECTOR, 
-                    value='div.item-info-container > a.item-link').get_attribute('href')
-                houses_to_visit.append(article_url)
-            try:
-                next_page = main_content.find_element(by=By.CSS_SELECTOR, value='div.pagination > ul > li.next > a')
-                driver.execute_script('arguments[0].scrollIntoView();', next_page)
-                utils.mini_wait()
-                
-                page_number = page_number+1
-                if page_number >= max_pages_before_wait:
-                    page_number = 0
-                    utils.mega_wait()
-                
-                next_page.click()
-            except NoSuchElementException as e:
-                utils.log(f'[{self.id}] No more pages to visit')
-                utils.warn(f'[{self.id}] {e.msg}')
-                break   # no more pages to navigate to
+        articles = main_content.find_elements(by=By.CSS_SELECTOR, value='article.item')
+        for article in articles:
+            # get each article url
+            article_url = article.find_element(by=By.CSS_SELECTOR, 
+                value='div.item-info-container > a.item-link').get_attribute('href')
+            self.__houses_to_visit.put(article_url)
+        try:
+            next_page = main_content.find_element(by=By.CSS_SELECTOR, value='div.pagination > ul > li.next > a')
+            next_page_link = next_page.get_attribute('href')
+            self.__navigations_to_visit.put(next_page_link)
+        except NoSuchElementException as e:
+            utils.log(f'[{self.id}] No more pages to visit')
+            utils.warn(f'[{self.id}] {e.msg}')
         
         utils.mini_wait()
         driver.quit()
-        return houses_to_visit
 
     def _get_house_features(self, driver, anchors, features, extended_features, house : dict) -> dict:
         """
@@ -118,7 +135,7 @@ class IdealistaScraper(HouseScraper):
             photos = int(re.search(r'\d+', photos_text).group(0))   # '10 fotos' -> 10
         except NoSuchElementException as e:
             pass    # no photos
-        house['photos'] = photos
+        house['num-photos'] = photos
 
         map = False
         try: 
@@ -136,7 +153,7 @@ class IdealistaScraper(HouseScraper):
                     ' div.image-gallery-slide.center > figure.item-gallery > img')
             
             map_url = map_img.get_attribute('src')
-            utils.download_image(map_url, os.path.join(config.IDEALISTA_MAPS, house['id'] + '.jpg'))
+            utils.download_image(map_url, os.path.join(config.IDEALISTA_MAPS, str(house['id']) + '.jpg'))
 
             close_button.click()
             utils.mini_wait()
@@ -144,7 +161,7 @@ class IdealistaScraper(HouseScraper):
             map = True  # checks if map button exists
         except NoSuchElementException as e: 
             pass    # map button does not exist
-        house['map'] = 1 if map else 0
+        house['floor-plan'] = 1 if map else 0
 
         view3d = False
         try: 
@@ -202,14 +219,12 @@ class IdealistaScraper(HouseScraper):
 
         return house
 
-    def _scrape_house_page(self, location: str, url : str) -> dict:
+    def _scrape_house_page(self, url : str):
         """
         Scrapes a certain house detail page
 
         Parameters
         ----------
-        location: str
-            Location the house in in
         url : str
             URL to scrap
         
@@ -219,10 +234,10 @@ class IdealistaScraper(HouseScraper):
         """
         with utils.get_selenium() as driver:
             try:
-                house = {'id': '', 'url': '', 'title': '', 'location': '', 'sublocation': '',
-                    'price': '', 'm2': '', 'rooms': '', 'floor': '', 'photos': '', 'map': '',
-                    'view3d': '', 'video': '', 'home-staging': '', 'description': ''}
-                utils.log(f'[idealista:{location}] Scraping {url}')
+                house = {'id': '', 'url': '', 'title': '', 'location': '', 'price': '', 
+                'm2': '', 'rooms': '', 'floor': '', 'num-photos': '', 'floor-plan': '','view3d': '', 
+                'video': '', 'home-staging': '', 'description': ''}
+                utils.log(f'[idealista] Scraping {url}')
                 utils.mini_wait()
                 driver.get(url)
                 main_content = self.try_page(driver, lambda: driver.find_element(by=By.CSS_SELECTOR, value='main.detail-container > section.detail-info'))
@@ -230,8 +245,7 @@ class IdealistaScraper(HouseScraper):
                 house['id'] = int(re.search(r'\d+', url).group(0))
                 house['url'] = driver.current_url
                 house['title'] = main_content.find_element(by=By.CSS_SELECTOR, value='div.main-info__title > h1 > span').text
-                house['location'] = location
-                house['sublocation'] = main_content.find_element(by=By.CSS_SELECTOR, value='div.main-info__title > span > span').text
+                house['location'] = main_content.find_element(by=By.CSS_SELECTOR, value='div.main-info__title > span > span').text
                 house['price'] = int(main_content.find_element(by= By.CSS_SELECTOR, 
                     value='div.info-data > span.info-data-price > span').text.replace('.', ''))
                 
@@ -243,34 +257,12 @@ class IdealistaScraper(HouseScraper):
                 house['description'] = main_content.find_element(by=By.CSS_SELECTOR, 
                 value='div.commentsContainer > div.comment > div.adCommentsLanguage > p').text.strip()
 
-                utils.mini_wait()
-                return house
+                self.__houses_visited.append(house)
             except NoSuchElementException as e:
                 utils.error(f'[{self.id}] Something happened!')
                 utils.error(f'Exception: {e.msg}')
-                return None
         
-    def _scrape_location(self, location : str, url : str):
-        """
-        Scrapes a location in idealista and puts all the info in the TMP folder
-        of the project, under idealista/{location}.txt
-
-        Parameters
-        ----------
-        location : str
-            Name of the location to scrape
-        url : str
-            URL to be attached to the IDEALISTA_URL in order to scrape
-        """
-        utils.mini_wait()
-        utils.log(f'[idealista] Scraping {location}')
-        # browse all houses and get their info
-        house_urls = self._scrape_navigation(url, location)
-        self.__urls.update(dict.fromkeys(house_urls, location))
-        utils.log(f'[idealista] {location} navigation scraped: found {len(house_urls)} houses')
-    
-    def _scrape_houses_urls(self):
-        locations_urls = dict()
+    def _scrape_first_time_nav(self):
         try:
             with utils.get_selenium() as driver:
                 utils.mini_wait()
@@ -283,65 +275,83 @@ class IdealistaScraper(HouseScraper):
                 # gets a pair of (province, url) for each location
                 for location in locations_list:
                     loc_link = location.find_element(by=By.CSS_SELECTOR, value='a')
-                    loc_number = int(location.find_element(by=By.CSS_SELECTOR, value='p').text.replace('.', ''))
+                    # loc_number = int(location.find_element(by=By.CSS_SELECTOR, value='p').text.replace('.', ''))
                     # bypass choosing a sublocation
-                    locations_urls[loc_number] = { 'url': re.sub(r'municipios$', '', loc_link.get_attribute('href')),
-                        'location': loc_link.text}
+                    self.__navigations_to_visit.put(re.sub(r'municipios$', '', loc_link.get_attribute('href')))
                 utils.mini_wait()
         except Exception as e:
             utils.error(f'[{self.id}]: {e.msg}')
-        
-        # concurrent scrape of all provinces, using 5 threads
-        with ThreadPoolExecutor(max_workers=config.MAX_WORKERS) as executor:
-            max_locations_before_wait = 5
-            loc_number = 0
-            for _, value in sorted(locations_urls.items()):
-                location = value['location']
-                url = value['url']
-                executor.submit(self._scrape_location, location, url)
-                loc_number = loc_number+1
-                if loc_number >= max_locations_before_wait:
-                    loc_number = 0
-                    for _ in range(config.MAX_WORKERS):
-                        executor.submit(lambda: utils.mega_wait())
 
-    def _scrape_houses_details(self) -> list:
-        houses = list()
+    def start_navigating(self):
+        # concurrent scrape of all provinces, using multiple threads
         with ThreadPoolExecutor(max_workers=config.MAX_WORKERS) as executor:
+            # max_locations_before_wait = 20
+            # loc_number = 0
             futures = []
-            max_houses_before_wait = 5
+            while self.__scrape_navigation:
+                try:
+                    navigation = self.__navigations_to_visit.get(timeout=500)
+                except Exception:
+                    # everything has been scraped
+                    if all(scrap.done() for scrap in futures):
+                        self.__scrape_navigation = False
+                        continue
+
+                futures.append(executor.submit(self._scrape_navigation, navigation))
+                # loc_number = loc_number+1
+                # if loc_number >= max_locations_before_wait:
+                #     loc_number = 0
+                #     for _ in range(config.MAX_WORKERS):
+                #         executor.submit(lambda: utils.mega_wait())
+
+    def start_house_scraping(self) -> list:
+        with ThreadPoolExecutor(max_workers=config.MAX_WORKERS) as executor:
+            max_houses_before_wait = 20
             house_number = 0
-            for url, location in self.__urls.items():
-                futures.append(executor.submit(self._scrape_house_page, location, url))
+            futures = []
+            while self.__scrape_houses:
+                try:
+                    house = self.__houses_to_visit.get(timeout=500)
+                except Exception:
+                    # navigation scraped and houses scraped
+                    if all(scrap.done() for scrap in futures) and not self.__scrape_navigation:
+                        self.__scrape_houses = False
+                        continue
+                
+                futures.append(executor.submit(self._scrape_house_page, house))
                 house_number = house_number+1
                 if house_number >= max_houses_before_wait:
                     house_number = 0
-                    utils.mega_wait()
-            for future in as_completed(futures):
-                house = future.result()
-                houses.append(house)    # can append None values
-        return list(filter(None, houses))
+                    for _ in range(config.MAX_WORKERS):
+                        executor.submit(lambda : utils.mega_wait())
 
     def scrape(self):
         """
         Scrapes the entire idealista website
         """
-        with utils.create_file(config.TMP_DIR, self.id + '.csv') as _file:
-            writer = csv.DictWriter(_file,fieldnames=['url', 'location'])
-            self._scrape_houses_urls()
-            writer.writeheader()
-            for url, location in self.__urls.items():
-                writer.writerow([url, location])
-
         utils.create_directory(config.IDEALISTA_MAPS)
-        houses = self._scrape_houses_details()
+        nav_thread = None
+        if self.__scrape_navigation:
+            if self.__navigations_to_visit.empty():
+                self._scrape_first_time_nav()
+            nav_thread = threading.Thread(target=self.start_navigating)
+        
+        houses_thread = None
+        if self.__scrape_houses:
+            houses_thread = threading.Thread(target=self.start_house_scraping)
+        
+        if nav_thread: nav_thread.start()
+        if houses_thread: houses_thread.start()
+
+        if nav_thread: nav_thread.join()
+        if houses_thread: houses_thread.join()
 
         # mix all the data, keep unique IDs
         utils.log('Merging the data')
-        house_fields = ['id', 'url', 'title', 'location', 'sublocation',
-            'price', 'm2', 'rooms', 'floor', 'photos', 'map', 'view3d', 
-            'video', 'home-staging', 'description']
-        df = pd.DataFrame(houses, columns=house_fields).drop_duplicates('id')
+        house_fields = ['id', 'url', 'title', 'location', 'price', 
+        'm2', 'rooms', 'floor', 'num-photos', 'floor-plan', 'view3d', 'video', 
+        'home-staging', 'description']
+        df = pd.DataFrame(self.__houses_visited, columns=house_fields).drop_duplicates('id')
 
         if not utils.directory_exists(config.DATASET_DIR):
             utils.create_directory(config.DATASET_DIR)

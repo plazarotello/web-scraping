@@ -19,6 +19,7 @@ IDEALISTA_ID = 'idealista'
 IDEALISTA_URL = 'https://www.idealista.com'
 IDEALISTA_FILE = os.path.join(DATASET_DIR, IDEALISTA_ID + '.csv')
 IDEALISTA_MAPS = os.path.join(DATASET_DIR, IDEALISTA_ID + '-maps')
+IDEALISTA_TMP = os.path.join(TMP_DIR, IDEALISTA_ID)
 
 FOTOCASA_ID = 'fotocasa'
 FOTOCASA_URL = 'https://www.fotocasa.es/es/'
@@ -40,4 +41,4 @@ CHANCE_MEGA_WAIT = 0.2
 MEGA_MIN_WAIT = 60
 MEGA_MAX_WAIT = 240
 
-MAX_WORKERS = 3
+MAX_WORKERS = 6
