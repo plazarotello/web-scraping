@@ -2,6 +2,7 @@
 
 ## Technologies used
 
+- Windows O.S.
 - Python (3.9.10 requiered)
 - Selenium 4.1.3
 - Requests 2.27.1
