@@ -37,7 +37,7 @@ class FotocasaScraper(HouseScraper):
                 utils.mini_wait()
                 driver.get(url)
                 main_content = self.try_page(driver, lambda: driver.find_element(by=By.CSS_SELECTOR, value='#App > div.re-Page > main > div.re-LayoutContainer.re-LayoutContainer--large > div.re-ContentDetail-topContainer'))
-                house['id'] = 1111 #TODO re.match("(\d+)", url)
+                house['id'] = re.findall('\d+', url)[0]
                 house['url'] = driver.current_url
                 house['title'] = main_content.find_element(by=By.CSS_SELECTOR, value='div > section:nth-child(1) > div > div.re-DetailHeader-header > div.re-DetailHeader-propertyTitleContainer > h1').text
                 house['location'] = location
@@ -50,8 +50,13 @@ class FotocasaScraper(HouseScraper):
                 house['floor'] = main_content.find_element(by=By.CSS_SELECTOR, value='div > section:nth-child(1) > div > div.re-DetailHeader-header > div.re-DetailHeader-propertyTitleContainer > ul > li:nth-child(4) > span:nth-child(2) > span').text
                 house['baths'] = main_content.find_element(by=By.CSS_SELECTOR, value='div > section:nth-child(1) > div > div.re-DetailHeader-header > div.re-DetailHeader-propertyTitleContainer > ul > li:nth-child(2) > span:nth-child(2) > span').text
                 
-                house['num_photos'] = driver.find_element(by=By.CSS_SELECTOR, value='#App > div.re-Page > main > ul > li > button > span > span.sui-AtomButton-text')
- 
+                house['num_photos'] = driver.find_element(by=By.CSS_SELECTOR, value='#App > div.re-Page > main > ul > li > button > span > span.sui-AtomButton-text').text
+                #house['others'] = main_content.find_element(by=By.CSS_SELECTOR, value='div > section:nth-child(1) > div > div.re-DetailHeader-header > div.re-DetailHeader-propertyTitleContainer > ul > li:nth-child(2) > span:nth-child(2) > span')
+                print(house)
+                resultSet = driver.find_element(by=By.CSS_SELECTOR, value='#re-DetailMultimediaModal > div > div > div.sui-MoleculeModalContent.sui-MoleculeModalContent--without-indentation > div > div.re-DetailMultimediaModal-listColumn > ul.re-DetailMultimediaModal-listWrapper')
+                image_list = resultSet.find_elements_by_tag_name("li")
+                for image in image_list:
+                    print("--------",image.text)
                 
                 utils.mini_wait()
                 return house
