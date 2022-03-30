@@ -100,13 +100,23 @@ def get_files_in_directory(dir_name : str, extension : str = '') -> list:
 # INTERNET CAPABILITIES
 # =========================================================
 
-def get_http_code(url) -> int:
+def get_http_code(url : str) -> int:
     try:
         r_headers = {'User-Agent': config.get_user_agent()}
         r = requests.get(url, headers=r_headers)
         return r.status_code
     except (requests.HTTPError, requests.ConnectionError) as e:
-        print(f'Error trying to get status code for {url}: {e.msg}')
+        error(f'Error trying to get status code for {url}: {e.msg}')
+
+def download_image(url : str, img_file : str) -> bool:
+    try:
+        r_headers = {'User-Agent': config.get_user_agent()}
+        r = requests.get(url, headers=r_headers)
+        r.raise_for_status()
+        with open(img_file, 'wb') as handler:
+            handler.write(r.content)
+    except Exception as e:
+        warn(f'Error trying to download image from {url}: {e.msg}')
 
 # =========================================================
 # SELENIUM UTILITIES
