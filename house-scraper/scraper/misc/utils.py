@@ -119,13 +119,13 @@ def get_http_code(url : str) -> int:
 
 def download_image(url : str, img_file : str) -> bool:
     try:
-        r_headers = {'User-Agent': config.get_user_agent()}
+        r_headers = {'User-Agent': network.get_user_agent()}
         r = requests.get(url, headers=r_headers)
         r.raise_for_status()
         with open(img_file, 'wb') as handler:
             handler.write(r.content)
     except Exception as e:
-        warn(f'Error trying to download image from {url}: {e.msg}')
+        warn(f'Error trying to download image from {url}')
 
 # =========================================================
 # SELENIUM UTILITIES

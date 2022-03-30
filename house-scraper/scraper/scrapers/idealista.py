@@ -187,11 +187,18 @@ class IdealistaScraper(HouseScraper):
             pass    # staging button does not exist
         house['home-staging'] = 1 if staging else 0
 
-        house_features = features.find_elements(by=By.XPATH, value='./span')
-        house['m2'] = house_features[0].find_element(by=By.CSS_SELECTOR, value='span').text
-        house['rooms'] = house_features[1].find_element(by=By.CSS_SELECTOR, value='span').text
-        house['floor'] = house_features[2].find_element(by=By.CSS_SELECTOR, value='span'
-        ).text + house_features[2].text
+        house_features = features.find_elements(by=By.CSS_SELECTOR, value='div.info-features > span')
+        if len(house_features) >= 1:
+            house['m2'] = house_features[0].find_element(by=By.CSS_SELECTOR, value='span').text
+        if len(house_features) >= 2:
+            maybe_rooms = house_features[1].find_element(by=By.CSS_SELECTOR, value='span').text
+            if re.search(r'\d+ hab.', maybe_rooms):
+                house['rooms'] = maybe_rooms
+            else:
+                house['floor'] = maybe_rooms
+        if len(house_features) >= 3:
+            house['floor'] = house_features[2].find_element(by=By.CSS_SELECTOR, value='span'
+                ).text + house_features[2].text
         if not re.search(r'Planta', house['floor']):
             house['floor'] = 'Sin planta'
         
@@ -250,9 +257,8 @@ class IdealistaScraper(HouseScraper):
                     value='div.info-data > span.info-data-price > span').text.replace('.', ''))
                 
                 anchors = main_content.find_element(by=By.CSS_SELECTOR, value='div.fake-anchors')
-                features = main_content.find_element(by=By.CSS_SELECTOR, value='div.info-features')
                 extended_features = main_content.find_element(by=By.CSS_SELECTOR, value='section#details > div.details-property')
-                house = self._get_house_features(driver, anchors, features, extended_features, house)
+                house = self._get_house_features(driver, anchors, main_content, extended_features, house)
                 
                 house['description'] = main_content.find_element(by=By.CSS_SELECTOR, 
                 value='div.commentsContainer > div.comment > div.adCommentsLanguage > p').text.strip()
