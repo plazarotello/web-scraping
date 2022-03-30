@@ -30,9 +30,9 @@ class FotocasaScraper(HouseScraper):
         """
         with utils.get_selenium() as driver:
             try:
-                house = {'id': '', 'url': '', 'title': '', 'location': '', 'sublocation': '',
-                    'price': '', 'm2': '', 'rooms': '', 'floor': '', 'photos': '', 'map': '',
-                    'view3d': '', 'video': '', 'home-staging': '', 'description': ''}
+                house = {'id': '', 'url': '', 'title': '', 'location': '', 
+                    'price': '', 'm2': '', 'rooms': '', 'floor': '', 'num-photos': '','floor-plan': '','view-3d': '',
+                    'video': '', 'home-staging': '', 'description': ''}
                 utils.log(f'[fotocasa:{location}] Scraping {url}')
                 utils.mini_wait()
                 driver.get(url)
@@ -41,7 +41,6 @@ class FotocasaScraper(HouseScraper):
                 house['url'] = driver.current_url
                 house['title'] = main_content.find_element(by=By.CSS_SELECTOR, value='div > section:nth-child(1) > div > div.re-DetailHeader-header > div.re-DetailHeader-propertyTitleContainer > h1').text
                 house['location'] = location
-                house['sublocation'] = "sublocation"
                 house['price'] = main_content.find_element(by= By.CSS_SELECTOR, value='div > section:nth-child(1) > div > div.re-DetailHeader-header > div.re-DetailHeader-userActionContainer > div.re-DetailHeader-priceContainer > span').text.replace(' €', '')
                 house['description'] = main_content.find_element(by=By.CSS_SELECTOR, value='div > section:nth-child(1) > div > div.fc-DetailDescriptionContainer > div.sui-MoleculeCollapsible.sui-MoleculeCollapsible--withGradient.is-collapsed > div > div > p').text.strip()
                 
@@ -50,8 +49,8 @@ class FotocasaScraper(HouseScraper):
                 house['floor'] = main_content.find_element(by=By.CSS_SELECTOR, value='div > section:nth-child(1) > div > div.re-DetailHeader-header > div.re-DetailHeader-propertyTitleContainer > ul > li:nth-child(4) > span:nth-child(2) > span').text
                 house['baths'] = main_content.find_element(by=By.CSS_SELECTOR, value='div > section:nth-child(1) > div > div.re-DetailHeader-header > div.re-DetailHeader-propertyTitleContainer > ul > li:nth-child(2) > span:nth-child(2) > span').text
                 
-                house['num_photos'] = driver.find_element(by=By.CSS_SELECTOR, value='#App > div.re-Page > main > ul > li > button > span > span.sui-AtomButton-text').text.replace(" Fotos","")
-                house['map'] = 0
+                house['num-photos'] = driver.find_element(by=By.CSS_SELECTOR, value='#App > div.re-Page > main > ul > li > button > span > span.sui-AtomButton-text').text.replace(" Fotos","")
+                house['floor-plan'] = 0
                 house['video'] = 0
                 house['home-staging'] = 0
 
@@ -62,7 +61,7 @@ class FotocasaScraper(HouseScraper):
                     house['view3d'] = 0
 
                 '''
-                TODO gestionar urls de las imagenes y su descarga
+                TODO gestionar urls de las imagenes y su descarga en url atributo map
                 resultSet = driver.find_element(by=By.CSS_SELECTOR, value='#re-DetailMultimediaModal > div > div > div.sui-MoleculeModalContent.sui-MoleculeModalContent--without-indentation > div > div.re-DetailMultimediaModal-listColumn > ul.re-DetailMultimediaModal-listWrapper')
                 image_list = resultSet.find_elements_by_tag_name("li")
                 print("......",image_list)
@@ -140,7 +139,6 @@ class FotocasaScraper(HouseScraper):
                 try:
                     house_urls = article.find_element(by=By.CSS_SELECTOR, 
                         value='a.re-CardPackPremium-carousel').get_attribute('href')
-                    print(f"found article url: {house_urls}")
                     houses_to_visit.append(house_urls)
                     self.__urls.update(dict.fromkeys(house_urls, location))
                 except Exception as e:
@@ -181,14 +179,14 @@ class FotocasaScraper(HouseScraper):
 
             # mix all the data, keep unique IDs
             utils.log('Merging the data')
-            house_fields = ['id', 'url', 'title', 'location', 'sublocation',
-                'price', 'm2', 'rooms', 'floor', 'photos', 'map', 'view3d', 
-                'video', 'home-staging', 'description']
-            #df = pd.DataFrame(houses, columns=house_fields).drop_duplicates('id')
+            house_fields = ['id', 'url', 'title', 'location', 'price', 
+            'm2', 'rooms', 'floor', 'num-photos', 'floor-plan', 'view3d', 'video', 
+            'home-staging', 'description']
+            df = pd.DataFrame(houses, columns=house_fields).drop_duplicates('id')
 
             if not utils.directory_exists(config.DATASET_DIR):
                 utils.create_directory(config.DATASET_DIR)
             utils.log(f'Dumping dataset into {config.FOTOCASA_FILE}')
-            #df.to_csv(config.FOTOCASA_FILE)
+            df.to_csv(config.FOTOCASA_FILE)
             utils.log(f'Dumped dataset into {config.FOTOCASA_FILE}')
 
