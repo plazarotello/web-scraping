@@ -12,19 +12,18 @@ from selenium.webdriver.common.by import By
 class FotocasaScraper(HouseScraper):
 
 
+
     def scrape(self):
             """
             Scrapes the entire idealista website
             """
-            with utils.create_file(config.TMP_DIR, self.id + '.csv') as _file:
-                writer = csv.DictWriter(_file,fieldnames=['url', 'location'])
-                '''
-                self._scrape_houses_urls()
-                writer.writeheader()
-                for url, location in self.__urls.items():
-                    writer.writerow([url, location])
-'''
-            #houses = self._scrape_houses_details()
+
+            # create url using municiplity name only. Not necessary to invoke main page to get url-muniipality pair 
+            location = "fuenlabrada"
+            url_call = f"{config.FOTOCASA_URL}/comprar/viviendas/{location}/todas-las-zonas/l?sortType=scoring"
+                
+
+            houses = self._scrape_houses_details()
 
             # mix all the data, keep unique IDs
             utils.log('Merging the data')
