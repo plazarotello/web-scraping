@@ -50,14 +50,25 @@ class FotocasaScraper(HouseScraper):
                 house['floor'] = main_content.find_element(by=By.CSS_SELECTOR, value='div > section:nth-child(1) > div > div.re-DetailHeader-header > div.re-DetailHeader-propertyTitleContainer > ul > li:nth-child(4) > span:nth-child(2) > span').text
                 house['baths'] = main_content.find_element(by=By.CSS_SELECTOR, value='div > section:nth-child(1) > div > div.re-DetailHeader-header > div.re-DetailHeader-propertyTitleContainer > ul > li:nth-child(2) > span:nth-child(2) > span').text
                 
-                house['num_photos'] = driver.find_element(by=By.CSS_SELECTOR, value='#App > div.re-Page > main > ul > li > button > span > span.sui-AtomButton-text').text
-                #house['others'] = main_content.find_element(by=By.CSS_SELECTOR, value='div > section:nth-child(1) > div > div.re-DetailHeader-header > div.re-DetailHeader-propertyTitleContainer > ul > li:nth-child(2) > span:nth-child(2) > span')
-                print(house)
+                house['num_photos'] = driver.find_element(by=By.CSS_SELECTOR, value='#App > div.re-Page > main > ul > li > button > span > span.sui-AtomButton-text').text.replace(" Fotos","")
+                house['map'] = 0
+                house['video'] = 0
+                house['home-staging'] = 0
+
+                try:
+                    driver.find_element(by=By.CSS_SELECTOR, value='#App > div.re-Page > main > ul > li:nth-child(2) > button')
+                    house['view3d'] = 1
+                except NoSuchElementException:
+                    house['view3d'] = 0
+
+                '''
+                TODO gestionar urls de las imagenes y su descarga
                 resultSet = driver.find_element(by=By.CSS_SELECTOR, value='#re-DetailMultimediaModal > div > div > div.sui-MoleculeModalContent.sui-MoleculeModalContent--without-indentation > div > div.re-DetailMultimediaModal-listColumn > ul.re-DetailMultimediaModal-listWrapper')
                 image_list = resultSet.find_elements_by_tag_name("li")
+                print("......",image_list)
                 for image in image_list:
                     print("--------",image.text)
-                
+                '''
                 utils.mini_wait()
                 return house
             except NoSuchElementException as e:
