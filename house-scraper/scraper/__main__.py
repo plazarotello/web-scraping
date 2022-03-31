@@ -30,7 +30,7 @@ def init_tmp_folder(scrapers : list, delete_all : bool = False):
 
 
 
-def scrape_web(scraper : HouseScraper):
+def scrape_web(scraper : HouseScraper, urls : list = None):
     """
     Monitors the elapsed time needed to scrape a real estate listing web
 
@@ -40,7 +40,7 @@ def scrape_web(scraper : HouseScraper):
         The scraper object that is going to scrape the web
     """
     start_time = time()
-    scraper.scrape()
+    scraper.scrape(urls)
     end_time = time()
     elapsed_seconds = end_time - start_time
     utils.log(f'[{scraper.id}] Elapsed time: {strftime("%H:%M:%S", gmtime(elapsed_seconds))}')
