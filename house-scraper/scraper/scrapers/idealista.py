@@ -113,7 +113,7 @@ class IdealistaScraper(HouseScraper):
             utils.log(f'[{self.id}] No more pages to visit')
             utils.warn(f'[{self.id}] {e.msg}')
 
-    def _get_house_features(self, driver, anchors, features, extended_features, house : dict) -> dict:
+    def _get_house_features(self, driver, anchors, features, house : dict) -> dict:
         """
         Gets some features from the house: number of photos, if there is a map, video and 3D view 
         available in the web, if there exists a home staging feature, the m2, number of rooms and
@@ -206,28 +206,6 @@ class IdealistaScraper(HouseScraper):
                 ).text + house_features[2].text
         if not re.search(r'Planta', house['floor']):
             house['floor'] = 'Sin planta'
-        
-        # TODO Get info on house, building, equipment and energy features
-        try:
-            basic_features = extended_features.find_element(by=By.XPATH, 
-                value='// h3[contains(text(), "Características básicas")]/following-sibling::div/child::ul')
-        except NoSuchElementException as e:
-            pass    # no basic features
-        try:
-            building_features = extended_features.find_element(by=By.XPATH, 
-            value='// h3[contains(text(), "Edificio")]/following-sibling::div/child::ul')
-        except NoSuchElementException as e:
-            pass    # no building features
-        try:
-            equipment_features = extended_features.find_element(by=By.XPATH, 
-            value='// h3[contains(text(), "Equipamiento")]/following-sibling::div/child::ul')
-        except NoSuchElementException as e:
-            pass    # no equipment features
-        try:
-            energy_features = extended_features.find_element(by=By.XPATH, 
-            value='// h3[contains(text(), "Certificado energético")]/following-sibling::div/child::ul')
-        except NoSuchElementException as e:
-            pass    # no energy features
 
         return house
 
@@ -262,8 +240,7 @@ class IdealistaScraper(HouseScraper):
                 value='div.info-data > span.info-data-price > span').text.replace('.', ''))
             
             anchors = main_content.find_element(by=By.CSS_SELECTOR, value='div.fake-anchors')
-            extended_features = main_content.find_element(by=By.CSS_SELECTOR, value='section#details > div.details-property')
-            house = self._get_house_features(driver, anchors, main_content, extended_features, house)
+            house = self._get_house_features(driver, anchors, main_content, house)
             
             house['description'] = main_content.find_element(by=By.CSS_SELECTOR, 
             value='div.commentsContainer > div.comment > div.adCommentsLanguage > p').text.rstrip()
