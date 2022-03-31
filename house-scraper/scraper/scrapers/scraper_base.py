@@ -9,15 +9,15 @@ class HouseScraper():
     ----------
     id : str
         identifier for the scraper
-    
+
     Methods
     -------
-    scrape()
-        Crawls through the web
+    scrape(urls : str, opt)
+        Crawls through a web or a subset of pages in the web
 
     """
 
-    def __init__(self, id : str):
+    def __init__(self, id: str):
         self.id = id
-    
-    def scrape(self, urls : list = None): raise NotImplementedError
+
+    def scrape(self, urls: list = None): raise NotImplementedError
