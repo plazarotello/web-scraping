@@ -1,6 +1,10 @@
+[![Maintainer](https://img.shields.io/badge/author-plazarotello-informational)](https://github.com/plazarotello) [![Maintainer](https://img.shields.io/badge/author-alba620-informational)](https://github.com/alba620) [![Python 3.9](https://img.shields.io/badge/python-3.9-blue.svg)](https://www.python.org/downloads/release/python-3910/)
+
 # Título provisional
 
-[![Maintainer](https://img.shields.io/badge/author-plazarotello-informational)](https://github.com/plazarotello) [![Maintainer](https://img.shields.io/badge/author-alba620-informational)](https://github.com/alba620) [![Python 3.9](https://img.shields.io/badge/python-3.9-blue.svg)](https://www.python.org/downloads/release/python-3910/)
+## Autoría y licencia
+
+El código, el informe, el _dataset_ y el repositorio han sido creados y desarrollados por **Alba Gómez Varela** (agomezvarela@uoc.edu) y **Patricia Lázaro Tello** (plazarotello@uoc.edu).
 
 ## Contexto
 
