@@ -25,10 +25,6 @@ FOTOCASA_ID = 'fotocasa'
 FOTOCASA_URL = 'https://www.fotocasa.es/es/'
 FOTOCASA_FILE = os.path.join(DATASET_DIR, FOTOCASA_ID + '.csv')
 
-PISOSCOM_ID = 'pisos.com'
-
-KASAZ_ID = 'kasaz'
-
 # ---------------------------------------------------------
 
 RANDOM_MIN_WAIT = 10
