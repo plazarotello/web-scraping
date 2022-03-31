@@ -16,6 +16,8 @@ Descripción provisional.
 
 ## Estructura
 
+A continuación se muestra en árbol la estructura del proyecto. Dentro de cada carpeta de house-scraper hay un README.md que provee de más detalles sobre cada fichero de código.
+
     .
     ├── house-scraper                     # carpeta con el código python del scraper
     |   ├── dataset                       # carpeta en que se guarda el dataset final
