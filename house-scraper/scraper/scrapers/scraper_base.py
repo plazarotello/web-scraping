@@ -20,4 +20,4 @@ class HouseScraper():
     def __init__(self, id : str):
         self.id = id
     
-    def scrape(self): raise NotImplementedError
+    def scrape(self, urls : list = None): raise NotImplementedError

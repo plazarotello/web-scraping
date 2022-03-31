@@ -5,6 +5,7 @@ from queue import PriorityQueue, Queue
 import pickle
 import threading
 from concurrent.futures import ThreadPoolExecutor
+from time import sleep
 
 import pandas as pd
 from selenium.common.exceptions import NoSuchElementException
@@ -21,6 +22,10 @@ class IdealistaScraper(HouseScraper):
     __navigations_to_visit = PriorityQueue()
     __houses_to_visit = Queue()
     __houses_visited = list()
+
+    __urls_before_cleanup = 10
+    __cleaner_semaphore = threading.Semaphore(value=__urls_before_cleanup)
+    __cleaner_signal = threading.Event()
 
     def __init__(self, id: str):
         super().__init__(id)
@@ -71,7 +76,7 @@ class IdealistaScraper(HouseScraper):
                 madeit=False
         return result
 
-    def _scrape_navigation(self, url : str, priority : int = 0):
+    def _scrape_navigation(self, driver, url : str, priority : int = 0):
         """
         Scrapes the navigation pages for a location (given in the starting url).
 
@@ -84,12 +89,11 @@ class IdealistaScraper(HouseScraper):
         -------
         List of the relative URL of the houses that are present in the navigation pages
         """
-        driver = utils.get_selenium()
         utils.mini_wait()
         driver.get(url)
 
         # see how much we have to wait
-        utils.mini_wait() if utils.flip_coin() else utils.wait()
+        utils.wait() if utils.flip_coin() else utils.mini_wait()
 
         # browse all pages
         main_content = self.try_page(driver, lambda : driver.find_element(by=By.CSS_SELECTOR, 
@@ -108,9 +112,6 @@ class IdealistaScraper(HouseScraper):
         except NoSuchElementException as e:
             utils.log(f'[{self.id}] No more pages to visit')
             utils.warn(f'[{self.id}] {e.msg}')
-        
-        utils.mini_wait()
-        driver.quit()
 
     def _get_house_features(self, driver, anchors, features, extended_features, house : dict) -> dict:
         """
@@ -147,7 +148,6 @@ class IdealistaScraper(HouseScraper):
             map_button = anchors.find_element(by=By.CSS_SELECTOR, value='button.icon-plan')
             
             # get image
-            utils.mini_wait()
             map_button.click()
             utils.mini_wait()
             
@@ -231,7 +231,7 @@ class IdealistaScraper(HouseScraper):
 
         return house
 
-    def _scrape_house_page(self, url : str):
+    def _scrape_house_page(self, driver, url : str):
         """
         Scrapes a certain house detail page
 
@@ -244,34 +244,35 @@ class IdealistaScraper(HouseScraper):
         -------
         Dictionary with all the info on the house
         """
-        with utils.get_selenium() as driver:
-            try:
-                house = {'id': '', 'url': '', 'title': '', 'location': '', 'price': '', 
-                'm2': '', 'rooms': '', 'floor': '', 'num-photos': '', 'floor-plan': '','view3d': '', 
-                'video': '', 'home-staging': '', 'description': ''}
-                utils.log(f'[idealista] Scraping {url}')
-                utils.mini_wait()
-                driver.get(url)
-                main_content = self.try_page(driver, lambda: driver.find_element(by=By.CSS_SELECTOR, value='main.detail-container > section.detail-info'))
+        try:
+            house = {'id': '', 'url': '', 'title': '', 'location': '', 'price': '', 
+            'm2': '', 'rooms': '', 'floor': '', 'num-photos': '', 'floor-plan': '','view3d': '', 
+            'video': '', 'home-staging': '', 'description': ''}
+            utils.log(f'[idealista] Scraping {url}')
+            utils.mini_wait()
+            driver.get(url)
+            utils.mini_wait()
+            main_content = self.try_page(driver, lambda: driver.find_element(by=By.CSS_SELECTOR, value='main.detail-container > section.detail-info'))
 
-                house['id'] = int(re.search(r'\d+', url).group(0))
-                house['url'] = driver.current_url
-                house['title'] = main_content.find_element(by=By.CSS_SELECTOR, value='div.main-info__title > h1 > span').text
-                house['location'] = main_content.find_element(by=By.CSS_SELECTOR, value='div.main-info__title > span > span').text
-                house['price'] = int(main_content.find_element(by= By.CSS_SELECTOR, 
-                    value='div.info-data > span.info-data-price > span').text.replace('.', ''))
-                
-                anchors = main_content.find_element(by=By.CSS_SELECTOR, value='div.fake-anchors')
-                extended_features = main_content.find_element(by=By.CSS_SELECTOR, value='section#details > div.details-property')
-                house = self._get_house_features(driver, anchors, main_content, extended_features, house)
-                
-                house['description'] = main_content.find_element(by=By.CSS_SELECTOR, 
-                value='div.commentsContainer > div.comment > div.adCommentsLanguage > p').text.strip()
+            house['id'] = int(re.search(r'\d+', url).group(0))
+            house['url'] = driver.current_url
+            house['title'] = main_content.find_element(by=By.CSS_SELECTOR, value='div.main-info__title > h1 > span').text
+            house['location'] = main_content.find_element(by=By.CSS_SELECTOR, value='div.main-info__title > span > span').text
+            house['price'] = int(main_content.find_element(by= By.CSS_SELECTOR, 
+                value='div.info-data > span.info-data-price > span').text.replace('.', ''))
+            
+            anchors = main_content.find_element(by=By.CSS_SELECTOR, value='div.fake-anchors')
+            extended_features = main_content.find_element(by=By.CSS_SELECTOR, value='section#details > div.details-property')
+            house = self._get_house_features(driver, anchors, main_content, extended_features, house)
+            
+            house['description'] = main_content.find_element(by=By.CSS_SELECTOR, 
+            value='div.commentsContainer > div.comment > div.adCommentsLanguage > p').text.rstrip()
+            house['description'] = house['description'].replace('\n', ' ').rstrip()
 
-                self.__houses_visited.append(house)
-            except NoSuchElementException as e:
-                utils.error(f'[{self.id}] Something happened!')
-                utils.error(f'Exception: {e.msg}')
+            self.__houses_visited.append(house)
+        except NoSuchElementException as e:
+            utils.error(f'[{self.id}] Something happened!')
+            utils.error(f'Exception: {e.msg}')
         
     def _scrape_first_time_nav(self):
         try:
@@ -294,52 +295,32 @@ class IdealistaScraper(HouseScraper):
             utils.error(f'[{self.id}]: {e.msg}')
 
     def start_navigating(self):
-        while not self.__navigations_to_visit.empty():
-            navigation = self.__navigations_to_visit.get()
-            self._scrape_navigation(navigation[1], navigation[0])
-        self.__scrape_navigation = False
-
-        # # concurrent scrape of all provinces, using multiple threads
-        # with ThreadPoolExecutor(max_workers=config.MAX_WORKERS) as executor:
-        #     # max_locations_before_wait = 20
-        #     # loc_number = 0
-        #     futures = []
-        #     while self.__scrape_navigation:
-        #         try:
-        #             navigation = self.__navigations_to_visit.get(timeout=500)
-        #         except Exception:
-        #             # everything has been scraped
-        #             if all(scrap.done() for scrap in futures):
-        #                 self.__scrape_navigation = False
-        #                 continue
-
-        #         futures.append(executor.submit(self._scrape_navigation, navigation[1], navigation[0]))
-        #         # loc_number = loc_number+1
-        #         # if loc_number >= max_locations_before_wait:
-        #         #     loc_number = 0
-        #         #     for _ in range(config.MAX_WORKERS):
-        #         #         executor.submit(lambda: utils.mega_wait())
+        with utils.get_selenium() as driver:
+            while not self.__navigations_to_visit.empty():
+                if not self.__cleaner_semaphore.acquire(blocking=True, timeout=100):
+                    # reached maximum URLs visited before dump
+                    self.__cleaner_signal.set()
+                    self.__cleaner_semaphore.acquire(blocking=True, timeout=0)
+                navigation = self.__navigations_to_visit.get()
+                self._scrape_navigation(driver, navigation[1], navigation[0])
+            self.__scrape_navigation = False
 
     def start_house_scraping(self) -> list:
-        with ThreadPoolExecutor(max_workers=config.MAX_WORKERS) as executor:
-            max_houses_before_wait = 20
-            house_number = 0
-            futures = []
+        with utils.get_selenium() as driver:
+            utils.mini_wait()
             while self.__scrape_houses:
                 try:
+                    if not self.__cleaner_semaphore.acquire(blocking=True, timeout=100):
+                        self.__cleaner_signal.set()
+                        self.__cleaner_semaphore.acquire(blocking=True, timeout=0)
                     house = self.__houses_to_visit.get(timeout=500)
                 except Exception:
                     # navigation scraped and houses scraped
-                    if all(scrap.done() for scrap in futures) and not self.__scrape_navigation:
+                    if not self.__scrape_navigation:
                         self.__scrape_houses = False
                         continue
-                
-                futures.append(executor.submit(self._scrape_house_page, house))
-                house_number = house_number+1
-                if house_number >= max_houses_before_wait:
-                    house_number = 0
-                    for _ in range(config.MAX_WORKERS):
-                        executor.submit(lambda : utils.mega_wait())
+                self._scrape_house_page(driver, house)
+                utils.mega_wait() if utils.flip_coin() else utils.wait() if utils.flip_coin() else utils.mini_wait()
 
     def dump_houses(self):
         # mix all the data, keep unique IDs
@@ -352,19 +333,26 @@ class IdealistaScraper(HouseScraper):
         if not utils.directory_exists(config.DATASET_DIR):
             utils.create_directory(config.DATASET_DIR)
         utils.log(f'Dumping dataset into {config.IDEALISTA_FILE}')
-        df.to_csv(config.IDEALISTA_FILE)
+        df.to_csv(config.IDEALISTA_FILE, encoding='utf-8', index=False, header=True)
         utils.log(f'Dumped dataset of {df.shape} into {config.IDEALISTA_FILE}')
 
-    def scrape(self):
+    def scrape(self, urls : list = None):
         """
         Scrapes the entire idealista website
         """
         try:
             utils.create_directory(config.IDEALISTA_MAPS)
             nav_thread = None
+
             if self.__scrape_navigation:
                 if self.__navigations_to_visit.empty():
-                    self._scrape_first_time_nav()
+                    if not urls:
+                        utils.log('[idealista] Started navigating all idealista')
+                        self._scrape_first_time_nav()
+                    else:
+                        utils.log(f'[idealista] Started navigating only {len(urls)} idealista locations')
+                        for i, url in enumerate(urls):
+                            self.__navigations_to_visit.put((i, url))
                 nav_thread = threading.Thread(target=self.start_navigating)
             
             houses_thread = None
@@ -374,15 +362,16 @@ class IdealistaScraper(HouseScraper):
             if nav_thread: nav_thread.start()
             if houses_thread: houses_thread.start()
 
-            # waits at most 1.5 minutes in each thread, then backs up
-            wait_time = 100/2 #seconds
-            while ((nav_thread.is_alive() if nav_thread else True) and 
-                    (houses_thread.is_alive() if houses_thread else True)):
-                if nav_thread: nav_thread.join(timeout=wait_time)
-                if houses_thread: houses_thread.join(timeout=wait_time)
+            while ((nav_thread.is_alive() if nav_thread else False) or 
+                    (houses_thread.is_alive() if houses_thread else False)):
+                self.__cleaner_signal.wait()
+                sleep(config.SYNCHRO_MAX_WAIT)
 
                 self.dump_houses()
                 self.cleanup()
+
+                self.__cleaner_signal.clear()
+                self.__cleaner_semaphore.release(n=self.__urls_before_cleanup)
         except Exception as e:
             utils.error(f'[idealista] Something went wrong (?)')
             utils.error(e)

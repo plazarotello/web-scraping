@@ -1,4 +1,5 @@
 import os
+import sys
 import argparse
 import threading
 from time import gmtime, strftime, time
@@ -45,7 +46,7 @@ def scrape_web(scraper : HouseScraper):
     utils.log(f'[{scraper.id}] Elapsed time: {strftime("%H:%M:%S", gmtime(elapsed_seconds))}')
 
 
-def main(scrapers_ids : list):
+def main(scrapers_ids : list, urls : dict):
     """
     Launches several threads to scrape multiple real estate listing webs; then joins 
     the results in a single CSV file
@@ -60,7 +61,8 @@ def main(scrapers_ids : list):
     init_tmp_folder(scraper_ids)
     scraper_threads = list()
     for id in scrapers_ids:
-        scraper_thread = threading.Thread(target=scrape_web, args=(ScraperFactory.create_scraper(id),))
+        scraper_urls = urls.get(id)
+        scraper_thread = threading.Thread(target=scrape_web, args=(ScraperFactory.create_scraper(id), scraper_urls))
         scraper_threads.append(scraper_thread)
         scraper_thread.start()
     
@@ -79,17 +81,20 @@ if __name__ == '__main__':
     argparser.add_argument('-f', '--fotocasa', help='launches the fotocasa scraper', action='store_true')
     argparser.add_argument('-p', '--pisoscom', help='launches the pisos.com scraper', action='store_true')
     argparser.add_argument('-k', '--kasaz', help='launches the kasaz scraper', action='store_true')
+    argparser.add_argument('--urls-idealista', help='urls to scrape with idealista', required=False, type=str, nargs='+')
     args = argparser.parse_args()
 
     scraper_ids = list()
+    urls = dict()
     if args.idealista: scraper_ids.append(config.IDEALISTA_ID)
     if args.fotocasa: scraper_ids.append(config.FOTOCASA_ID)
     if args.pisoscom: scraper_ids.append(config.PISOSCOM_ID)
     if args.kasaz: scraper_ids.append(config.KASAZ_ID)
+    if args.urls_idealista: urls[config.IDEALISTA_ID] = args.urls_idealista
 
     if not scraper_ids:
         scraper_ids = [config.IDEALISTA_ID, config.FOTOCASA_ID, 
             config.PISOSCOM_ID, config.KASAZ_ID]
 
     utils.log(f'Scraping {scraper_ids}')
-    main(scrapers_ids=scraper_ids)
+    main(scrapers_ids=scraper_ids, urls=urls)
