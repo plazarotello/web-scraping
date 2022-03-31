@@ -3,11 +3,14 @@ import csv
 import os
 import re
 from concurrent.futures import ThreadPoolExecutor, as_completed
-
+from bs4 import BeautifulSoup
 import pandas as pd
 from misc import config, utils
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.action_chains import ActionChains
+import time
 
 class FotocasaScraper(HouseScraper):
 
@@ -20,7 +23,7 @@ class FotocasaScraper(HouseScraper):
         Parameters
         ----------
         location: str
-            Location the house in in
+            Location the house is in
         url : str
             URL to scrap
         
@@ -95,6 +98,7 @@ class FotocasaScraper(HouseScraper):
         return list(filter(None, houses))
 
     def try_page(self, driver, fn):
+        '''TODO gestionar cookies en cada página'''
         madeit = False
         while not madeit:   
             try:
@@ -124,26 +128,22 @@ class FotocasaScraper(HouseScraper):
         houses_to_visit = list()
         max_pages_before_wait = 5
         page_number = 0
+        utils.mini_wait()
 
-        while True:
-            # see how much we have to wait
-            utils.mini_wait() if utils.flip_coin() else utils.wait()
-            # browse all pages
-            main_content = self.try_page(driver, lambda : driver.find_element(by=By.CSS_SELECTOR, 
-                    value='#App > div.re-Page > div.re-SearchPage > main > div > div.re-SearchResult-wrapper > section'))
-
-            articles = main_content.find_elements(by=By.CSS_SELECTOR, value='article')
-            print(f"numero de articulos {len(articles)}")
-            for article in articles:
-                # get each article url
-                try:
-                    house_urls = article.find_element(by=By.CSS_SELECTOR, 
-                        value='a.re-CardPackPremium-carousel').get_attribute('href')
-                    houses_to_visit.append(house_urls)
-                    self.__urls.update(dict.fromkeys(house_urls, location))
-                except Exception as e:
-                    utils.error(e)
-                #
+        main_content = self.try_page(driver, lambda : driver.find_element(by=By.CSS_SELECTOR,value='#App > div.re-Page > div.re-SearchPage > main > div > div.re-SearchResult-wrapper > section'))
+            #main_content = driver.find_elements('#App > div.re-Page > div.re-SearchPage > main > div > div.re-SearchResult-wrapper > section')
+        articles = main_content.find_elements(by=By.CSS_SELECTOR, value='article.re-CardPackPremium')
+        print(f"numero de articulos {len(articles)}")
+        for article in articles:
+            # get each article url
+            try:
+                house_urls = article.find_element(by=By.CSS_SELECTOR, 
+                    value='a.re-CardPackPremium-carousel').get_attribute('href')
+                houses_to_visit.append(house_urls)
+                self.__urls.update(dict.fromkeys(house_urls, location))
+            except Exception as e:
+                utils.error(e)
+                
             try:
                 next_page = main_content.find_element(by=By.CSS_SELECTOR, value='App > div.re-Page > div.re-SearchPage > main > div > div.re-Pagination > ul > li:nth-child(7) > a')
                 driver.execute_script('arguments[0].scrollIntoView();', next_page)
@@ -165,28 +165,95 @@ class FotocasaScraper(HouseScraper):
         print(f"houses_to_visit: {houses_to_visit}")
         return houses_to_visit
 
-    def scrape(self):
-            """
-            Scrapes the entire idealista website
-            """
+        '''
+        TODO gestionar lazy load
+        # This will scroll the web page till end.
+        ## driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        #utils.mega_wait()
 
-            # create url using municiplity name only. Not necessary to invoke main page to get url-muniipality pair 
-            location = "fuenlabrada"
-            url_call = f"{config.FOTOCASA_URL}comprar/viviendas/{location}/todas-las-zonas/l?sortType=scoring"
-            houses_list = self._scrape_navigation(url_call, location)
+        while True:
+            # see how much we have to wait
+            utils.mini_wait() if utils.flip_coin() else utils.wait()
+            # browse all pages
+            for i in range(15):
+                html_text = driver.page_source
+                soup = BeautifulSoup(html_text)
+                houses = soup.find_all('article', class_='re-CardPackPremium')
+                for house in houses:
+                    house_url = house.find_element(by=By.CSS_SELECTOR, 
+                            value='a.re-CardPackPremium-carousel').get_attribute('href')
+                    houses_to_visit.append(house_url)
+                ActionChains(driver).key_down(Keys.PAGE_DOWN).key_up(Keys.PAGE_DOWN).perform()
+                time.sleep(0.5)
+        print(f"El número de URL es {len(houses_to_visit)}")
+        return houses_to_visit
 
-            houses = self._scrape_houses_details(location, houses_list)
+        
 
-            # mix all the data, keep unique IDs
-            utils.log('Merging the data')
-            house_fields = ['id', 'url', 'title', 'location', 'price', 
-            'm2', 'rooms', 'floor', 'num-photos', 'floor-plan', 'view3d', 'video', 
-            'home-staging', 'description']
-            df = pd.DataFrame(houses, columns=house_fields).drop_duplicates('id')
+        
+            html_text = driver.page_source
+            soup = BeautifulSoup(html_text)
+            list_houses = []
+            casas = soup.find_all('article', class_='re-CardPackPremium')
+            print(f"numero de casas {len(casas)}")
+            
 
-            if not utils.directory_exists(config.DATASET_DIR):
-                utils.create_directory(config.DATASET_DIR)
+            main_content = self.try_page(driver, lambda : driver.find_element(by=By.CSS_SELECTOR,value='#App > div.re-Page > div.re-SearchPage > main > div > div.re-SearchResult-wrapper > section'))
+            #main_content = driver.find_elements('#App > div.re-Page > div.re-SearchPage > main > div > div.re-SearchResult-wrapper > section')
+            articles = main_content.find_elements(by=By.CSS_SELECTOR, value='article.re-CardPackPremium')
+            print(f"numero de articulos {len(articles)}")
+            for article in articles:
+                # get each article url
+                try:
+                    house_urls = article.find_element(by=By.CSS_SELECTOR, 
+                        value='a.re-CardPackPremium-carousel').get_attribute('href')
+                    houses_to_visit.append(house_urls)
+                    self.__urls.update(dict.fromkeys(house_urls, location))
+                except Exception as e:
+                    utils.error(e)
+                
+            try:
+                next_page = main_content.find_element(by=By.CSS_SELECTOR, value='App > div.re-Page > div.re-SearchPage > main > div > div.re-Pagination > ul > li:nth-child(7) > a')
+                driver.execute_script('arguments[0].scrollIntoView();', next_page)
+                utils.mini_wait()
+                
+                page_number = page_number+1
+                if page_number >= max_pages_before_wait:
+                    page_number = 0
+                    utils.mega_wait()
+                
+                next_page.click()
+            except NoSuchElementException as e:
+                utils.log(f'[{self.id}] No more pages to visit')
+                utils.warn(f'[{self.id}] {e.msg}')
+                break   # no more pages to navigate to
+        
+        utils.mini_wait()
+        driver.quit()
+        print(f"houses_to_visit: {houses_to_visit}")
+        return houses_to_visit
+    '''
+
+    def scrape(self, urls : list = None):
+        """
+        Scrapes https://www.fotocasa.es/es/
+        """
+
+        # create url using municiplity name only. Not necessary to invoke main page to get url-muniipality pair 
+        location = "fuenlabrada"
+        url_call = f"{config.FOTOCASA_URL}comprar/viviendas/{location}/todas-las-zonas/l?sortType=scoring"
+        houses_list = self._scrape_navigation(url_call, location)
+        houses = self._scrape_houses_details(location, houses_list)
+
+        # mix all the data, keep unique IDs
+        utils.log('Merging the data')
+        house_fields = ['id', 'url', 'title', 'location', 'price', 
+        'm2', 'rooms', 'floor', 'num-photos', 'floor-plan', 'view3d', 'video', 
+        'home-staging', 'description']
+        df = pd.DataFrame(houses, columns=house_fields).drop_duplicates('id')
+
+        if not utils.directory_exists(config.DATASET_DIR):
+            utils.create_directory(config.DATASET_DIR)
             utils.log(f'Dumping dataset into {config.FOTOCASA_FILE}')
             df.to_csv(config.FOTOCASA_FILE)
             utils.log(f'Dumped dataset into {config.FOTOCASA_FILE}')
-
