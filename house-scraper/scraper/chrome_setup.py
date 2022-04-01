@@ -1,6 +1,6 @@
 """
 Deletes the web driver's user data if needed and starts a selenium web driver to
-manually get to each to-be-scraped page. The user must fill in the CAPTCHA.
+manually get to  each to-be-scraped page. The user must fill in the CAPTCHA.
 """
 
 import os
