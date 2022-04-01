@@ -18,7 +18,7 @@ class FotocasaScraper(HouseScraper):
 
     def _scrape_house_page(self, location: str, url : str) -> dict: 
         """
-        Scrapes a certain house detail page
+        Scrapes a certain house detail page 
 
         Parameters
         ----------
