@@ -4,7 +4,7 @@ navigation - collects the houses URLs - and a thread to
 scrape the houses - getting the details of each house.
 
 Includes saving of state objects and dataframe periodically
-so it can be relaunched if it fails.
+so it can be relaunched  if it fails.
 """
 
 import atexit
