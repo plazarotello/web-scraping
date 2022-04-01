@@ -35,34 +35,14 @@ class FotocasaScraper(HouseScraper):
             try:
                 house = {'id': '', 'url': '', 'title': '', 'location': '', 
                     'price': '', 'm2': '', 'rooms': '', 'floor': '', 'num-photos': '','floor-plan': '','view3d': '',
-                    'video': '', 'home-staging': '', 'description': '', 'photo_urls': ''}
+                    'video': '', 'home-staging': '', 'description': ''}
                 utils.log(f'[fotocasa:{location}] Scraping {url}')
                 utils.mini_wait()
                 driver.get(url)
 
-                id = re.findall('\d+', url)[0]
-                
-                # checking if download directory exixts
-                download_dir = f"{config.FOTOCASA_IMG_DIR}/{id}"
-                if utils.directory_exists(download_dir) == False:
-                    utils.create_directory(download_dir)
-
                 for scroll_i in range(config.FOTOCASA_SCROLL_HOUSE_PAGE):
-                    
-                    photo_list = []
-                    num_img = 1
-                    resultSet = driver.find_element(by=By.CSS_SELECTOR, value='#App > div.re-Page > main > section')
-                    image_list = resultSet.find_elements_by_tag_name("figure")
-                    for image in image_list:
-                        img_src = image.find_element(by=By.CSS_SELECTOR, value='img').get_attribute('src')
-                        photo_list.append(img_src)
-                        utils.download_image(img_src, f"{download_dir}/{num_img}.jpg")
-                        num_img = num_img +1
-                        
-
-
                     main_content = self.try_page(driver, lambda: driver.find_element(by=By.CSS_SELECTOR, value='#App > div.re-Page > main > div.re-LayoutContainer.re-LayoutContainer--large > div.re-ContentDetail-topContainer'))
-                    house['id'] = id
+                    house['id'] = re.findall('\d+', url)[0]
                     house['url'] = driver.current_url
                     house['title'] = main_content.find_element(by=By.CSS_SELECTOR, value='div > section:nth-child(1) > div > div.re-DetailHeader-header > div.re-DetailHeader-propertyTitleContainer > h1').text
                     house['location'] = location
@@ -85,8 +65,14 @@ class FotocasaScraper(HouseScraper):
                     except NoSuchElementException:
                         house['view3d'] = 0
                     
-                    house['photo_urls'] = photo_list
-
+                    '''
+                    TODO gestionar urls de las imagenes y su descarga en url atributo map
+                    resultSet = driver.find_element(by=By.CSS_SELECTOR, value='#re-DetailMultimediaModal > div > div > div.sui-MoleculeModalContent.sui-MoleculeModalContent--without-indentation > div > div.re-DetailMultimediaModal-listColumn > ul.re-DetailMultimediaModal-listWrapper')
+                    image_list = resultSet.find_elements_by_tag_name("li")
+                    print("......",image_list)
+                    for image in image_list:
+                        print("--------",image.text)
+                    '''
                     ActionChains(driver).key_down(Keys.PAGE_DOWN).key_up(Keys.PAGE_DOWN).perform()
                     time.sleep(0.5)
 
@@ -165,10 +151,6 @@ class FotocasaScraper(HouseScraper):
             
             ActionChains(driver).key_down(Keys.PAGE_DOWN).key_up(Keys.PAGE_DOWN).perform()
             time.sleep(0.5)
-
-
-        #
-        
         utils.mini_wait()
         driver.quit()
         utils.debug(f"Num of houses_to_visit: {len(houses_to_visit)}")
@@ -247,26 +229,24 @@ class FotocasaScraper(HouseScraper):
         """
         Scrapes https://www.fotocasa.es/es/
         """
-        utils.log("Starting Fotocasa dataset")
+
         # create url using municiplity name only. Not necessary to invoke main page to get url-muniipality pair 
         location = "fuenlabrada"
         url_call = f"{config.FOTOCASA_URL}comprar/viviendas/{location}/todas-las-zonas/l?sortType=scoring"
-        utils.log("Obtaining list of houses")
         houses_list = self._scrape_navigation(url_call, location)
-        utils.log("Scrapping houses")
         houses = self._scrape_houses_details(location, houses_list)
 
         # mix all the data, keep unique IDs
         utils.log('Merging the data')
         house_fields = ['id', 'url', 'title', 'location', 'price', 
         'm2', 'rooms', 'floor', 'num-photos', 'floor-plan', 'view3d', 'video', 
-        'home-staging', 'description','photo_urls']
+        'home-staging', 'description']
         utils.debug(f"Writing dataframe")
         df = pd.DataFrame(houses, columns=house_fields).drop_duplicates('id')
+        utils.log(df.head)
 
         if not utils.directory_exists(config.DATASET_DIR):
             utils.create_directory(config.DATASET_DIR)
-        
-        utils.log(f'Dumping dataset into {config.FOTOCASA_FILE}')
-        df.to_csv(config.FOTOCASA_FILE)
-        utils.log(f'Dumped dataset into {config.FOTOCASA_FILE}')
+            utils.log(f'Dumping dataset into {config.FOTOCASA_FILE}')
+            df.to_csv(config.FOTOCASA_FILE)
+            utils.log(f'Dumped dataset into {config.FOTOCASA_FILE}')
