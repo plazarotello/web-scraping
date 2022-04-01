@@ -40,45 +40,49 @@ class FotocasaScraper(HouseScraper):
                 utils.mini_wait()
                 driver.get(url)
 
-                main_content = self.try_page(driver, lambda: driver.find_element(by=By.CSS_SELECTOR, value='#App > div.re-Page > main > div.re-LayoutContainer.re-LayoutContainer--large > div.re-ContentDetail-topContainer'))
-                house['id'] = re.findall('\d+', url)[0]
-                house['url'] = driver.current_url
-                house['title'] = main_content.find_element(by=By.CSS_SELECTOR, value='div > section:nth-child(1) > div > div.re-DetailHeader-header > div.re-DetailHeader-propertyTitleContainer > h1').text
-                house['location'] = location
-                house['price'] = main_content.find_element(by= By.CSS_SELECTOR, value='div > section:nth-child(1) > div > div.re-DetailHeader-header > div.re-DetailHeader-userActionContainer > div.re-DetailHeader-priceContainer > span').text.replace(' €', '')
-                house['description'] = main_content.find_element(by=By.CSS_SELECTOR, value='div > section:nth-child(1) > div > div.fc-DetailDescriptionContainer > div.sui-MoleculeCollapsible.sui-MoleculeCollapsible--withGradient.is-collapsed > div > div > p').text.strip()
-                                                                                    
-                house['m2'] =  main_content.find_element(by=By.CSS_SELECTOR, value='div > section:nth-child(1) > div > div.re-DetailHeader-header > div.re-DetailHeader-propertyTitleContainer > ul > li:nth-child(3) > span:nth-child(2) > span').text
-                house['rooms'] = main_content.find_element(by=By.CSS_SELECTOR, value='div > section:nth-child(1) > div > div.re-DetailHeader-header > div.re-DetailHeader-propertyTitleContainer > ul > li:nth-child(1) > span:nth-child(2) > span').text
-                house['floor'] = main_content.find_element(by=By.CSS_SELECTOR, value='div > section:nth-child(1) > div > div.re-DetailHeader-header > div.re-DetailHeader-propertyTitleContainer > ul > li:nth-child(4) > span:nth-child(2) > span').text
-                house['baths'] = main_content.find_element(by=By.CSS_SELECTOR, value='div > section:nth-child(1) > div > div.re-DetailHeader-header > div.re-DetailHeader-propertyTitleContainer > ul > li:nth-child(2) > span:nth-child(2) > span').text
-                
-                house['num-photos'] = driver.find_element(by=By.CSS_SELECTOR, value='#App > div.re-Page > main > ul > li > button > span > span.sui-AtomButton-text').text.replace(" Fotos","")
-                house['floor-plan'] = 0
-                house['video'] = 0
-                house['home-staging'] = 0
+                for scroll_i in range(config.FOTOCASA_SCROLL_HOUSE_PAGE):
+                    main_content = self.try_page(driver, lambda: driver.find_element(by=By.CSS_SELECTOR, value='#App > div.re-Page > main > div.re-LayoutContainer.re-LayoutContainer--large > div.re-ContentDetail-topContainer'))
+                    house['id'] = re.findall('\d+', url)[0]
+                    house['url'] = driver.current_url
+                    house['title'] = main_content.find_element(by=By.CSS_SELECTOR, value='div > section:nth-child(1) > div > div.re-DetailHeader-header > div.re-DetailHeader-propertyTitleContainer > h1').text
+                    house['location'] = location
+                    house['price'] = main_content.find_element(by= By.CSS_SELECTOR, value='div > section:nth-child(1) > div > div.re-DetailHeader-header > div.re-DetailHeader-userActionContainer > div.re-DetailHeader-priceContainer > span').text.replace(' €', '')
+                    house['description'] = main_content.find_element(by=By.CSS_SELECTOR, value='div > section:nth-child(1) > div > div.fc-DetailDescriptionContainer > div.sui-MoleculeCollapsible.sui-MoleculeCollapsible--withGradient.is-collapsed > div > div > p').text.strip()
+                                                                                        
+                    house['m2'] =  main_content.find_element(by=By.CSS_SELECTOR, value='div > section:nth-child(1) > div > div.re-DetailHeader-header > div.re-DetailHeader-propertyTitleContainer > ul > li:nth-child(3) > span:nth-child(2) > span').text
+                    house['rooms'] = main_content.find_element(by=By.CSS_SELECTOR, value='div > section:nth-child(1) > div > div.re-DetailHeader-header > div.re-DetailHeader-propertyTitleContainer > ul > li:nth-child(1) > span:nth-child(2) > span').text
+                    house['floor'] = main_content.find_element(by=By.CSS_SELECTOR, value='div > section:nth-child(1) > div > div.re-DetailHeader-header > div.re-DetailHeader-propertyTitleContainer > ul > li:nth-child(4) > span:nth-child(2) > span').text
+                    house['baths'] = main_content.find_element(by=By.CSS_SELECTOR, value='div > section:nth-child(1) > div > div.re-DetailHeader-header > div.re-DetailHeader-propertyTitleContainer > ul > li:nth-child(2) > span:nth-child(2) > span').text
+                    
+                    house['num-photos'] = driver.find_element(by=By.CSS_SELECTOR, value='#App > div.re-Page > main > ul > li > button > span > span.sui-AtomButton-text').text.replace(" Fotos","")
+                    house['floor-plan'] = 0
+                    house['video'] = 0
+                    house['home-staging'] = 0
 
-                try:
-                    driver.find_element(by=By.CSS_SELECTOR, value='#App > div.re-Page > main > ul > li:nth-child(2) > button')
-                    house['view3d'] = 1
-                except NoSuchElementException:
-                    house['view3d'] = 0
-                print("--------".house)
-                '''
-                TODO gestionar urls de las imagenes y su descarga en url atributo map
-                resultSet = driver.find_element(by=By.CSS_SELECTOR, value='#re-DetailMultimediaModal > div > div > div.sui-MoleculeModalContent.sui-MoleculeModalContent--without-indentation > div > div.re-DetailMultimediaModal-listColumn > ul.re-DetailMultimediaModal-listWrapper')
-                image_list = resultSet.find_elements_by_tag_name("li")
-                print("......",image_list)
-                for image in image_list:
-                    print("--------",image.text)
-                '''
+                    try:
+                        driver.find_element(by=By.CSS_SELECTOR, value='#App > div.re-Page > main > ul > li:nth-child(2) > button')
+                        house['view3d'] = 1
+                    except NoSuchElementException:
+                        house['view3d'] = 0
+                    
+                    '''
+                    TODO gestionar urls de las imagenes y su descarga en url atributo map
+                    resultSet = driver.find_element(by=By.CSS_SELECTOR, value='#re-DetailMultimediaModal > div > div > div.sui-MoleculeModalContent.sui-MoleculeModalContent--without-indentation > div > div.re-DetailMultimediaModal-listColumn > ul.re-DetailMultimediaModal-listWrapper')
+                    image_list = resultSet.find_elements_by_tag_name("li")
+                    print("......",image_list)
+                    for image in image_list:
+                        print("--------",image.text)
+                    '''
+                    ActionChains(driver).key_down(Keys.PAGE_DOWN).key_up(Keys.PAGE_DOWN).perform()
+                    time.sleep(0.5)
+
                 utils.mini_wait()
                 return house
+            
             except NoSuchElementException as e:
                 utils.error(f'[{self.id}] Something happened!')
                 utils.error(f'Exception: {e.msg}')
                 return None
-    
 
     def _scrape_houses_details(self,location, houses_list) -> list:
         houses = list()
@@ -135,7 +139,6 @@ class FotocasaScraper(HouseScraper):
             main_content = self.try_page(driver, lambda : driver.find_element(by=By.CSS_SELECTOR,value='#App > div.re-Page > div.re-SearchPage > main > div > div.re-SearchResult-wrapper > section'))
             
             articles = main_content.find_elements(by=By.CSS_SELECTOR, value='article.re-CardPackPremium')
-            print(f"numero de articulos {len(articles)}")
             for article in articles:
                 # get each article url
                 try:
@@ -148,12 +151,9 @@ class FotocasaScraper(HouseScraper):
             
             ActionChains(driver).key_down(Keys.PAGE_DOWN).key_up(Keys.PAGE_DOWN).perform()
             time.sleep(0.5)
-
-
-
         utils.mini_wait()
         driver.quit()
-        print(f"Num of houses_to_visit: {len(houses_to_visit)}")
+        utils.debug(f"Num of houses_to_visit: {len(houses_to_visit)}")
         return houses_to_visit
 
         '''
