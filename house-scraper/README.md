@@ -1,4 +1,4 @@
-# Scraper project
+# Scraper project 
 
 ## Technologies used
 
