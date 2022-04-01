@@ -24,7 +24,7 @@ IDEALISTA_TMP = os.path.join(TMP_DIR, IDEALISTA_ID)
 FOTOCASA_ID = 'fotocasa'
 FOTOCASA_URL = 'https://www.fotocasa.es/es/'
 FOTOCASA_FILE = os.path.join(DATASET_DIR, FOTOCASA_ID + '.csv')
-FOTOCASA_SCROLL_LOCATION_PAGE = 2                                   # number of iteractions for scrolling in location pages
+FOTOCASA_SCROLL_LOCATION_PAGE = 3                                   # number of iteractions for scrolling in location pages
 FOTOCASA_SCROLL_HOUSE_PAGE = 2                                      # number of iteractions for scrolling in house pages
 
 # ---------------------------------------------------------
