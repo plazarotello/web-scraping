@@ -1,7 +1,7 @@
 class HouseScraper():
     """
     Class used to represent a scraper that will crawl through a single 
-    real estate listing web
+    real estate listing web 
 
     ...
 
