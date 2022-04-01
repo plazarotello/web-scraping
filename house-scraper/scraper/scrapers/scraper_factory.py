@@ -1,6 +1,6 @@
 """
 Scraper factory (implements Factory design pattern) to
-create the right object of all the types that are 
+create the right object of all the  types that are 
 available
 """
 
