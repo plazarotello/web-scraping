@@ -9,11 +9,9 @@ import shutil
 import uuid
 from random import randint, random, uniform
 from time import sleep
-
 import requests
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-
 from . import config, network
 
 # =========================================================
