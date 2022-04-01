@@ -15,7 +15,7 @@ def init_tmp_folder(scrapers: list, delete_all: bool = False):
     Parameters
     ----------
     scrapers : list
-        List of scrapers' ids that we do not want to remove temporary 
+        List of scrapers' ids that we do not  want to remove temporary 
         files for
     delete_all : bool, opt
         Flag to delete all temporary files
