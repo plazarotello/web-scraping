@@ -274,8 +274,10 @@ def get_selenium(use_proxy: bool = False):
     A selenium driver
     """
     log('Creating new driver')
-    driver_path = os.path.join(config.ROOT_DIR, 'chromedriver.exe')
-    driver = webdriver.Chrome(executable_path=driver_path, options=set_human_options(),
+    #------------------- LINUX CONFIG FOR chromedriver -------------------------------------
+    #driver_path = os.path.join(config.ROOT_DIR, 'chromedriver.exe')
+    #driver = webdriver.Chrome(executable_path=driver_path, options=set_human_options(),
+    driver = webdriver.Chrome(options=set_human_options(),
                               desired_capabilities=proxify() if use_proxy else webdriver.DesiredCapabilities.CHROME)
     driver.implicitly_wait(15)
     return driver
