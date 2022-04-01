@@ -1,4 +1,4 @@
-Submodule with utilities. Contains:
+Submodule with utilities. Contains: 
 
 - `captcha_solver.py`: attempts to solve the captcha from idealista (untested for other domains).
 - `config.py`: configuration variables store.
