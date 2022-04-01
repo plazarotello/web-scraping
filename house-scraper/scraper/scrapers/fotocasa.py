@@ -34,11 +34,12 @@ class FotocasaScraper(HouseScraper):
         with utils.get_selenium() as driver:
             try:
                 house = {'id': '', 'url': '', 'title': '', 'location': '', 
-                    'price': '', 'm2': '', 'rooms': '', 'floor': '', 'num-photos': '','floor-plan': '','view-3d': '',
+                    'price': '', 'm2': '', 'rooms': '', 'floor': '', 'num-photos': '','floor-plan': '','view3d': '',
                     'video': '', 'home-staging': '', 'description': ''}
                 utils.log(f'[fotocasa:{location}] Scraping {url}')
                 utils.mini_wait()
                 driver.get(url)
+
                 main_content = self.try_page(driver, lambda: driver.find_element(by=By.CSS_SELECTOR, value='#App > div.re-Page > main > div.re-LayoutContainer.re-LayoutContainer--large > div.re-ContentDetail-topContainer'))
                 house['id'] = re.findall('\d+', url)[0]
                 house['url'] = driver.current_url
@@ -46,7 +47,7 @@ class FotocasaScraper(HouseScraper):
                 house['location'] = location
                 house['price'] = main_content.find_element(by= By.CSS_SELECTOR, value='div > section:nth-child(1) > div > div.re-DetailHeader-header > div.re-DetailHeader-userActionContainer > div.re-DetailHeader-priceContainer > span').text.replace(' €', '')
                 house['description'] = main_content.find_element(by=By.CSS_SELECTOR, value='div > section:nth-child(1) > div > div.fc-DetailDescriptionContainer > div.sui-MoleculeCollapsible.sui-MoleculeCollapsible--withGradient.is-collapsed > div > div > p').text.strip()
-                
+                                                                                    
                 house['m2'] =  main_content.find_element(by=By.CSS_SELECTOR, value='div > section:nth-child(1) > div > div.re-DetailHeader-header > div.re-DetailHeader-propertyTitleContainer > ul > li:nth-child(3) > span:nth-child(2) > span').text
                 house['rooms'] = main_content.find_element(by=By.CSS_SELECTOR, value='div > section:nth-child(1) > div > div.re-DetailHeader-header > div.re-DetailHeader-propertyTitleContainer > ul > li:nth-child(1) > span:nth-child(2) > span').text
                 house['floor'] = main_content.find_element(by=By.CSS_SELECTOR, value='div > section:nth-child(1) > div > div.re-DetailHeader-header > div.re-DetailHeader-propertyTitleContainer > ul > li:nth-child(4) > span:nth-child(2) > span').text
@@ -62,7 +63,7 @@ class FotocasaScraper(HouseScraper):
                     house['view3d'] = 1
                 except NoSuchElementException:
                     house['view3d'] = 0
-
+                print("--------".house)
                 '''
                 TODO gestionar urls de las imagenes y su descarga en url atributo map
                 resultSet = driver.find_element(by=By.CSS_SELECTOR, value='#re-DetailMultimediaModal > div > div > div.sui-MoleculeModalContent.sui-MoleculeModalContent--without-indentation > div > div.re-DetailMultimediaModal-listColumn > ul.re-DetailMultimediaModal-listWrapper')
@@ -130,39 +131,29 @@ class FotocasaScraper(HouseScraper):
         page_number = 0
         utils.mini_wait()
 
-        main_content = self.try_page(driver, lambda : driver.find_element(by=By.CSS_SELECTOR,value='#App > div.re-Page > div.re-SearchPage > main > div > div.re-SearchResult-wrapper > section'))
-            #main_content = driver.find_elements('#App > div.re-Page > div.re-SearchPage > main > div > div.re-SearchResult-wrapper > section')
-        articles = main_content.find_elements(by=By.CSS_SELECTOR, value='article.re-CardPackPremium')
-        print(f"numero de articulos {len(articles)}")
-        for article in articles:
-            # get each article url
-            try:
-                house_urls = article.find_element(by=By.CSS_SELECTOR, 
-                    value='a.re-CardPackPremium-carousel').get_attribute('href')
-                houses_to_visit.append(house_urls)
-                self.__urls.update(dict.fromkeys(house_urls, location))
-            except Exception as e:
-                utils.error(e)
-                
-            try:
-                next_page = main_content.find_element(by=By.CSS_SELECTOR, value='App > div.re-Page > div.re-SearchPage > main > div > div.re-Pagination > ul > li:nth-child(7) > a')
-                driver.execute_script('arguments[0].scrollIntoView();', next_page)
-                utils.mini_wait()
-                
-                page_number = page_number+1
-                if page_number >= max_pages_before_wait:
-                    page_number = 0
-                    utils.mega_wait()
-                
-                next_page.click()
-            except NoSuchElementException as e:
-                utils.log(f'[{self.id}] No more pages to visit')
-                utils.warn(f'[{self.id}] {e.msg}')
-                break   # no more pages to navigate to
-        
+        for scroll_i in range(config.FOTOCASA_SCROLL_LOCATION_PAGE):
+            main_content = self.try_page(driver, lambda : driver.find_element(by=By.CSS_SELECTOR,value='#App > div.re-Page > div.re-SearchPage > main > div > div.re-SearchResult-wrapper > section'))
+            
+            articles = main_content.find_elements(by=By.CSS_SELECTOR, value='article.re-CardPackPremium')
+            print(f"numero de articulos {len(articles)}")
+            for article in articles:
+                # get each article url
+                try:
+                    house_urls = article.find_element(by=By.CSS_SELECTOR, 
+                        value='a.re-CardPackPremium-carousel').get_attribute('href')
+                    houses_to_visit.append(house_urls)
+                    self.__urls.update(dict.fromkeys(house_urls, location))
+                except Exception as e:
+                    utils.error(e)
+            
+            ActionChains(driver).key_down(Keys.PAGE_DOWN).key_up(Keys.PAGE_DOWN).perform()
+            time.sleep(0.5)
+
+
+
         utils.mini_wait()
         driver.quit()
-        print(f"houses_to_visit: {houses_to_visit}")
+        print(f"Num of houses_to_visit: {len(houses_to_visit)}")
         return houses_to_visit
 
         '''
@@ -250,7 +241,9 @@ class FotocasaScraper(HouseScraper):
         house_fields = ['id', 'url', 'title', 'location', 'price', 
         'm2', 'rooms', 'floor', 'num-photos', 'floor-plan', 'view3d', 'video', 
         'home-staging', 'description']
+        utils.debug(f"Writing dataframe")
         df = pd.DataFrame(houses, columns=house_fields).drop_duplicates('id')
+        utils.log(df.head)
 
         if not utils.directory_exists(config.DATASET_DIR):
             utils.create_directory(config.DATASET_DIR)
