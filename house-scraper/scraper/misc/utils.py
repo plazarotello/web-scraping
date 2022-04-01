@@ -331,6 +331,12 @@ logging.basicConfig(filename=os.path.join(config.ROOT_DIR, 'house-scraper.log'),
                     filemode='w', encoding='utf-8', level=logging.INFO,
                     format='%(asctime)s | %(levelname)s | %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
 
+def debug(msg: str):
+    """
+    Logs an DEBUG message to the log
+    """
+    logging.debug(msg)
+
 
 def log(msg: str):
     """
