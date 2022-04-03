@@ -10,6 +10,8 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 import time
 
 class FotocasaScraper(HouseScraper):
@@ -126,6 +128,7 @@ class FotocasaScraper(HouseScraper):
             try:
                 result = fn()
                 madeit = True
+
             except NoSuchElementException:
                 utils.error(NoSuchElementException)
                 madeit=False
@@ -150,104 +153,64 @@ class FotocasaScraper(HouseScraper):
         driver = utils.get_selenium()
         utils.mini_wait()
         driver.get(url)
+        acc = driver.find_element(by=By.CSS_SELECTOR,value='#App > div.re-SharedCmp > div > div > div > footer > div > button.sui-AtomButton.sui-AtomButton--primary.sui-AtomButton--solid.sui-AtomButton--center')
+        utils.mini_wait()
+        acc.click()
+        #accept = driver.find_element_by_class_name('ui-AtomButton--center')
+        #accept.click()
         houses_to_visit = list()
         max_pages_before_wait = 5
         page_number = 0
-        utils.mini_wait()
+    
+        # next page, looking for '>' icon
+        last_page = False
+        num_page = 1
+        while last_page == False:
+            utils.log(f"fotocasa - current page {num_page}")
 
-        for scroll_i in range(config.FOTOCASA_SCROLL_LOCATION_PAGE):
+            # scroll down and read each house
+            for scroll_i in range(config.FOTOCASA_SCROLL_LOCATION_PAGE):
+                ActionChains(driver).key_down(Keys.PAGE_DOWN).key_up(Keys.PAGE_DOWN).perform()
+                time.sleep(0.5)
+
+            # read the page to get huose's urls
             main_content = self.try_page(driver, lambda : driver.find_element(by=By.CSS_SELECTOR,value='#App > div.re-Page > div.re-SearchPage > main > div > div.re-SearchResult-wrapper > section'))
             
             articles = main_content.find_elements(by=By.CSS_SELECTOR, value='article.re-CardPackPremium')
+            
             for article in articles:
                 # get each article url
                 try:
                     house_urls = article.find_element(by=By.CSS_SELECTOR, 
                         value='a.re-CardPackPremium-carousel').get_attribute('href')
+                    #print(f"house url {house_urls}")
                     houses_to_visit.append(house_urls)
                     self.__urls.update(dict.fromkeys(house_urls, location))
                 except Exception as e:
                     utils.error(e)
             
-            ActionChains(driver).key_down(Keys.PAGE_DOWN).key_up(Keys.PAGE_DOWN).perform()
-            time.sleep(0.5)
+            # when finish, next page
+            try:
+                #next_page_bar = driver.find_element_by_class_name('sui-AtomButton--empty')
+                #next_page_bar.click()
+                pagination_barr = driver.find_element(by=By.CSS_SELECTOR,value='sui-LinkBasic sui-AtomButton sui-AtomButton--primary sui-AtomButton--outline sui-AtomButton--center sui-AtomButton--small sui-AtomButton--link sui-AtomButton--empty')
+                
+                utils.mini_wait()
+                acc.click()
+            except Exception as e:
+                print(e)
+                last_page = True
 
+            num_page = num_page + 1
 
-        #
+        print(f"ultima pagina {num_page}")
+        
         
         utils.mini_wait()
         driver.quit()
         utils.debug(f"Num of houses_to_visit: {len(houses_to_visit)}")
         return houses_to_visit
 
-        '''
-        TODO gestionar lazy load
-        # This will scroll the web page till end.
-        ## driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-        #utils.mega_wait()
-
-        while True:
-            # see how much we have to wait
-            utils.mini_wait() if utils.flip_coin() else utils.wait()
-            # browse all pages
-            for i in range(15):
-                html_text = driver.page_source
-                soup = BeautifulSoup(html_text)
-                houses = soup.find_all('article', class_='re-CardPackPremium')
-                for house in houses:
-                    house_url = house.find_element(by=By.CSS_SELECTOR, 
-                            value='a.re-CardPackPremium-carousel').get_attribute('href')
-                    houses_to_visit.append(house_url)
-                ActionChains(driver).key_down(Keys.PAGE_DOWN).key_up(Keys.PAGE_DOWN).perform()
-                time.sleep(0.5)
-        print(f"El número de URL es {len(houses_to_visit)}")
-        return houses_to_visit
-
-        
-
-        
-            html_text = driver.page_source
-            soup = BeautifulSoup(html_text)
-            list_houses = []
-            casas = soup.find_all('article', class_='re-CardPackPremium')
-            print(f"numero de casas {len(casas)}")
-            
-
-            main_content = self.try_page(driver, lambda : driver.find_element(by=By.CSS_SELECTOR,value='#App > div.re-Page > div.re-SearchPage > main > div > div.re-SearchResult-wrapper > section'))
-            #main_content = driver.find_elements('#App > div.re-Page > div.re-SearchPage > main > div > div.re-SearchResult-wrapper > section')
-            articles = main_content.find_elements(by=By.CSS_SELECTOR, value='article.re-CardPackPremium')
-            print(f"numero de articulos {len(articles)}")
-            for article in articles:
-                # get each article url
-                try:
-                    house_urls = article.find_element(by=By.CSS_SELECTOR, 
-                        value='a.re-CardPackPremium-carousel').get_attribute('href')
-                    houses_to_visit.append(house_urls)
-                    self.__urls.update(dict.fromkeys(house_urls, location))
-                except Exception as e:
-                    utils.error(e)
-                
-            try:
-                next_page = main_content.find_element(by=By.CSS_SELECTOR, value='App > div.re-Page > div.re-SearchPage > main > div > div.re-Pagination > ul > li:nth-child(7) > a')
-                driver.execute_script('arguments[0].scrollIntoView();', next_page)
-                utils.mini_wait()
-                
-                page_number = page_number+1
-                if page_number >= max_pages_before_wait:
-                    page_number = 0
-                    utils.mega_wait()
-                
-                next_page.click()
-            except NoSuchElementException as e:
-                utils.log(f'[{self.id}] No more pages to visit')
-                utils.warn(f'[{self.id}] {e.msg}')
-                break   # no more pages to navigate to
-        
-        utils.mini_wait()
-        driver.quit()
-        print(f"houses_to_visit: {houses_to_visit}")
-        return houses_to_visit
-    '''
 
     def scrape(self, urls : list = None):
         """
