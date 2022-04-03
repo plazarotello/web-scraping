@@ -166,8 +166,9 @@ class FotocasaScraper(HouseScraper):
     
         # next page, looking for '>' icon
         last_page = False
-        num_page = 1
+        num_page = 0
         while last_page == False:
+            num_page = num_page + 1
             utils.log(f"fotocasa - current page {num_page}")
 
             # scroll down and read each house
@@ -201,7 +202,9 @@ class FotocasaScraper(HouseScraper):
                 print(e)
                 last_page = True
 
-            num_page = num_page + 1
+            # conttrol the maximun pages to process
+            if config.FOTOCASA_NUM_PAGES_TO_READ == num_page:
+                last_page = True
 
         print(f"ultima pagina {num_page}")
         
