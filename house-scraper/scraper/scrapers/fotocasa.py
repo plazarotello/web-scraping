@@ -151,13 +151,15 @@ class FotocasaScraper(HouseScraper):
             List of the relative URL of the houses that are present in the navigation pages to scrape one by one
         """
         driver = utils.get_selenium()
-        utils.mini_wait()
+        #driver.minimize_window()
         driver.get(url)
+
+
+        # accept terms and conditios
         acc = driver.find_element(by=By.CSS_SELECTOR,value='#App > div.re-SharedCmp > div > div > div > footer > div > button.sui-AtomButton.sui-AtomButton--primary.sui-AtomButton--solid.sui-AtomButton--center')
         utils.mini_wait()
         acc.click()
-        #accept = driver.find_element_by_class_name('ui-AtomButton--center')
-        #accept.click()
+
         houses_to_visit = list()
         max_pages_before_wait = 5
         page_number = 0
@@ -181,9 +183,7 @@ class FotocasaScraper(HouseScraper):
             for article in articles:
                 # get each article url
                 try:
-                    house_urls = article.find_element(by=By.CSS_SELECTOR, 
-                        value='a.re-CardPackPremium-carousel').get_attribute('href')
-                    #print(f"house url {house_urls}")
+                    house_urls = article.find_element(by=By.CSS_SELECTOR, value='a.re-CardPackPremium-carousel').get_attribute('href')
                     houses_to_visit.append(house_urls)
                     self.__urls.update(dict.fromkeys(house_urls, location))
                 except Exception as e:
@@ -191,12 +191,12 @@ class FotocasaScraper(HouseScraper):
             
             # when finish, next page
             try:
-                #next_page_bar = driver.find_element_by_class_name('sui-AtomButton--empty')
-                #next_page_bar.click()
-                pagination_barr = driver.find_element(by=By.CSS_SELECTOR,value='sui-LinkBasic sui-AtomButton sui-AtomButton--primary sui-AtomButton--outline sui-AtomButton--center sui-AtomButton--small sui-AtomButton--link sui-AtomButton--empty')
-                
                 utils.mini_wait()
-                acc.click()
+                items = driver.find_elements(by=By.CSS_SELECTOR, value='#App > div.re-Page > div.re-SearchPage.re-SearchPage--withMap > main > div > div.re-Pagination > ul > li.sui-MoleculePagination-item')
+                for item in items:
+                    url_next = item.find_element(by=By.CSS_SELECTOR, value='a')
+
+                driver.get(url_next.get_attribute('href'))
             except Exception as e:
                 print(e)
                 last_page = True
