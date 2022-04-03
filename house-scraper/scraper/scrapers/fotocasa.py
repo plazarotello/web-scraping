@@ -99,6 +99,9 @@ class FotocasaScraper(HouseScraper):
                 return None
 
     def _scrape_houses_details(self,location, houses_list) -> list:
+        """
+
+        """
         houses = list()
         with ThreadPoolExecutor(max_workers=config.MAX_WORKERS) as executor:
             futures = []
@@ -137,9 +140,12 @@ class FotocasaScraper(HouseScraper):
         url : str
             URL to start the scraping
         
+        location : str
+            literal name of the location to scrape
+        
         Returns
         -------
-        List of the relative URL of the houses that are present in the navigation pages
+            List of the relative URL of the houses that are present in the navigation pages to scrape one by one
         """
         driver = utils.get_selenium()
         utils.mini_wait()
