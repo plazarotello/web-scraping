@@ -360,8 +360,9 @@ class IdealistaScraper(HouseScraper):
         """
         Launches some workers that will scrape the houses
         """
-        threads = [threading.Thread(target=self.house_scraper()).start() for _ in range(config.MAX_WORKERS)]
-        map(thread.join() for thread in threads)
+        threads = [threading.Thread(target=self.house_scraper) for _ in range(config.MAX_WORKERS)]
+        [thread.start() for thread in threads]
+        [thread.join() for thread in threads]
     
     def house_scraper(self):
         """
