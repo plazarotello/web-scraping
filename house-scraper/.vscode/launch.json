@@ -4,8 +4,52 @@
     // Para más información, visite: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+
         {
-            "name": "Barrio pobre",
+            "name": "Setup chrome",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/scraper/chrome_setup.py",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "Web Scraping",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/scraper/__main__.py",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "Idealista",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/scraper/__main__.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": ["-i"]
+        },
+        {
+            "name": "Fotocasa-bvillaverde",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/scraper/__main__.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": ["-f", "--urls-fotocasa", "https://www.fotocasa.es/es/comprar/viviendas/madrid-capital/villaverde/l"]
+        },
+        {
+            "name": "Fotocasa-bsalamanca",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/scraper/__main__.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": ["-f", "--urls-fotocasa", "https://www.fotocasa.es/es/comprar/viviendas/madrid-capital/barrio-de-salamanca/l"]
+        },
+        {
+            "name": "Idealista-bvillaverde",
             "type": "python",
             "request": "launch",
             "program": "${workspaceFolder}/scraper/__main__.py",
@@ -14,7 +58,7 @@
             "justMyCode": true
         },
         {
-            "name": "Barrio rico",
+            "name": "Idealista-bsalamanca",
             "type": "python",
             "request": "launch",
             "program": "${workspaceFolder}/scraper/__main__.py",

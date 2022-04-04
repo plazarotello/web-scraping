@@ -30,8 +30,10 @@ FOTOCASA_SCROLL_HOUSE_PAGE = 3                                      # number of 
 FOTOCASA_NUM_PAGES_TO_READ = 1                                      # number of pages to process
 
 MERGED_FILE = os.path.join(DATASET_DIR, 'merged.csv')               # name of merged dataframe
-MERGED__ZIP_FILE = os.path.join(DATASET_DIR, 'merged.zip')          # name of zip merged dataframe
+MERGED_ZIP_FILE = os.path.join(DATASET_DIR, 'merged.zip')           # name of zip merged dataframe
 # ---------------------------------------------------------
+
+SCROLL_WAIT = 0.5
 
 RANDOM_MIN_WAIT = 10
 RANDOM_MAX_WAIT = 30
