@@ -31,13 +31,30 @@
             "args": ["-i"]
         },
         {
-            "name": "Fotocasa",
+            "name": "Fotocasa-bvillaverde",
             "type": "python",
             "request": "launch",
             "program": "${workspaceFolder}/scraper/__main__.py",
             "console": "integratedTerminal",
             "justMyCode": true,
-            "args": ["-f"]
+            "args": ["-f", "--urls-fotocasa", "https://www.fotocasa.es/es/comprar/viviendas/madrid-capital/villaverde/l"]
         },
+        {
+            "name": "Fotocasa-bsalamanca",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/scraper/__main__.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": ["-f", "--urls-fotocasa", "https://www.fotocasa.es/es/comprar/viviendas/madrid-capital/barrio-de-salamanca/l"]
+        },
+        {
+            "name": "Barrio pobre",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/scraper/__main__.py",
+            "args": ["-i", "--urls-idealista", "https://www.idealista.com/venta-viviendas/madrid/villaverde/"],
+            "console": "integratedTerminal",
+            "justMyCode": true
+        }
     ]
-}

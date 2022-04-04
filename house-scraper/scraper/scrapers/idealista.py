@@ -98,17 +98,19 @@ class IdealistaScraper(HouseScraper):
             except NoSuchElementException:
                 try:
                     #utils.wait() if utils.flip_coin() else utils.mega_wait()
-                    utils.warn(f'[{self.id}] Error 403, trying to solve it...')
-                    if captcha_solver.check(driver):
+                    status_code = utils.get_http_code(driver.current_url)
+                    utils.warn(f'[{self.id}] Error {status_code}, trying to solve it...')
+                    if status_code == 403 or captcha_solver.check(driver):
                         captcha_solver.solve(driver)
-                    elif not utils.get_http_code(driver.current_url) in [200, 403]:
+                    elif status_code == 404:
+                        return None, False
+                    else:
                         utils.mega_wait()
                         driver.refresh()
                 except Exception:
-                    utils.mega_wait()
-                    driver.refresh()
+                    return None, False
                 madeit = False
-        return result
+        return result, True
 
     def _scrape_navigation(self, driver, url: str, priority: int = 0):
         """
@@ -132,9 +134,11 @@ class IdealistaScraper(HouseScraper):
         utils.wait() if utils.flip_coin() else utils.mini_wait()
 
         # browse all pages
-        main_content = self.try_page(driver, lambda: driver.find_element(by=By.CSS_SELECTOR,
+        main_content, success = self.try_page(driver, lambda: driver.find_element(by=By.CSS_SELECTOR,
                                                                          value='main#main-content > section.items-container'))
-
+        if not success:
+            utils.warn(f'[{self.id}] Page unavailable: {url}')
+            return
         articles = main_content.find_elements(
             by=By.CSS_SELECTOR, value='article.item')
         for article in articles:
@@ -273,8 +277,12 @@ class IdealistaScraper(HouseScraper):
             utils.mini_wait()
             driver.get(url)
             utils.mini_wait()
-            main_content = self.try_page(driver, lambda: driver.find_element(
+            main_content, success = self.try_page(driver, lambda: driver.find_element(
                 by=By.CSS_SELECTOR, value='main.detail-container > section.detail-info'))
+
+            if not success:
+                utils.warn(f'[{self.id}] Page unavailable: {url}')
+                return
 
             house['id'] = int(re.search(r'\d+', url).group(0))
             house['url'] = driver.current_url
@@ -294,6 +302,19 @@ class IdealistaScraper(HouseScraper):
                                                              value='div.commentsContainer > div.comment > div.adCommentsLanguage > p').text.rstrip()
             house['description'] = house['description'].replace(
                 '\n', ' ').rstrip()
+            
+            if house['num-photos'] > 0:
+                photo_container = driver.find_element(by=By.CSS_SELECTOR, value='div#multimedia-container > div#main-multimedia')
+
+                # check if there is a button of 'show all the photos'
+                photo_buttons = photo_container.find_elements(by=By.CSS_SELECTOR, value='div.more')
+                if len(photo_buttons) > 0:
+                    photo_buttons[0].click()
+                
+                utils.mini_wait()
+
+                photos = photo_container.find_elements(by=By.CSS_SELECTOR, value='div.image > img')
+                house['photo_urls'] = [photo.get_attribute('data-ondemand-img') for photo in photos]
 
             self.__houses_visited.append(house)
         except NoSuchElementException as e:
@@ -310,8 +331,13 @@ class IdealistaScraper(HouseScraper):
                 utils.mini_wait()
                 driver.get(config.IDEALISTA_URL)
                 utils.mini_wait()
-                _ = self.try_page(driver, lambda: driver.find_element(
+                _, success = self.try_page(driver, lambda: driver.find_element(
                     by=By.CSS_SELECTOR, value='section#municipality-search'))
+                
+                if not success:
+                    utils.warn(f'[{self.id}] Page unavailable: {config.IDEALISTA_URL}')
+                    return
+
                 locations_list = driver.find_elements(by=By.CSS_SELECTOR,
                                                       value='section#municipality-search > div.locations-list > ul > li')
                 driver.execute_script(
@@ -345,6 +371,14 @@ class IdealistaScraper(HouseScraper):
 
     def start_house_scraping(self):
         """
+        Launches some workers that will scrape the houses
+        """
+        threads = [threading.Thread(target=self.house_scraper) for _ in range(config.MAX_WORKERS)]
+        [thread.start() for thread in threads]
+        [thread.join() for thread in threads]
+    
+    def house_scraper(self):
+        """
         Begins scraping the house URLs provided by the state holding objects
         """
         with utils.get_selenium() as driver:
@@ -373,7 +407,7 @@ class IdealistaScraper(HouseScraper):
         utils.log(f'Dumping houses CSV')
         house_fields = ['id', 'url', 'title', 'location', 'price',
                         'm2', 'rooms', 'floor', 'num-photos', 'floor-plan', 'view3d', 'video',
-                        'home-staging', 'description']
+                        'home-staging', 'description', 'photo_urls']
         df = pd.DataFrame(self.__houses_visited,
                           columns=house_fields).drop_duplicates('id')
 
