@@ -151,9 +151,7 @@ class FotocasaScraper(HouseScraper):
             List of the relative URL of the houses that are present in the navigation pages to scrape one by one
         """
         driver = utils.get_selenium()
-        #driver.minimize_window()
         driver.get(url)
-
 
         # accept terms and conditios
         acc = driver.find_element(by=By.CSS_SELECTOR,value='#App > div.re-SharedCmp > div > div > div > footer > div > button.sui-AtomButton.sui-AtomButton--primary.sui-AtomButton--solid.sui-AtomButton--center')
@@ -174,7 +172,7 @@ class FotocasaScraper(HouseScraper):
             # scroll down and read each house
             for scroll_i in range(config.FOTOCASA_SCROLL_LOCATION_PAGE):
                 ActionChains(driver).key_down(Keys.PAGE_DOWN).key_up(Keys.PAGE_DOWN).perform()
-                time.sleep(0.5)
+                utils.scroll_wait()
 
             # read the page to get huose's urls
             main_content = self.try_page(driver, lambda : driver.find_element(by=By.CSS_SELECTOR,value='#App > div.re-Page > div.re-SearchPage > main > div > div.re-SearchResult-wrapper > section'))
