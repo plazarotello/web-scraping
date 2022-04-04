@@ -220,18 +220,21 @@ class FotocasaScraper(HouseScraper):
 
 
                 else:
-                    main_content = driver.find_element(by=By.CSS_SELECTOR,value='#App > div.re-Page > div.re-SearchPage.re-SearchPage--withMap > main > div > div.re-SearchResult-wrapper > section')
-                    
-                    articles = main_content.find_elements(by=By.CSS_SELECTOR, value='article.re-CardPackMinimal')
-                    
-                    for article in articles:
-                        # get each article url
-                        try:
-                            house_urls = article.find_element(by=By.CSS_SELECTOR, value='a.re-CardPackMinimal-slider').get_attribute('href')
-                            houses_to_visit.append(house_urls)
-                            self.__urls.update(dict.fromkeys(house_urls, location))
-                        except Exception as e:
-                            utils.error(e)  
+                    try:
+                        main_content = driver.find_element(by=By.CSS_SELECTOR,value='#App > div.re-Page > div.re-SearchPage.re-SearchPage--withMap > main > div > div.re-SearchResult-wrapper > section')
+                        
+                        articles = main_content.find_elements(by=By.CSS_SELECTOR, value='article.re-CardPackMinimal')
+                        
+                        for article in articles:
+                            # get each article url
+                            try:
+                                house_urls = article.find_element(by=By.CSS_SELECTOR, value='a.re-CardPackMinimal-slider').get_attribute('href')
+                                houses_to_visit.append(house_urls)
+                                self.__urls.update(dict.fromkeys(house_urls, location))
+                            except Exception as e:
+                                utils.error(e)  
+                    except Exception as e:
+                        utils.log(e)
                 
             houses_set = set(houses_to_visit)
             houses_to_visit = list(houses_set)
