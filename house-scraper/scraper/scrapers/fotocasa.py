@@ -158,7 +158,7 @@ class FotocasaScraper(HouseScraper):
         utils.mini_wait()
         acc.click()
 
-        houses_to_visit = list()
+        houses_to_visit = []
         max_pages_before_wait = 5
         page_number = 0
     
@@ -174,20 +174,76 @@ class FotocasaScraper(HouseScraper):
                 ActionChains(driver).key_down(Keys.PAGE_DOWN).key_up(Keys.PAGE_DOWN).perform()
                 utils.scroll_wait()
 
-            # read the page to get huose's urls
-            main_content = self.try_page(driver, lambda : driver.find_element(by=By.CSS_SELECTOR,value='#App > div.re-Page > div.re-SearchPage > main > div > div.re-SearchResult-wrapper > section'))
-            
-            articles = main_content.find_elements(by=By.CSS_SELECTOR, value='article.re-CardPackPremium')
-            
-            for article in articles:
-                # get each article url
-                try:
-                    house_urls = article.find_element(by=By.CSS_SELECTOR, value='a.re-CardPackPremium-carousel').get_attribute('href')
-                    houses_to_visit.append(house_urls)
-                    self.__urls.update(dict.fromkeys(house_urls, location))
-                except Exception as e:
-                    utils.error(e)
-            
+                #utils.mini_wait()
+                # read the page to get huose's urls
+                #main_content = self.try_page(driver, lambda : driver.find_element(by=By.CSS_SELECTOR,value='#App > div.re-Page > div.re-SearchPage > main > div > div.re-SearchResult-wrapper > section'))
+                
+                if num_page == 1:
+                    main_content = driver.find_element(by=By.CSS_SELECTOR,value='#App > div.re-Page > div.re-SearchPage > main > div > div.re-SearchResult-wrapper > section')
+                    
+                    try:
+                        articles = main_content.find_elements(by=By.CSS_SELECTOR, value='article.re-CardPackPremium')
+                    except Exception as e:
+                        articles = main_content.find_elements(by=By.CSS_SELECTOR, value='article.re-CardPackAdvance')
+                    
+                    for article in articles:
+                        # get each article url
+                        try:
+                            house_urls = article.find_element(by=By.CSS_SELECTOR, value='a.re-CardPackPremium-carousel').get_attribute('href')
+                            houses_to_visit.append(house_urls)
+                            self.__urls.update(dict.fromkeys(house_urls, location))
+                        except Exception as e:
+                            utils.error(e)
+
+
+
+
+
+
+                elif num_page == 2:                                              
+                    main_content = driver.find_element(by=By.CSS_SELECTOR,value='#App > div.re-Page > div.re-SearchPage > main > div > div.re-SearchResult-wrapper > section')
+                    
+                    articles = main_content.find_elements(by=By.CSS_SELECTOR, value='article.re-CardPackAdvance')
+                    
+                    for article in articles:
+                        # get each article url
+                        try:
+                            house_urls = article.find_element(by=By.CSS_SELECTOR, value='a.re-CardPackAdvance-slider').get_attribute('href')
+                            houses_to_visit.append(house_urls)
+                            self.__urls.update(dict.fromkeys(house_urls, location))
+                        except Exception as e:
+                            utils.error(e)
+
+
+
+
+
+
+                else:
+                    main_content = driver.find_element(by=By.CSS_SELECTOR,value='#App > div.re-Page > div.re-SearchPage.re-SearchPage--withMap > main > div > div.re-SearchResult-wrapper > section')
+                    
+                    articles = main_content.find_elements(by=By.CSS_SELECTOR, value='article.re-CardPackMinimal')
+                    
+                    for article in articles:
+                        # get each article url
+                        try:
+                            house_urls = article.find_element(by=By.CSS_SELECTOR, value='a.re-CardPackMinimal-slider').get_attribute('href')
+                            houses_to_visit.append(house_urls)
+                            self.__urls.update(dict.fromkeys(house_urls, location))
+                        except Exception as e:
+                            utils.error(e)  
+                
+            houses_set = set(houses_to_visit)
+            houses_to_visit = list(houses_set)
+
+
+
+
+
+
+
+
+
             # when finish, next page
             try:
                 utils.mini_wait()
@@ -197,7 +253,7 @@ class FotocasaScraper(HouseScraper):
 
                 driver.get(url_next.get_attribute('href'))
             except Exception as e:
-                print(e)
+                utils.log(e)
                 last_page = True
 
             # conttrol the maximun pages to process
@@ -209,7 +265,7 @@ class FotocasaScraper(HouseScraper):
         
         utils.mini_wait()
         driver.quit()
-        utils.debug(f"Num of houses_to_visit: {len(houses_to_visit)}")
+        utils.info(f"Num of houses_to_visit: {len(houses_to_visit)}")
         return houses_to_visit
 
 
