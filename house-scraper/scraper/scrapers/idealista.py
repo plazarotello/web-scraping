@@ -294,6 +294,19 @@ class IdealistaScraper(HouseScraper):
                                                              value='div.commentsContainer > div.comment > div.adCommentsLanguage > p').text.rstrip()
             house['description'] = house['description'].replace(
                 '\n', ' ').rstrip()
+            
+            if house['num-photos'] > 0:
+                photo_container = driver.find_element(by=By.CSS_SELECTOR, value='div#multimedia-container > div#main-multimedia')
+
+                # check if there is a button of 'show all the photos'
+                photo_buttons = photo_container.find_elements(by=By.CSS_SELECTOR, value='div.more')
+                if len(photo_buttons) > 0:
+                    photo_buttons[0].click()
+                
+                utils.mini_wait()
+
+                photos = photo_container.find_elements(by=By.CSS_SELECTOR, value='div.image > img')
+                house['photo_urls'] = [photo.get_attribute('data-ondemand-img') for photo in photos]
 
             self.__houses_visited.append(house)
         except NoSuchElementException as e:
@@ -345,6 +358,13 @@ class IdealistaScraper(HouseScraper):
 
     def start_house_scraping(self):
         """
+        Launches some workers that will scrape the houses
+        """
+        threads = [threading.Thread(target=self.house_scraper()).start() for _ in range(config.MAX_WORKERS)]
+        map(thread.join() for thread in threads)
+    
+    def house_scraper(self):
+        """
         Begins scraping the house URLs provided by the state holding objects
         """
         with utils.get_selenium() as driver:
@@ -373,7 +393,7 @@ class IdealistaScraper(HouseScraper):
         utils.log(f'Dumping houses CSV')
         house_fields = ['id', 'url', 'title', 'location', 'price',
                         'm2', 'rooms', 'floor', 'num-photos', 'floor-plan', 'view3d', 'video',
-                        'home-staging', 'description']
+                        'home-staging', 'description', 'photo_urls']
         df = pd.DataFrame(self.__houses_visited,
                           columns=house_fields).drop_duplicates('id')
 
