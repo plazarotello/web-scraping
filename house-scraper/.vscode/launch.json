@@ -31,6 +31,15 @@
             "args": ["-i"]
         },
         {
+            "name": "Fotocasa",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/scraper/__main__.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": ["-f"]
+        },
+        {
             "name": "Fotocasa-bvillaverde",
             "type": "python",
             "request": "launch",
