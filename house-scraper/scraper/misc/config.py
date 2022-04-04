@@ -25,9 +25,12 @@ FOTOCASA_ID = 'fotocasa'
 FOTOCASA_URL = 'https://www.fotocasa.es/es/'
 FOTOCASA_IMG_DIR = os.path.join(DATASET_DIR, FOTOCASA_ID+'-imgs')   # Directory to save downloaded images
 FOTOCASA_FILE = os.path.join(DATASET_DIR, FOTOCASA_ID + '.csv')
-FOTOCASA_SCROLL_LOCATION_PAGE = 2                                   # number of iteractions for scrolling in location pages
+FOTOCASA_SCROLL_LOCATION_PAGE = 20                                  # number of iteractions for scrolling in location pages
 FOTOCASA_SCROLL_HOUSE_PAGE = 3                                      # number of iteractions for scrolling in house pages
+FOTOCASA_NUM_PAGES_TO_READ = 1                                      # number of pages to process
 
+MERGED_FILE = os.path.join(DATASET_DIR, 'merged.csv')               # name of merged dataframe
+MERGED__ZIP_FILE = os.path.join(DATASET_DIR, 'merged.zip')          # name of zip merged dataframe
 # ---------------------------------------------------------
 
 RANDOM_MIN_WAIT = 10
