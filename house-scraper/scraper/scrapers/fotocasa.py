@@ -219,8 +219,9 @@ class FotocasaScraper(HouseScraper):
         """
         utils.log("Starting Fotocasa dataset")
         # create url using municiplity name only. Not necessary to invoke main page to get url-muniipality pair 
-        location = "fuenlabrada"
-        url_call = f"{config.FOTOCASA_URL}comprar/viviendas/{location}/todas-las-zonas/l?sortType=scoring"
+        url_call = urls[0]
+        location = url_call.split("/")[-2]
+
         utils.log("Obtaining list of houses")
         houses_list = self._scrape_navigation(url_call, location)
         utils.log("Scrapping houses")
