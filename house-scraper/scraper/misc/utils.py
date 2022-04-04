@@ -19,6 +19,7 @@ from . import config, network
 # =========================================================
 
 
+
 def delete_directory(dir_name: str):
     """
     Deletes the directory
@@ -272,10 +273,8 @@ def get_selenium(use_proxy: bool = False):
     A selenium driver
     """
     log('Creating new driver')
-    #-----------------LINUX-----------------------
-    #driver_path = os.path.join(config.ROOT_DIR, 'chromedriver.exe')
-    #driver = webdriver.Chrome(executable_path=driver_path, options=set_human_options(),
-    driver = webdriver.Chrome(options=set_human_options(),
+    driver_path = os.path.join(config.ROOT_DIR, 'chromedriver.exe')
+    driver = webdriver.Chrome(executable_path=driver_path, options=set_human_options(),
                               desired_capabilities=proxify() if use_proxy else webdriver.DesiredCapabilities.CHROME)
     driver.implicitly_wait(15)
     return driver
@@ -316,6 +315,11 @@ def mini_wait():
     """
     sleep(uniform(config.RANDOM_SMALL_MIN_WAIT, config.RANDOM_SMALL_MAX_WAIT))
 
+def scroll_wait():
+    """
+    Waits a little bit of time during scroll
+    """
+    sleep(config.SCROLL_WAIT)
 
 # =========================================================
 # LOGGING UTILITIES
