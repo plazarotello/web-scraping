@@ -88,9 +88,10 @@ class IdealistaScraper(HouseScraper):
 
         Returns
         -------
-        The result of executing fn()
+        The result of executing fn() and if the request was successful
         """
         madeit = False
+        retries = 0
         while not madeit:
             try:
                 result = fn()
@@ -105,9 +106,13 @@ class IdealistaScraper(HouseScraper):
                     elif status_code == 404:
                         return None, False
                     else:
+                        retries += 1
+                        if retries > 3:
+                            return None, False
                         utils.mega_wait()
                         driver.refresh()
-                except Exception:
+                except Exception as e:
+                    utils.error(f'[{self.id}] Error retrieving {driver.current_url}: {e}')
                     return None, False
                 madeit = False
         return result, True
@@ -251,8 +256,7 @@ class IdealistaScraper(HouseScraper):
             else:
                 house['floor'] = maybe_rooms
         if len(house_features) >= 3:
-            house['floor'] = house_features[2].find_element(by=By.CSS_SELECTOR, value='span'
-                                                            ).text + house_features[2].text
+            house['floor'] = house_features[2].text
         if not re.search(r'Planta', house['floor']):
             house['floor'] = 'Sin planta'
 

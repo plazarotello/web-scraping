@@ -175,7 +175,7 @@ def get_http_code(url: str) -> int:
     Status code of the response
     """
     try:
-        r_headers = {'User-Agent': config.get_user_agent()}
+        r_headers = {'User-Agent': network.get_user_agent()}
         r = requests.get(url, headers=r_headers)
         return r.status_code
     except (requests.HTTPError, requests.ConnectionError) as e:
@@ -273,9 +273,8 @@ def get_selenium(use_proxy: bool = False):
     """
     log('Creating new driver')
     #-----------------LINUX-----------------------
-    #driver_path = os.path.join(config.ROOT_DIR, 'chromedriver.exe')
-    #driver = webdriver.Chrome(executable_path=driver_path, options=set_human_options(),
-    driver = webdriver.Chrome(options=set_human_options(),
+    driver_path = os.path.join(config.ROOT_DIR, 'chromedriver.exe')
+    driver = webdriver.Chrome(executable_path=driver_path, options=set_human_options(),
                               desired_capabilities=proxify() if use_proxy else webdriver.DesiredCapabilities.CHROME)
     driver.implicitly_wait(15)
     return driver

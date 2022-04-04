@@ -12,6 +12,15 @@
             "args": ["-i", "--urls-idealista", "https://www.idealista.com/venta-viviendas/madrid/villaverde/"],
             "console": "integratedTerminal",
             "justMyCode": true
+        },
+        {
+            "name": "Barrio rico",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/scraper/__main__.py",
+            "args": ["-i", "--urls-idealista", "https://www.idealista.com/venta-viviendas/madrid/barrio-de-salamanca/"],
+            "console": "integratedTerminal",
+            "justMyCode": true
         }
     ]
 }
