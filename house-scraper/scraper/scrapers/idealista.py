@@ -104,6 +104,7 @@ class IdealistaScraper(HouseScraper):
                     if status_code == 403 or captcha_solver.check(driver):
                         captcha_solver.solve(driver)
                     elif status_code == 404:
+                        utils.warn(f'[{self.id}] Error 404 in {driver.current_url}')
                         return None, False
                     else:
                         retries += 1
@@ -368,14 +369,17 @@ class IdealistaScraper(HouseScraper):
         Begins navigating the URLs provided by the state holding objects
         """
         with utils.get_selenium() as driver:
-            while not self.__navigations_to_visit.empty():
-                if not self.__cleaner_semaphore.acquire(blocking=True, timeout=100):
-                    # reached maximum URLs visited before dump
-                    self.__cleaner_signal.set()
-                    self.__cleaner_semaphore.acquire(blocking=True, timeout=0)
-                navigation = self.__navigations_to_visit.get()
-                self._scrape_navigation(driver, navigation[1], navigation[0])
-            self.__scrape_navigation = False
+            try:
+                while not self.__navigations_to_visit.empty():
+                    if not self.__cleaner_semaphore.acquire(blocking=True, timeout=100):
+                        # reached maximum URLs visited before dump
+                        self.__cleaner_signal.set()
+                        self.__cleaner_semaphore.acquire(blocking=True, timeout=0)
+                    navigation = self.__navigations_to_visit.get()
+                    self._scrape_navigation(driver, navigation[1], navigation[0])
+                self.__scrape_navigation = False
+            except Exception as e:
+                utils.error(f'[{self.id}] Error while navigating: {e}')
 
     def start_house_scraping(self):
         """
@@ -390,22 +394,25 @@ class IdealistaScraper(HouseScraper):
         Begins scraping the house URLs provided by the state holding objects
         """
         with utils.get_selenium() as driver:
-            utils.mini_wait()
-            while self.__scrape_houses:
-                try:
-                    if not self.__cleaner_semaphore.acquire(blocking=True, timeout=100):
-                        self.__cleaner_signal.set()
-                        self.__cleaner_semaphore.acquire(
-                            blocking=True, timeout=0)
-                    house = self.__houses_to_visit.get(timeout=500)
-                except Exception:
-                    # navigation scraped and houses scraped
-                    if not self.__scrape_navigation:
-                        self.__scrape_houses = False
-                        continue
-                self._scrape_house_page(driver, house)
-                utils.mega_wait() if utils.flip_coin() else utils.wait(
-                ) if utils.flip_coin() else utils.mini_wait()
+            try:
+                utils.mini_wait()
+                while self.__scrape_houses:
+                    try:
+                        if not self.__cleaner_semaphore.acquire(blocking=True, timeout=100):
+                            self.__cleaner_signal.set()
+                            self.__cleaner_semaphore.acquire(
+                                blocking=True, timeout=0)
+                        house = self.__houses_to_visit.get(timeout=500)
+                    except Exception:
+                        # navigation scraped and houses scraped
+                        if not self.__scrape_navigation:
+                            self.__scrape_houses = False
+                            continue
+                    self._scrape_house_page(driver, house)
+                    utils.mega_wait() if utils.flip_coin() else utils.wait(
+                    ) if utils.flip_coin() else utils.mini_wait()
+            except Exception as e:
+                utils.error(f'[{self.id}] Error while scraping: {e}')
 
     def dump_houses(self):
         """

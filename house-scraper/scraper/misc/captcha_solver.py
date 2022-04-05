@@ -29,6 +29,8 @@ def check(driver) -> bool:
     except NoSuchElementException as e:
         utils.warn('This page is not a idealista captcha')
         return False
+    except Exception as e:
+        utils.error(f'There was an unexpected error: {e}')
 
 
 def solve(driver):
@@ -40,27 +42,31 @@ def solve(driver):
     driver : WebElement
         Selenium driver, in the root content
     """
-    sleep(5)
-    driver.switch_to.default_content()
-    parent_frame = driver.find_element(by=By.TAG_NAME, value='iframe')
-    driver.switch_to.frame(parent_frame)
-    driver.switch_to.frame(driver.find_element(
-        by=By.CSS_SELECTOR, value='iframe[title="reCAPTCHA"]'))
-    captcha = driver.find_element(by=By.ID, value='recaptcha-anchor-label')
-    sleep(5)
-    captcha.click()
-    sleep(5)
+    try:
+        sleep(5)
+        driver.switch_to.default_content()
+        parent_frame = driver.find_element(by=By.TAG_NAME, value='iframe')
+        driver.switch_to.frame(parent_frame)
+        driver.switch_to.frame(driver.find_element(
+            by=By.CSS_SELECTOR, value='iframe[title="reCAPTCHA"]'))
+        captcha = driver.find_element(by=By.ID, value='recaptcha-anchor-label')
+        sleep(5)
+        captcha.click()
+        sleep(5)
 
-    driver.switch_to.default_content()
-    while check(driver):
-        __click_solve(driver, parent_frame)
-        sleep(1.5)
-        if check(driver):
+        driver.switch_to.default_content()
+        while check(driver):
             __click_solve(driver, parent_frame)
-            sleep(5)
+            sleep(1.5)
             if check(driver):
-                __click_reload(driver, parent_frame)
-                sleep(2.5)
+                __click_solve(driver, parent_frame)
+                sleep(5)
+                if check(driver):
+                    __click_reload(driver, parent_frame)
+                    sleep(2.5)
+    except Exception as e:
+        utils.warn(f'There was an unexpected error: {e}')
+        return
 
 
 def __click_solve(driver, parent_frame):
