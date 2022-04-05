@@ -3,7 +3,7 @@ import os
 import threading
 from time import gmtime, strftime, time
 
-from misc import config, utils
+from misc import config, utils, merge_datasets
 from scrapers.scraper_base import HouseScraper
 from scrapers.scraper_factory import ScraperFactory
 
@@ -55,6 +55,12 @@ def scrape_web(scraper: HouseScraper, urls: list = None):
         f'[{scraper.id}] Elapsed time: {strftime("%H:%M:%S", gmtime(elapsed_seconds))}')
 
 
+def join_results():
+    merge_datasets.merge_idealista_files()
+    merge_datasets.merge_idealista_folders()
+    merge_datasets.merge_fotocasa_idealista()
+    merge_datasets.zip_everything()
+
 def main(scrapers_ids: list, urls: dict):
     """
     Launches several threads to scrape multiple real estate listing webs; then joins 
@@ -82,9 +88,12 @@ def main(scrapers_ids: list, urls: dict):
         scraper_thread.join()
 
     utils.delete_directory(os.path.join(config.TMP_DIR, config.CHROME_SESSION))
+    
     utils.log('Finished web-scraping')
     utils.log('Joining results...')
-    # TODO join results and create final dataset in CSV
+
+    join_results()
+    
     utils.log('... Results joined')
 
 
@@ -97,6 +106,8 @@ if __name__ == '__main__':
         '-f', '--fotocasa', help='launches the fotocasa scraper', action='store_true')
     argparser.add_argument(
         '--urls-idealista', help='urls to scrape with idealista', required=False, type=str, nargs='+')
+    argparser.add_argument('-m', '--merge', help='merges the data files without launching the scrapers',
+        action='store_true')
     args = argparser.parse_args()
 
     scraper_ids = list()
@@ -111,5 +122,9 @@ if __name__ == '__main__':
     if not scraper_ids:
         scraper_ids = [config.IDEALISTA_ID, config.FOTOCASA_ID]
 
-    utils.log(f'Scraping {scraper_ids}')
-    main(scrapers_ids=scraper_ids, urls=urls)
+    if args.merge:
+        utils.log('Joining and zipping the scraping results')
+        join_results()
+    else:
+        utils.log(f'Scraping {scraper_ids}')
+        main(scrapers_ids=scraper_ids, urls=urls)
