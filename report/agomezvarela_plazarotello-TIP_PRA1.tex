@@ -17,6 +17,7 @@
 \usepackage{fontspec}
 \usepackage{fancyhdr}
 \usepackage{titling}
+\usepackage{array}
 \usepackage{multicol}
 \usepackage{framed}
 \usepackage{enumitem}
@@ -164,21 +165,71 @@
 
 \vspace{-2em}
 
-\section*{Contexto}
+\section*{Contexto}\vspace{-1.5em}
+
+Explicar en qué contexto se ha recolectado la información. Explicar
+por qué el sitio web elegido proporciona dicha información
 
 Mercado inmobiliario, nueva legislación, contexto inflación...
 
-\section*{Inspiración}
+\vspace{-1.5em}\section*{Inspiración}\vspace{-1.5em}
 
-\section*{Agradecimientos}
+Explicar por qué es interesante este conjunto de datos y qué
+preguntas se pretenden responder. Es necesario comparar con los análisis
+anteriores presentados en agradecimientos
 
-\section*{\textit{Dataset} nombre del dataset}
+\vspace{-1.5em}\section*{Agradecimientos}\vspace{-1.5em}
 
-\subsection*{Descripción}
+Presentar al propietario del conjunto de datos. Es necesario
+incluir citas de análisis anteriores o, en caso de no haberlas, justificar esta
+búsqueda con análisis similares. Justificar qué pasos se han seguido para
+actuar de acuerdo a los principios éticos y legales en el contexto del proyecto
 
-\subsection*{Contenido}
+\vspace{-1.5em}\section*{\textit{Dataset} nombre del dataset}
 
-\subsection*{Representación gráfica}
+\vspace{-1.5em}\subsection*{Descripción}\vspace{-1.5em}
+
+Desarrollar una descripción breve del conjunto de
+datos que se ha extraído. Es necesario que esta descripción tenga sentido con
+el título elegido.
+
+\vspace{-1.5em}\subsection*{Licencia}\vspace{-1.5em}
+
+Seleccionar una de estas licencias para el dataset resultante y
+justificar el motivo de su selección:
+● Released Under CC0: Public Domain License.
+● Released Under CC BY-NC-SA 4.0 License.
+● Released Under CC BY-SA 4.0 License.
+● Database released under Open Database License, individual contents
+under Database Contents License.
+● Other (specified above).
+● Unknown License.
+
+\vspace{-1.5em}\subsection*{Contenido}\vspace{-1.5em}
+
+Explicar los campos que incluye el dataset, el periodo de tiempo de los datos y cómo se han recogido
+
+\vspace{-1.5em}\subsection*{Representación gráfica}\vspace{-1.5em}
+
+Dibujar un esquema o diagrama que identifique el
+dataset visualmente y el proyecto elegido
+
+\begin{table}[h]
+	\centering
+	\begin{tabular}{ | >{\arraybackslash}p{0.5\textwidth} | >{\centering\arraybackslash}p{0.2\textwidth} |}
+		\hline
+		\textbf{Contribuciones} &
+		\textbf{Firma} \\ \hline
+		\begin{tabular}{l}\underline{Investigación previa} \\ \hspace{1em}\textit{Brainstorm} de ideas \\ \hspace{1em}Filtro de distritos\end{tabular} &
+		\begin{tabular}[c]{@{}c@{}}AGV, PLT\\ AGV, PLT\\ AGV\end{tabular} \\ \hline
+		\begin{tabular}{l}\underline{Desarrollo de código}\\ \hspace{1em}Estructura del código\\ \hspace{1em}\textit{Scraper} Fotocasa\\ \hspace{1em}\textit{Scraper} Idealista\\ \hspace{1em}Unión de \textit{datasets}\\ \hspace{1em}Representación gráfica\end{tabular} &
+		\begin{tabular}[c]{@{}c@{}}AGV, PLT\\ PLT\\ AGV\\ PLT\\ AGV\end{tabular} \\ \hline
+		\begin{tabular}{l}\underline{Redacción de las respuestas}\\ Creación del vídeo\end{tabular} &
+		\begin{tabular}[c]{@{}c@{}}AGV, PLT\\ AGV, PLT\end{tabular} \\ \hline
+		\begin{tabular}{l}Documentación\\ \hspace{1em}Documentación del código\\ \hspace{1em}Documentación del repositorio\end{tabular} &
+		\begin{tabular}[c]{@{}c@{}}AGV, PLT\\ AGV, PLT\\ PLT\end{tabular} \\ \hline
+	\end{tabular}
+\end{table}
 
 \newpage
 \vspace{0.3cm}
