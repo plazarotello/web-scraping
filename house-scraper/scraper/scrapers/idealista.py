@@ -113,7 +113,11 @@ class IdealistaScraper(HouseScraper):
                         driver.refresh()
                 except Exception as e:
                     utils.error(f'[{self.id}] Error retrieving {driver.current_url}: {e}')
-                    return None, False
+                    retries += 1
+                    if retries > 3:
+                        return None, False
+                    utils.mega_wait()
+                    driver.refresh()
                 madeit = False
         return result, True
 
