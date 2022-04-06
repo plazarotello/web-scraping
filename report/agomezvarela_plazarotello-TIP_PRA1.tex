@@ -152,7 +152,7 @@
 \begin{framed}
 	\begin{multicols}{2}
 		\begin{itemize}[topsep=0cm,partopsep=0cm,label={},wide]
-			\item \textbf{Título}: título
+			\item \textbf{Título}: Houses for sale in the Salamanca and Villaverde district of Madrid in April 2022
 			\item \textbf{Licencia}: CC BY-NC-SA 4.0
 			\item \textbf{DOI}:
 			\columnbreak
@@ -198,16 +198,64 @@ Explicar los campos que incluye el dataset, el periodo de tiempo de los datos y 
 
 \section*{6. Agradecimientos }\vspace{-1.5em}
 
-Presentar al propietario del conjunto de datos. Es necesario
-incluir citas de análisis anteriores o, en caso de no haberlas, justificar esta
-búsqueda con análisis similares. Justificar qué pasos se han seguido para
-actuar de acuerdo a los principios éticos y legales en el contexto del proyecto
+A continuación se abordará el apartado de agradecimientos divido en tres bloques debido a la complejidad del proyecto planteado y la necesidad de diferenciar claramente entre ellos. 
+
+\underline{Propietarios de los datos}
+
+Como se ha indicado en otros apartados nos encontramos ante un proyecto en el que se integran \textbf{dos fuentes de datos} diferentes, con sus respectivos propietarios de los datos. 
+
+Por un lado, sobre el portal web \href{http://www.idealista.com}{\textbf{\underline{Idealista}}}, cuyo fundador y CEO es Jesús Encinar, es importante destacar que la empresa está registrada como una Sociedad Anónima Unipersonal (Idealista S.A.U) fundada en el año 2000, aunque en la actualidad está participada mayoritariamente por los fondos gestionados por EQT. En estos momentos opera además en Portugal e Italia, países en los que no nos centramos en este proyecto, pero cuya estructura de la web es idéntica, con todo lo que esto implica. 
+
+Explorando el dominio mediante \textit{whois} de python, se obtienen otros datos del mismo, como que su fecha de creación fue el 21 de agosto de 1999 y otra información irrelevante en este punto. 
+
+Por otro lado, según explican ellos mismos y se puede verificar en gran medida en el desarrollo del código, el \textbf{desarrollo de software }de idealista usa como base el sistema de arquitectura LEMP (Linux, Nginx, MySql, PHP) además de otras herramientas, como bases de datos (Oracle y SQLite), motores de búsqueda fulltext (Sphinxsearch y Solr), lenguajes de programación PHP en sus versiones 5.6 y 7.1 ó JavaScript y Laravel y Lumen como frameworks para el desarrollo de aplicaciones.
+
+En cuanto al portal web \href{https://www.fotocasa.es/es/}{\textbf{\underline{Fotocasa}}}, pertenece a Adevinta Spain S.L.U., empresa que también es propietaria del portal inmobiliario \href{https://www.habitaclia.com/madrid}{\textbf{\underline{Habitaclia}}} y se fundó en 1999. Al contrario que con Idealista, la estructura de los portales de los que Adevinta es propietaria es diferente en cada caso. Con Fotocasa, además, no se obtiene ningún tipo de información del dominio mediante \textit{whois}. 
+
+Por otro lado, son menos transparentes en cuanto a cómo está \textbf{desarrollado} el portal, aunque sí que se han detectado el uso de bases de datos, motores de búsquedas y lenguajes de programación PHP y JavaScript.
+
+\underline{Trabajos anteriores}
+
+Idealista y Fotocasa han sido objeto de análisis en varias ocasiones, y los que se han hecho públicos proceden sobre todo del \textbf{ámbito académico}, debido a la dificultad que conlleva el intentar someter a estos portales a un proceso de \textit{scraping}. La razón de esto reside en que el corazón de su negocio son los datos y cualquiera que se haga con ellos puede obtener una ventaja competitiva indeseable para ambos portales. Es por este motivo por el que sus equipos de desarrolladores son especialmente conocidos por intentar poner trabas a estas prácticas que, como se verá en el siguiente apartado, de manera explícita ellos prohíben realizar.
+
+En el contexto del Máster en Inteligencia Artificial aplicada a los Mercados Financieros (mIA-X) del Instituto BME, David Carrasco Cuñado desarrolló un proyecto para \textit{scrapear} \textbf{Idealista}, cuyo código se puede encontrar en \href{https://github.com/David-Carrasco/Scrapy-Idealista}{\textbf{\underline{este repositorio}}} de GitHub y tiene como última actualización octubre de 2020. Este repositorio es el más completo que se ha encontrado que se aproxime a los objetivos del nuestro y únicamente permite registrar la información de cada uno de los inmuebles que aparecen en la\textbf{ primera página de una URL} dada con una ubicación en concreto, extrayendo los datos únicamente de esta dirección sin entrar a ver los detalles en las páginas correspondientes de cada una de las viviendas. 
+
+El tutorial\textbf{ más completo} es el ofrecido por el usuario de YouTube Code Monkey King, que se puede ver en \href{https://www.youtube.com/watch?v=4Tv73KuqgVo}{\textbf{\underline{este vídeo}}}. El punto de entrada son códigos postales y enseña a descargar todos los datos tanto de las páginas de localización en las que se encuentran los listados de inmuebles como de las URL con cada uno de ellos. Por tanto, aunque no proporcione el código ejecutable de una forma directa, se trata de una pieza completa e interesante. 
+
+Por su parte, Miguel Ángel Gisbert publicó en junio de 2021 un tutorial sobre cómo \textit{scrapear} los datos de una vivienda \textbf{dada la URL} de la misma, que se puede consultar en \href{https://www.youtube.com/watch?v=2UyJv5oe570}{\textbf{\underline{este vídeo}}}. Al igual que el proyecto anterior, no realiza ningún análisis una vez obtenidos los datos. 
+
+En cuanto a Idealista, ya no destacan más ejemplos que merezcan una especial mención puesto que no se acercan, ni de lejos, a los objetivos de este proyecto. Por ejemplo, se ha encontrado \href{https://medium.com/@rubenmarcos/crear-una-base-de-datos-de-la-evoluci%C3%B3n-del-mercado-inmobiliario-con-idealista-y-r-y-sin-scraping-1d5025a9d47e}{\textbf{\underline{una alternativa}}} al \textit{scraping} directo del portal mediante el análisis con R de la propia bandeja de entrada del\textbf{ correo electrónico}, al que llega información de los pisos que cumplen los requisitos a los que el usuario se ha suscrito.
+
+Centrándonos en \textbf{Fotocasa}, los compañeros Irene Fernández Molina y Héctor Hernández Membiela en el contexto académico de esta misma asignatura en abril de 2019 desarrollaron un proyecto de \textit{web scraping} en el que este era uno de los dos sitios web del que realizaban la captura de datos. Como se puede observar en \href{https://github.com/EdelBlau/PEC_TPC}{\textbf{\underline{su repositorio}}}, sin embargo, toda la información que se extrae se encuentra en las páginas en las que se muestra el\textbf{ listado de inmuebles }y no se propone una extracción de la información que contiene cada una de las páginas de los mismos. 
+
+También en el ámbito académico, el Trabajo de Fin de Máster (TFM) de Álvaro Torrente Patiño del Máster de Ciberseguridad de la Universidade da Coruna también trabajaba sobre el \textit{web scraping} de portales inmobiliarios, entre los que se encontraba Fotocasa según ha explicado él mismo en LinkedIn, pero el portal de la facultad en el que está colgado \href{http://castor.det.uvigo.es:8080/xmlui/bitstream/handle/123456789/575/TorrentePatino_Alvaro_TFM_2021.pdf?sequence=1&isAllowed=y}{\textbf{\underline{dicho trabajo}}} ha estado caído durante todo el desarrollo de este proyecto, por lo que no se ha podido estudiar su trabajo previo.  
+
+Por otro lado, el usuario de YouTube Fpred publicó en octubre de 2020 un \textbf{pequeño tutorial} en el que explica cómo enfrentarse al \textit{lazy loading} de la web de Fotocasa para obtener los precios de todas las viviendas que aparecen en cada página del listado cuando se busca una localización, como se puede ver en \href{https://www.youtube.com/watch?v=WMjV7rF3oX8}{\textbf{\underline{este vídeo}}}, pero no profundiza en ningún otro aspecto adicional. 
+
+En relación a \textbf{análisis} en sí mismos, no se ha encontrado ninguno relevante ni con datos descargados de Idealista ni de Fotocasa más allá que los que ellos publican en sus respectivos portales web. Así, cabe destacar, por último, que es probable que existan \textbf{empresas} que hayan realizado proyectos para obtener la información de estos dos portales web, pero no se han hecho públicos y, por tanto, no se han podido tener en cuenta para esta fase del proyecto. 
+
+\underline{Pasos para actuar con principios éticos y legales}
+
+Este es uno de los apartados\textbf{ más complejos} del proyecto y que hemos tratado con especial sensibilidad.
+
+Según se recoge en el fichero \href{https://www.idealista.com/robots.txt}{\textbf{\underline{robots.txt}}} de \textbf{Idealista}, están específicamente no permitidas algunas de las acciones contempladas en este proyecto, como la navegación a través de la \textbf{paginación} ("Disallow: /*/pagina-*.htm") o el empleo de más de dos \textbf{filtros} ("Disallow: /venta-*,*,*," o "Disallow: /venta-*,"), cuando en este caso se están empleando tres: viviendas + Madrid + distrito. 
+
+Según se recoge en el fichero \href{https://www.fotocasa.es/robots.txt}{\textbf{\underline{robots.txt}}} de \textbf{Fotocasa}, por su parte, el portal es mucho menos restrictivo. Sin embargo, también está especificado que no se permite la navegación a través de la \textbf{paginación} a partir de la cuarta incluida ("Disallow: */l/4*" hasta "Disallow: */l/39*"), condición necesaria para el proyecto planteado. No obstante, para la búsqueda de las viviendas de cada distrito no se incumple ninguna restricción ya que, según la construcción de la URL no está especificada como tal. Por ejemplo, el archivo indica "Disallow: /*filter=*" pero la URL de Villaverde es https://www.fotocasa.es/es/comprar/viviendas/madrid-capital/villaverde/l?sortType=scoring. Además, este tipo de \textit{sortType} es el único permitido, por lo que tampoco entra en conflicto con las indicaciones del propietario. 
+
+
+Así, y teniendo en cuenta que estas restricciones son "solo una sugerencia y \textbf{nunca una obligación}", tal y como se señala en el documento 'Web scraping', además de tenerlas en cuenta para reducir las posibilidades de ser bloqueados, se decide que este proyecto tenga una finalidad \textbf{exclusivamente educativa}. Es interesante que trabajando ambos portales, las posibilidades de aprendizaje se disparan exponencialmente pero, sin embargo, no debemos olvidar la voluntad de los propietarios de los mismos. Por ello, en todo momento se intenta mantener el equilibrio y, sobre todo, \textbf{respeto} hacia Idealista y Fotocasa. 
+
+ \underline{Agradecimiento final}
+ 
+Debido a todo lo expuesto en este apartado, agradecemos tanto a \textbf{Idealista} como a \textbf{Fotocasa} el haber servido como soporte para el proceso de aprendizaje que hemos desarrollado durante este proyecto de captura de datos, los cuales serán empleados con un fin exclusivamente académico. Además, hacemos extensible este agradecimiento a las personas mencionadas en \textbf{trabajos anteriores} por haber hecho público el conocimiento que han adquirido y que ha servido de punto de partida para este proyecto o para solventar obstáculos que nos hemos encontrado. 
 
 \section*{7. Inspiración }\vspace{-1.5em}
 
 Explicar por qué es interesante este conjunto de datos y qué
 preguntas se pretenden responder. Es necesario comparar con los análisis
 anteriores presentados en agradecimientos
+
+Beautiful soup
 
 \section*{8. Licencia }\vspace{-1.5em}
 
@@ -219,11 +267,11 @@ La licencia seleccionada es\textbf{ Atribución-NoComercial-CompartirIgual 4.0 I
 
 ● \textbf{CompartirIgual}. Por el mismo motivo que no se permite una explotación comercial ni del proyecto ni de las modificaciones que se pudieran trabajar sobre él, cualquier contribución en el que esté involucrado debe tener la licencia CC BY-NC-SA 4.0. De esta manera, se evitará un uso no deseado de cualquier transformación.
 
-Como se puede observar, el mayor interés a la hora de seleccionar esta licencia, por tanto, es favorecer el flujo de conocimiento con fines exclusivamente académicos a la vez que preservar la voluntad de los propietarios de los datos originales. 
+Como se puede observar, el mayor interés a la hora de seleccionar esta licencia, por tanto, es favorecer el \textbf{flujo de conocimiento} con fines exclusivamente académicos a la vez que preservar la\textbf{ voluntad de los propietarios} de los datos originales. 
 
 \section*{9. Código }\vspace{-1.5em}
 
-El \textbf{código} para el desarrollo de este proyecto se puede consultar al completo dentro de \textit{house-scraper} en: https://github.com/plazarotello/web-scraping
+El \textbf{código} para el desarrollo de este proyecto se puede consultar al completo dentro de \textit{house-scraper} en: \url{https://github.com/plazarotello/web-scraping}
 
 \section*{10. Dataset }\vspace{-1.5em}
 
