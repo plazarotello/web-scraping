@@ -108,6 +108,7 @@ if __name__ == '__main__':
         '--urls-idealista', help='urls to scrape with idealista', required=False, type=str, nargs='+')
     argparser.add_argument('-m', '--merge', help='merges the data files without launching the scrapers',
         action='store_true')
+    argparser.add_argument('-r', '--reset', help='resets the dataset and temporary files')
     args = argparser.parse_args()
 
     scraper_ids = list()
@@ -121,6 +122,10 @@ if __name__ == '__main__':
 
     if not scraper_ids:
         scraper_ids = [config.IDEALISTA_ID, config.FOTOCASA_ID]
+
+    if args.reset:
+        utils.create_directory(config.TMP_DIR)
+        utils.create_directory(config.DATASET_DIR)
 
     if args.merge:
         utils.log('Joining and zipping the scraping results')
