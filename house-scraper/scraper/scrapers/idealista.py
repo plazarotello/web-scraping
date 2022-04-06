@@ -112,8 +112,8 @@ class IdealistaScraper(HouseScraper):
                             return None, False
                         utils.mega_wait()
                         driver.refresh()
-                except Exception as e:
-                    utils.error(f'[{self.id}] Error retrieving {driver.current_url}: {e}')
+                except:
+                    utils.error(f'[{self.id}] Error retrieving {driver.current_url}')
                     retries += 1
                     if retries > 3:
                         return None, False
@@ -329,6 +329,8 @@ class IdealistaScraper(HouseScraper):
         except NoSuchElementException as e:
             utils.error(f'[{self.id}] Something happened!')
             utils.error(f'Exception: {e.msg}')
+        except:
+            utils.error(f'[{self.id}] Something happened!')
 
     def _scrape_first_time_nav(self):
         """
@@ -378,8 +380,8 @@ class IdealistaScraper(HouseScraper):
                     navigation = self.__navigations_to_visit.get()
                     self._scrape_navigation(driver, navigation[1], navigation[0])
                 self.__scrape_navigation = False
-            except Exception as e:
-                utils.error(f'[{self.id}] Error while navigating: {e}')
+            except:
+                utils.error(f'[{self.id}] Error while navigating')
 
     def start_house_scraping(self):
         """
@@ -411,8 +413,8 @@ class IdealistaScraper(HouseScraper):
                     self._scrape_house_page(driver, house)
                     utils.mega_wait() if utils.flip_coin() else utils.wait(
                     ) if utils.flip_coin() else utils.mini_wait()
-            except Exception as e:
-                utils.error(f'[{self.id}] Error while scraping: {e}')
+            except:
+                utils.error(f'[{self.id}] Error while scraping')
 
     def dump_houses(self):
         """
@@ -482,9 +484,8 @@ class IdealistaScraper(HouseScraper):
 
                 self.__cleaner_signal.clear()
                 self.__cleaner_semaphore.release(n=self.__urls_before_cleanup)
-        except Exception as e:
+        except:
             utils.error(f'[idealista] Something went wrong (?)')
-            utils.error(e)
         finally:
             # whatever happens, backup and dump!
             # final backup and dump

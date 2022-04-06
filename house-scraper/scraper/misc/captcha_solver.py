@@ -64,8 +64,8 @@ def solve(driver):
                 if check(driver):
                     __click_reload(driver, parent_frame)
                     sleep(2.5)
-    except Exception as e:
-        utils.warn(f'There was an unexpected error: {e}')
+    except:
+        utils.warn('There was an unexpected error')
         return
 
 
