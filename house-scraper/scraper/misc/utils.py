@@ -234,6 +234,7 @@ def set_human_options() -> Options:
     options.add_argument('--disable-gpu')
     options.add_argument('--window-size=1920,1080')
     options.add_argument('--disk-cache-size=0')
+    options.add_argument('--disable-application-cache')
     return options
 
 

@@ -430,9 +430,13 @@ class IdealistaScraper(HouseScraper):
 
         if not utils.directory_exists(config.DATASET_DIR):
             utils.create_directory(config.DATASET_DIR)
+        if utils.file_exists(config.IDEALISTA_FILE):
+            existing_df = pd.read_csv(config.IDEALISTA_FILE)
+            df = pd.concat([df, existing_df]).drop_duplicates('id')
         utils.log(f'Dumping dataset into {config.IDEALISTA_FILE}')
         df.to_csv(config.IDEALISTA_FILE, encoding='utf-8',
                   index=False, header=True)
+        self.__houses_visited.clear()
         utils.log(f'Dumped dataset of {df.shape} into {config.IDEALISTA_FILE}')
 
     def scrape(self, urls: list = None):
