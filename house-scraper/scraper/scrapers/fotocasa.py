@@ -357,6 +357,6 @@ class FotocasaScraper(HouseScraper):
         if not utils.directory_exists(config.DATASET_DIR):
             utils.create_directory(config.DATASET_DIR)
         
-        utils.log(f'Dumping dataset into {config.FOTOCASA_FILE}')
-        df.to_csv(config.FOTOCASA_FILE, mode='a')
-        utils.log(f'Dumped dataset into {config.FOTOCASA_FILE}')
+        utils.log(f'Dumping dataset into {config.FOTOCASA_FILE}-{location}.csv')
+        df.to_csv(config.FOTOCASA_FILE-{location}.csv, mode='a')
+        utils.log(f'Dumped dataset into {config.FOTOCASA_FILE}-{location}.csv')
