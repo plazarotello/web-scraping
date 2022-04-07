@@ -9,15 +9,16 @@ import shutil
 import uuid
 from random import randint, random, uniform
 from time import sleep
+
 import requests
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+
 from . import config, network
 
 # =========================================================
 # FILE UTILITIES
 # =========================================================
-
 
 
 def delete_directory(dir_name: str):
@@ -317,6 +318,7 @@ def mini_wait():
     """
     sleep(uniform(config.RANDOM_SMALL_MIN_WAIT, config.RANDOM_SMALL_MAX_WAIT))
 
+
 def scroll_wait():
     """
     Waits a little bit of time during scroll
@@ -327,6 +329,7 @@ def scroll_wait():
 # LOGGING UTILITIES
 # =========================================================
 
+
 """
 Starts a log file. The utilities log messages in the file with each correspondent
 priority level
@@ -336,6 +339,7 @@ priority level
 logging.basicConfig(filename=os.path.join(config.ROOT_DIR, 'house-scraper.log'),
                     filemode='w', encoding='utf-8', level=logging.INFO,
                     format='%(asctime)s | %(levelname)s | %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+
 
 def debug(msg: str):
     """

@@ -3,7 +3,7 @@ import os
 import threading
 from time import gmtime, strftime, time
 
-from misc import config, utils, merge_datasets
+from misc import config, merge_datasets, utils
 from scrapers.scraper_base import HouseScraper
 from scrapers.scraper_factory import ScraperFactory
 
@@ -56,10 +56,15 @@ def scrape_web(scraper: HouseScraper, urls: list = None):
 
 
 def join_results():
+    """
+    Performs the actions to merge the partial datasets in one; then zips the whole dataset and
+    images associated.
+    """
     merge_datasets.merge_idealista_files()
     merge_datasets.merge_idealista_folders()
     merge_datasets.merge_fotocasa_idealista()
     merge_datasets.zip_everything()
+
 
 def main(scrapers_ids: list, urls: dict):
     """
@@ -88,12 +93,12 @@ def main(scrapers_ids: list, urls: dict):
         scraper_thread.join()
 
     utils.delete_directory(os.path.join(config.TMP_DIR, config.CHROME_SESSION))
-    
+
     utils.log('Finished web-scraping')
     utils.log('Joining results...')
 
     join_results()
-    
+
     utils.log('... Results joined')
 
 
@@ -109,8 +114,9 @@ if __name__ == '__main__':
     argparser.add_argument(
         '--urls-idealista', help='urls to scrape with idealista', required=False, type=str, nargs='+')
     argparser.add_argument('-m', '--merge', help='merges the data files without launching the scrapers',
-        action='store_true')
-    argparser.add_argument('-r', '--reset', help='resets the dataset and temporary files', action='store_true')
+                           action='store_true')
+    argparser.add_argument(
+        '-r', '--reset', help='resets the dataset and temporary files', action='store_true')
     args = argparser.parse_args()
 
     scraper_ids = list()

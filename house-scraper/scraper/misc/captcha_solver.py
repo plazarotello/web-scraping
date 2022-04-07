@@ -4,8 +4,10 @@ the help of the Buster extension.
 """
 
 from time import sleep
+
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
+
 from . import utils
 
 
