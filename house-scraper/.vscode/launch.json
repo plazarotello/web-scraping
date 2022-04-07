@@ -22,6 +22,15 @@
             "justMyCode": true
         },
         {
+            "name": "Merge",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/scraper/__main__.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": ["-m"]
+        },
+        {
             "name": "Idealista",
             "type": "python",
             "request": "launch",

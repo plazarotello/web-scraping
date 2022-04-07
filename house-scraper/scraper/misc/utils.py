@@ -79,7 +79,7 @@ def duplicate_folder(dir: str, dest: str):
     dest : str
         Absolute folder path in which to paste the folder
     """
-    shutil.copytree(dir, dest)
+    shutil.copytree(dir, dest, dirs_exist_ok=True)
     log(f'{dir} has been copy-pasted to {dest}')
 
 
