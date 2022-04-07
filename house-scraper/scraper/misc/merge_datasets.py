@@ -41,7 +41,7 @@ def merge_fotocasa_idealista():
     df_i['source'] = config.IDEALISTA_ID
 
     # concat dataframes
-    df_merged = pd.concat([df_f,df_i])
+    df_merged = pd.concat([df_f, df_i])
     df_merged.to_csv(config.MERGED_FILE)
 
 

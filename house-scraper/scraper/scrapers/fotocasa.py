@@ -1,14 +1,15 @@
-from .scraper_base import HouseScraper
 import re
 from concurrent.futures import ThreadPoolExecutor, as_completed
+
 import pandas as pd
 from misc import config, utils
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.common.action_chains import ActionChains
-from selenium.webdriver.support import expected_conditions as EC
+
+from .scraper_base import HouseScraper
+
 
 class FotocasaScraper(HouseScraper):
 
