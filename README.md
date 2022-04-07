@@ -20,7 +20,8 @@ A continuación, se muestra en árbol la estructura del proyecto. Dentro de cada
 
     .
     ├── house-scraper                                   # carpeta con el código python del scraper
-    |   ├── dataset                                     # carpeta donde se guardan los datasets intermerdios, el final y las imágenes
+    |   ├── dataset                                     # carpeta donde se guardan los datos
+    |   |   └── README.md                               # descripción del módulo
     |   |
     |   ├── scraper                                     # módulo principal
     |   |

@@ -13,9 +13,10 @@ def merge_idealista_files():
     regex = re.compile('idealista-*[.]csv$')
     csvs = utils.get_files_in_directory(config.DATASET_DIR, extension='.csv')
     dfs = [pd.read_csv(csv_file) for csv_file in csvs if regex.match(csv_file)]
-    idealista_csv = pd.concat(dfs).drop_duplicates('id')
-    idealista_csv.to_csv(config.IDEALISTA_FILE, encoding='utf-8',
-                         index=False, header=True)
+    if len(dfs) > 0:
+        idealista_csv = pd.concat(dfs).drop_duplicates('id')
+        idealista_csv.to_csv(config.IDEALISTA_FILE, encoding='utf-8',
+                             index=False, header=True)
 
 
 def merge_idealista_folders():
