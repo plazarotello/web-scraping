@@ -108,7 +108,7 @@ if __name__ == '__main__':
         '--urls-idealista', help='urls to scrape with idealista', required=False, type=str, nargs='+')
     argparser.add_argument('-m', '--merge', help='merges the data files without launching the scrapers',
         action='store_true')
-    argparser.add_argument('-r', '--reset', help='resets the dataset and temporary files')
+    argparser.add_argument('-r', '--reset', help='resets the dataset and temporary files', action='store_true')
     args = argparser.parse_args()
 
     scraper_ids = list()
