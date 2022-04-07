@@ -44,8 +44,8 @@ class FotocasaScraper(HouseScraper):
 
                 id = re.findall('\d+', url)[0]
                 
-                # checking if download directory exixts
-                download_dir = f"{config.FOTOCASA_IMG_DIR}/{id}"
+                # checking if download directory exists
+                download_dir = f"{config.FOTOCASA_IMG_DIR}-imgs/{id}"
                 if utils.directory_exists(download_dir) == False:
                     utils.create_directory(download_dir)
 
@@ -151,6 +151,10 @@ class FotocasaScraper(HouseScraper):
             List of the relative URL of the houses that are present in the navigation pages to scrape one by one
         """
 
+        # checking if download directory exists
+        download_dir = f"{config.FOTOCASA_IMG_DIR}-imgs"
+        if utils.directory_exists(download_dir) == False:
+            utils.create_directory(download_dir)
 
         driver = utils.get_selenium()
         driver.get(url)
