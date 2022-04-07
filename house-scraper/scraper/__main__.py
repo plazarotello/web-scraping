@@ -105,6 +105,8 @@ if __name__ == '__main__':
     argparser.add_argument(
         '-f', '--fotocasa', help='launches the fotocasa scraper', action='store_true')
     argparser.add_argument(
+        '--urls-fotocasa', help='urls to scrape with fotocasa', required=False, type=str, nargs='+')
+    argparser.add_argument(
         '--urls-idealista', help='urls to scrape with idealista', required=False, type=str, nargs='+')
     argparser.add_argument('-m', '--merge', help='merges the data files without launching the scrapers',
         action='store_true')
@@ -117,6 +119,8 @@ if __name__ == '__main__':
         scraper_ids.append(config.IDEALISTA_ID)
     if args.fotocasa:
         scraper_ids.append(config.FOTOCASA_ID)
+    if args.urls_fotocasa:
+        urls[config.FOTOCASA_ID] = args.urls_fotocasa
     if args.urls_idealista:
         urls[config.IDEALISTA_ID] = args.urls_idealista
 
