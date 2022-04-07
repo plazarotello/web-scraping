@@ -150,6 +150,8 @@ class FotocasaScraper(HouseScraper):
         -------
             List of the relative URL of the houses that are present in the navigation pages to scrape one by one
         """
+
+
         driver = utils.get_selenium()
         driver.get(url)
 
@@ -168,6 +170,7 @@ class FotocasaScraper(HouseScraper):
         while last_page == False:
             num_page = num_page + 1
             utils.log(f"fotocasa - current page {num_page}")
+          
 
             if location == 'villaverde':
                 # scroll down and read each house
@@ -225,6 +228,7 @@ class FotocasaScraper(HouseScraper):
                             utils.log(e)
             
             if location == 'barrio-de-salamanca':
+
                 # scroll down and read each house
                 for scroll_i in range(config.FOTOCASA_SCROLL_LOCATION_PAGE):
                     ActionChains(driver).key_down(Keys.PAGE_DOWN).key_up(Keys.PAGE_DOWN).perform()
@@ -232,6 +236,7 @@ class FotocasaScraper(HouseScraper):
 
                     # read the page to get huose's urls
                     if num_page == 1 or num_page == 2 or num_page == 3:
+                        
                         
                         main_content = driver.find_element(by=By.CSS_SELECTOR,value='#App > div.re-Page > div.re-SearchPage > main > div > div.re-SearchResult-wrapper > section')
                         
@@ -250,7 +255,7 @@ class FotocasaScraper(HouseScraper):
                                 utils.error(e)
 
                     elif num_page == 4:
-                                                                                                                                 
+                                                                                                                                
                         main_content = driver.find_element(by=By.CSS_SELECTOR,value='#App > div.re-Page > div.re-SearchPage.re-SearchPage--withMap > main > div > div.re-SearchResult-wrapper > section')
                         
                         try:
@@ -268,7 +273,8 @@ class FotocasaScraper(HouseScraper):
                             except Exception as e:
                                 utils.error(e)
     
-                    else:                                           
+                    else: 
+                                                       
                         main_content = driver.find_element(by=By.CSS_SELECTOR,value='#App > div.re-Page > div.re-SearchPage.re-SearchPage--withMap > main > div > div.re-SearchResult-wrapper > section')
                         
                         try:
@@ -286,9 +292,12 @@ class FotocasaScraper(HouseScraper):
                             except Exception as e:
                                 utils.error(e)
 
-            # delete duplicates houses     
-            houses_set = set(houses_to_visit)
-            houses_to_visit = list(houses_set)
+
+                # delete duplicates houses     
+                houses_set = set(houses_to_visit)
+                houses_to_visit = list(houses_set)
+
+
 
             # when finish, next page
             try:
@@ -310,7 +319,7 @@ class FotocasaScraper(HouseScraper):
         
         utils.mini_wait()
         driver.quit()
-        utils.info(f"Num of houses_to_visit: {len(houses_to_visit)}")
+        utils.log(f"Num of houses_to_visit: {len(houses_to_visit)}")
         return houses_to_visit
 
 
@@ -319,6 +328,11 @@ class FotocasaScraper(HouseScraper):
         Scrapes https://www.fotocasa.es/es/
         """
         utils.log("Starting Fotocasa dataset")
+
+        if utils.directory_exists(config.FOTOCASA_IMG_DIR) == False:
+            utils.create_directory(config.FOTOCASA_IMG_DIR)
+
+
         # create url using municiplity name only. Not necessary to invoke main page to get url-muniipality pair 
         url_call = urls[0]
         location = url_call.split("/")[-2]
@@ -340,5 +354,5 @@ class FotocasaScraper(HouseScraper):
             utils.create_directory(config.DATASET_DIR)
         
         utils.log(f'Dumping dataset into {config.FOTOCASA_FILE}')
-        df.to_csv(config.FOTOCASA_FILE)
+        df.to_csv(config.FOTOCASA_FILE, mode='a')
         utils.log(f'Dumped dataset into {config.FOTOCASA_FILE}')
