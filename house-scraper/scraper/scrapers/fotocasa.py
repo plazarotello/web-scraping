@@ -1,10 +1,7 @@
-
 from .scraper_base import HouseScraper
 import re
-import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import pandas as pd
-from bs4 import BeautifulSoup
 from misc import config, utils
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.action_chains import ActionChains
