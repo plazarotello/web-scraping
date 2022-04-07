@@ -69,7 +69,7 @@
 
 \pretitle{\vspace{-2cm}\begin{center}\LARGE \bfseries}
 	\posttitle{\end{center}}
-\preauthor{\vspace{-0.5cm}\begin{center}
+\preauthor{\vspace{-0.65cm}\begin{center}
 		\large \itshape
 		\begin{tabular}[t]{c}}
 		\postauthor{\end{tabular}\end{center}\vspace{-1.5cm}}
@@ -97,6 +97,7 @@
 \setlength{\marginparsep}{0pt}
 \setlength{\marginparpush}{0pt}
 \setlength{\voffset}{-10pt}
+\setlength{\fboxsep}{0pt}
 }
 
 \pagestyle{uoc}
@@ -148,7 +149,7 @@
 \maketitle
 \thispagestyle{uoc}
 
-\vspace{-2em}
+%\vspace{-2em}
 \begin{framed}
 	\textbf{\underline{Houses for sale in the Salamanca and Villaverde district of Madrid in April 2022}}
 	\begin{multicols}{2}
@@ -181,9 +182,9 @@ Debido a la gran cantidad de conjuntos de datos existentes sobre la temática se
 
 \vspace{-1.5em}\section{Descripción del \textit{dataset}}\vspace{-1.5em}
 
-Desarrollar una descripción breve del conjunto de
-datos que se ha extraído. Es necesario que esta descripción tenga sentido con
-el título elegido.
+El conjunto de datos obtenido a partir de los \textit{scrapers} hace referencia a todos los pisos disponibles durante la primera semana de abril de 2022 para su compra en los distritos de Villaverde y Salamanca en la ciudad de Madrid en los sitios web de Idealista y Fotocasa.
+
+Se trata por tanto de una \textit{snapshot} del mercado inmobiliario en el distrito con el precio/m\textsuperscript{2} más bajo (Villaverde) y más alto (Salamanca) en Madrid. Con esta selección de distritos se busca descubrir las características que poseen los pisos de cada distrito, y si existe alguna otra razón, además del distrito en que se encuentra cada vivienda, que justifique su precio.
 
 \vspace{-1.5em}\section{Representación gráfica}\vspace{-1.5em}
 
@@ -194,7 +195,36 @@ dataset visualmente y el proyecto elegido
 
 Explicar los campos que incluye el dataset, el periodo de tiempo de los datos y cómo se han recogido
 
-\vspace{-1.5em}\section{Agradecimientos }\vspace{-1.5em}
+Los datos han sido obtenidos durante la primera semana de abril de 2022 (del 4 al 10 de abril) de los portales inmobiliarios Idealista y Fotocasa. Los registros obtenidos representan la mayor parte de las viviendas en venta en los distritos Villaverde y Salamanca en la ciudad de Madrid.
+
+\begin{figure}[h]
+	\centering
+	\captionsetup{font={normalsize}}
+	\caption{Distritos de Villaverde y Salamanca \textit{scrapeados}}
+	\begin{subfigure}{0.5\textwidth}
+		\centering
+		\fbox{\includegraphics[width=\linewidth]{idealista-villaverde-salamanca}}
+		\caption{\vspace{1.5em}Idealista}
+	\end{subfigure}%
+	\begin{subfigure}{0.5\textwidth}
+		\centering
+		\fbox{\includegraphics[width=\linewidth]{fotocasa-villaverde-salamanca}}
+		\caption{\vspace{1.5em}Fotocasa}
+	\end{subfigure}
+	\vspace{-2.5em}
+\end{figure}
+
+Para obtener los datos se ha utilizado las siguientes tecnologías:
+
+\begin{multicols}{3}
+	\begin{itemize}[topsep=0cm,partopsep=0cm,wide]
+		\item Python 3.9.10
+		\item Selenium 4.1.3
+		\item BeautifulSoup 4.10.0
+	\end{itemize}
+\end{multicols}
+
+\vspace{-1.5em}\section{Agradecimientos}\vspace{-1.5em}
 
 A continuación se aborda el apartado de agradecimientos divido en tres bloques debido a la complejidad del proyecto planteado y la necesidad de diferenciar claramente entre ellos.
 
