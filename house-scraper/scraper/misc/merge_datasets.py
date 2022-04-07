@@ -39,7 +39,6 @@ def merge_fotocasa_idealista():
 
     # concat dataframes
     df_merged = pd.concat([df_f,df_i])
-
     df_merged.to_csv(config.MERGED_FILE)
 
 def zip_everything():
