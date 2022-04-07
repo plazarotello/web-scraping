@@ -69,7 +69,7 @@
 
 \pretitle{\vspace{-2cm}\begin{center}\LARGE \bfseries}
 	\posttitle{\end{center}}
-\preauthor{\vspace{-0.5cm}\begin{center}
+\preauthor{\vspace{-0.65cm}\begin{center}
 		\large \itshape
 		\begin{tabular}[t]{c}}
 		\postauthor{\end{tabular}\end{center}\vspace{-1.5cm}}
@@ -97,6 +97,7 @@
 \setlength{\marginparsep}{0pt}
 \setlength{\marginparpush}{0pt}
 \setlength{\voffset}{-10pt}
+\setlength{\fboxsep}{0pt}
 }
 
 \pagestyle{uoc}
@@ -108,19 +109,19 @@
 \newlength{\leftbarsep}
 \setlength{\leftbarsep}{0pt}
 \renewenvironment{leftbar}{%
-	\def\FrameCommand{{\vrule width \leftbarwidth\relax\hspace {\leftbarsep}}}%
-	\MakeFramed {\advance \hsize -\width \FrameRestore }%
+\def\FrameCommand{{\vrule width \leftbarwidth\relax\hspace {\leftbarsep}}}%
+\MakeFramed {\advance \hsize -\width \FrameRestore }%
 }{%
-	\endMakeFramed
+\endMakeFramed
 }
 
 \newenvironment{blockquote}{%
-	\par%
-	\leftskip=2em
+\par%
+\leftskip=2em
 %	\begin{leftbar}
 	\noindent\ignorespaces}{%
-%	\end{leftbar}
-	\par}
+	%	\end{leftbar}
+\par}
 
 \setlength{\parindent}{0em}
 
@@ -131,10 +132,10 @@
 \definecolor{backcolour}{rgb}{0.97,0.97,0.95}
 
 \lstdefinestyle{mystyle}{backgroundcolor=\color{backcolour}, commentstyle=\color{codegreen},
-	keywordstyle=\color{magenta}, numberstyle=\tiny\color{codegray}, stringstyle=\color{codepurple},
-	basicstyle=\ttfamily\footnotesize, breakatwhitespace=false, breaklines=true, captionpos=t,                    
-	keepspaces=true, numbers=left, numbersep=5pt, showspaces=false,	showstringspaces=false,
-	showtabs=false, tabsize=4}
+keywordstyle=\color{magenta}, numberstyle=\tiny\color{codegray}, stringstyle=\color{codepurple},
+basicstyle=\ttfamily\footnotesize, breakatwhitespace=false, breaklines=true, captionpos=t,                    
+keepspaces=true, numbers=left, numbersep=5pt, showspaces=false,	showstringspaces=false,
+showtabs=false, tabsize=4}
 
 \lstset{style=mystyle}
 
@@ -148,7 +149,7 @@
 \maketitle
 \thispagestyle{uoc}
 
-\vspace{-2em}
+%\vspace{-2em}
 \begin{framed}
 	\textbf{\underline{Houses for sale in the Salamanca and Villaverde district of Madrid in April 2022}}
 	\begin{multicols}{2}
@@ -181,9 +182,9 @@ Debido a la gran cantidad de conjuntos de datos existentes sobre la temática se
 
 \vspace{-1.5em}\section{Descripción del \textit{dataset}}\vspace{-1.5em}
 
-Desarrollar una descripción breve del conjunto de
-datos que se ha extraído. Es necesario que esta descripción tenga sentido con
-el título elegido.
+El conjunto de datos obtenido a partir de los \textit{scrapers} hace referencia a todos los pisos disponibles durante la primera semana de abril de 2022 para su compra en los distritos de Villaverde y Salamanca en la ciudad de Madrid en los sitios web de Idealista y Fotocasa.
+
+Se trata por tanto de una \textit{snapshot} del mercado inmobiliario en el distrito con el precio/m\textsuperscript{2} más bajo (Villaverde) y más alto (Salamanca) en Madrid. Con esta selección de distritos se busca descubrir las características que poseen los pisos de cada distrito, y si existe alguna otra razón, además del distrito en que se encuentra cada vivienda, que justifique su precio.
 
 \vspace{-1.5em}\section{Representación gráfica}\vspace{-1.5em}
 
@@ -194,7 +195,36 @@ dataset visualmente y el proyecto elegido
 
 Explicar los campos que incluye el dataset, el periodo de tiempo de los datos y cómo se han recogido
 
-\vspace{-1.5em}\section{Agradecimientos }\vspace{-1.5em}
+Los datos han sido obtenidos durante la primera semana de abril de 2022 (del 4 al 10 de abril) de los portales inmobiliarios Idealista y Fotocasa. Los registros obtenidos representan la mayor parte de las viviendas en venta en los distritos Villaverde y Salamanca en la ciudad de Madrid.
+
+\begin{figure}[h]
+	\centering
+	\captionsetup{font={normalsize}}
+	\caption{Distritos de Villaverde y Salamanca \textit{scrapeados}}
+	\begin{subfigure}{0.5\textwidth}
+		\centering
+		\fbox{\includegraphics[width=\linewidth]{idealista-villaverde-salamanca}}
+		\caption{\vspace{1.5em}Idealista}
+	\end{subfigure}%
+	\begin{subfigure}{0.5\textwidth}
+		\centering
+		\fbox{\includegraphics[width=\linewidth]{fotocasa-villaverde-salamanca}}
+		\caption{\vspace{1.5em}Fotocasa}
+	\end{subfigure}
+	\vspace{-2.5em}
+\end{figure}
+
+Para obtener los datos se ha utilizado las siguientes tecnologías:
+
+\begin{multicols}{3}
+	\begin{itemize}[topsep=0cm,partopsep=0cm,wide]
+		\item Python 3.9.10
+		\item Selenium 4.1.3
+		\item BeautifulSoup 4.10.0
+	\end{itemize}
+\end{multicols}
+
+\vspace{-1.5em}\section{Agradecimientos}\vspace{-1.5em}
 
 A continuación se aborda el apartado de agradecimientos divido en tres bloques debido a la complejidad del proyecto planteado y la necesidad de diferenciar claramente entre ellos.
 
@@ -243,39 +273,49 @@ Según se recoge en el fichero \href{https://www.fotocasa.es/robots.txt}{\textbf
 
 Así, y teniendo en cuenta que estas restricciones son "solo una sugerencia y \textbf{nunca una obligación}", tal y como se señala en el documento 'Web scraping', además de tenerlas en cuenta para reducir las posibilidades de ser bloqueados, se decide que este proyecto tenga una finalidad \textbf{exclusivamente educativa}. Es interesante que trabajando ambos portales, las posibilidades de aprendizaje se disparan exponencialmente pero, sin embargo, no debemos olvidar la voluntad de los propietarios de los mismos. Por ello, en todo momento se intenta mantener el equilibrio y, sobre todo, \textbf{respeto} hacia Idealista y Fotocasa. 
 
- \underline{Agradecimiento final}
- 
+\underline{Agradecimiento final}
+
 Debido a todo lo expuesto en este apartado, agradecemos tanto a \textbf{Idealista} como a \textbf{Fotocasa} el haber servido como soporte para el proceso de aprendizaje que hemos desarrollado durante este proyecto de captura de datos, los cuales serán empleados con un fin exclusivamente académico. Además, hacemos extensible este agradecimiento a las personas mencionadas en \textbf{trabajos anteriores} por haber hecho público el conocimiento que han adquirido y que ha servido de punto de partida para este proyecto o para solventar obstáculos que nos hemos encontrado. 
 
-\section*{7. Inspiración }\vspace{-1.5em}
+\vspace{-1.5em}\section{Inspiración }\vspace{-1.5em}
 
-Explicar por qué es interesante este conjunto de datos y qué
-preguntas se pretenden responder. Es necesario comparar con los análisis
-anteriores presentados en agradecimientos
+Conocer la \textbf{situación del mercado inmobiliario} es siempre interesante debido a que es un sector muy importante en España. Por ello, en muchos momentos ha servido de \textbf{termómetro} sobre la situación económica e incluso ha llegado a desencadenar la mayor crisis que se ha vivido en lo que llevamos de siglo, tanto en este país como en el mundo. En este sentido, no es necesario extenderse mucho más puesto que en la sección \textbf{'Contexto' }se puede encontrar información detallada sobre el momento en el que se desarrolla este proyecto, motivo por el que ahora resulta especialmente relevante.  
 
-Beautiful soup
+El conjunto de datos resultante de este proyecto da un paso en esta dirección porque la captura se ha realizado de los dos portales inmobiliarios más empleados en España, por lo que los datos se pueden considerar suficientemente \textbf{representativos} para los análisis posteriores. 
 
-\section*{8. Licencia }\vspace{-1.5em}
+Así, en ningún proyecto publicado hasta la fecha, o por lo menos al que haya llegado en la fase de investigación, se integra información de Idealista y de Fotocasa y tampoco existen informes que aborden las diferencias de las viviendas en venta en los \textbf{dos barrios o distritos} con los precios más extremos dentro de una localidad, lo cual es interesante justo en un momento en el que la crisis provocada por la pandemia de coronavirus ha potenciado la desigualdad, tal y como concluyen los informes de 2022 de \href{https://www.foessa.es/blog/foessa-presenta-la-primera-radiografia-social-completa-de-la-crisis-de-la-covid-19-en-toda-espana/}{FOESSA}, \href{https://oxfamilibrary.openrepository.com/bitstream/handle/10546/621341/bp-inequality-kills-170122-es.pdf}{Oxfam International} y \href{https://elobservatoriosocial.fundacionlacaixa.org/documents/22890/492074/T01_ID_ES_AyalaCant%C3%B3.pdf/a0746431-109f-e009-6c77-296c378f0438?t=1642072938395}{Observatorio Social de La Caixa}.
+
+La ciudad de \textbf{Madrid} ha sido la elegida para la captura de datos porque se trata de la más poblada de España, 3.305.408 personas a 1 de enero de 2022 según los datos del INE. Sin embargo, no existe consenso sobre si es la más cara en cuanto a la media de precio por metro cuadrado de vivienda en venta, situándose por detrás de San Sebastián y Barcelona dependiendo de la fuente consultada. 
+
+Por otro lado, a pesar de no haber fuentes oficiales actualizadas, \href{https://www.fotocasa.es/fotocasa-life/compraventa/conoce-el-precio-de-la-vivienda-en-venta-este-mes/}{Fotocasa} e \href{https://www.idealista.com/sala-de-prensa/informes-precio-vivienda/venta/madrid-comunidad/madrid-provincia/madrid/}{Idealista} coinciden en sus informes en que el distrito más caro de la capital es el de \textbf{Salamanca} y el más barato el de \textbf{Villaverde}, por lo que estos son los que serán objeto del análisis final tras la captura realizada en esta fase del proyecto. Una vez seleccionado los distritos se verifica que no es útil el Anuario Estadístico de la Comunidad de Madrid (1985-2022) ni otros estudios oficiales, desactualizados o que no abordan este tipo de estudios, por lo que permitirá aportar conocimiento sobre este campo de estudio. 
+
+Teniendo en cuenta esta información, las preguntas que se pretenden resolver en este proyecto van en dos direcciones:
+\begin{enumerate}
+	\item \textbf{Comparativa entre distritos}. Cuáles son las diferencias entre las viviendas de ambos distritos además de la ubicación como, por ejemplo, los metros cuadrados, el número de baños o de habitaciones, el tipo de vivienda, el año de construcción, los precios, si los anuncios son más completos en uno de los distritos, etc. También se puede hacer un análisis textual de las descripciones para comparar los anuncios de cada zona.
+	\item \textbf{Comparativa dentro de cada distrito}. La amplitud de precios y la heterogeneidad y homogeneidad en cuanto a características como, por ejemplo, los metros cuadrados, el número de baños o de habitaciones, el tipo de vivienda, el año de construcción, etc. Al igual que en el apartado anterior, un análisis textual permitiría completar este estudio. 
+\end{enumerate}
+
+Por último, cabe destacar que gracias al proyecto desarrollado, estas preguntas se pueden responder sobre \textbf{cualquier zona de España}, comparándolas tanto de la misma localidad como de dos diferentes simplemente cambiando las URL de inicio en el código. Por ejemplo, se podría haber hecho sobre el distrito más caro de Madrid y el de Barcelona, siempre con fines educativos.
+
+\vspace{-1.5em}\section{Licencia }\vspace{-1.5em}
 
 La licencia seleccionada es\textbf{ Atribución-NoComercial-CompartirIgual 4.0 Internacional (CC BY-NC-SA 4.0)}, debido a que es la que más se ajusta a las necesidades de este proyecto y las preferencias de las integrantes del equipo de trabajo por los siguientes motivos:
 
-● \textbf{Atribución}. Aunque el proyecto se puede compartir y adaptar, se debe atribuir a las creadoras del mismo, con un enlace a la licencia e indicando los cambios que se han realizado. El objetivo es que se reconozca el trabajo realizado en esta fase y las modificaciones respecto al original sin que, en ningún caso, se sugiera que este uso tenga el apoyo de las licenciantes.  
-
-● \textbf{NoComercial}. Este punto ha sido el más relevante a la hora de seleccionar la licencia porque no está autorizado el \textit{scrapeo} de los portales web de Idealista y Fotocasa. Por esta razón, este proyecto se ha desarrollado exclusivamente con fines académicos y, por tanto, queda terminantemente prohibido que se emplee el material con propósitos comerciales. 
-
-● \textbf{CompartirIgual}. Por el mismo motivo que no se permite una explotación comercial ni del proyecto ni de las modificaciones que se pudieran trabajar sobre él, cualquier contribución en el que esté involucrado debe tener la licencia CC BY-NC-SA 4.0. De esta manera, se evitará un uso no deseado de cualquier transformación.
+\begin{itemize}
+	\item \textbf{Atribución}. Aunque el proyecto se puede compartir y adaptar, se debe atribuir a las creadoras del mismo, con un enlace a la licencia e indicando los cambios que se han realizado. El objetivo es que se reconozca el trabajo realizado en esta fase y las modificaciones respecto al original sin que, en ningún caso, se sugiera que este uso tenga el apoyo de las licenciantes.  
+	
+	\item \textbf{NoComercial}. Este punto ha sido el más relevante a la hora de seleccionar la licencia porque no está autorizado el \textit{scrapeo} de los portales web de Idealista y Fotocasa. Por esta razón, este proyecto se ha desarrollado exclusivamente con fines académicos y, por tanto, queda terminantemente prohibido que se emplee el material con propósitos comerciales. 
+	
+	\item \textbf{CompartirIgual}. Por el mismo motivo que no se permite una explotación comercial ni del proyecto ni de las modificaciones que se pudieran trabajar sobre él, cualquier contribución en el que esté involucrado debe tener la licencia CC BY-NC-SA 4.0. De esta manera, se evitará un uso no deseado de cualquier transformación.
+\end{itemize}
 
 Como se puede observar, el mayor interés a la hora de seleccionar esta licencia, por tanto, es favorecer el \textbf{flujo de conocimiento} con fines exclusivamente académicos a la vez que preservar la\textbf{ voluntad de los propietarios} de los datos originales. 
 
-\section*{9. Código }\vspace{-1.5em}
+\vspace{-1.5em}\section{Código }\vspace{-1.5em}
 
 El \textbf{código} para el desarrollo de este proyecto se puede consultar al completo dentro de \textit{house-scraper} en: \url{https://github.com/plazarotello/web-scraping}
 
-\section*{10. Dataset }\vspace{-1.5em}
-
-Blablablá
-
-\section*{11. Vídeo }\vspace{-1.5em}
+\vspace{-1.5em}\section{Dataset }\vspace{-1.5em}
 
 Blablablá
 
