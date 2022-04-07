@@ -12,7 +12,7 @@ Este trabajo corresponde con la pr√°ctica 1 de la asignatura **M2.851** Tipolog√
 
 ## Acceso al dataset generado
 
-DOI de Zenodo del dataset generado: XXX.
+El enlace del DOI de Zenodo del dataset generado es el siguiente: https://doi.org/10.5281/zenodo.6423459.
 
 ## Estructura
 
