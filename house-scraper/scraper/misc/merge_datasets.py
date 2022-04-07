@@ -1,9 +1,9 @@
-import pandas as pd
 import re
-
-from . import config
-from . import utils
 from zipfile import ZipFile
+
+import pandas as pd
+
+from . import config, utils
 
 
 def merge_idealista_files():
@@ -15,17 +15,19 @@ def merge_idealista_files():
     dfs = [pd.read_csv(csv_file) for csv_file in csvs if regex.match(csv_file)]
     idealista_csv = pd.concat(dfs).drop_duplicates('id')
     idealista_csv.to_csv(config.IDEALISTA_FILE, encoding='utf-8',
-        index=False, header=True)
+                         index=False, header=True)
+
 
 def merge_idealista_folders():
     """
     Merges folders from idealista individual location scraping
     """
     regex = re.compile('^idealista-*$')
-    folders = [folder for folder in utils.get_directories(config.DATASET_DIR) if regex.match(folder)]
+    folders = [folder for folder in utils.get_directories(
+        config.DATASET_DIR) if regex.match(folder)]
     utils.create_directory(config.IDEALISTA_MAPS)
     map(utils.duplicate_folder(dest=config.IDEALISTA_MAPS), folders)
-    
+
 
 def merge_fotocasa_idealista():
     """
@@ -41,6 +43,7 @@ def merge_fotocasa_idealista():
     df_merged = pd.concat([df_f,df_i])
     df_merged.to_csv(config.MERGED_FILE)
 
+
 def zip_everything():
     """
     Compresses resulting files
@@ -51,9 +54,9 @@ def zip_everything():
     zip_file.write(config.FOTOCASA_IMG_DIR)
     zip_file.close()
 
+
 if __name__ == '__main__':
     merge_idealista_files()
     merge_idealista_folders()
     merge_fotocasa_idealista()
     zip_everything()
-

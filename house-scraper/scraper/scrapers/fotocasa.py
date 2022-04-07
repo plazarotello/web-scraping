@@ -1,9 +1,13 @@
+
 from .scraper_base import HouseScraper
 import re
+import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import pandas as pd
+from bs4 import BeautifulSoup
 from misc import config, utils
 from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
@@ -13,7 +17,7 @@ class FotocasaScraper(HouseScraper):
 
     __urls = dict()
 
-    def _scrape_house_page(self, location: str, url : str) -> dict: 
+    def _scrape_house_page(self, location: str, url: str) -> dict:
         """
         Scrapes a certain house detail page
 
@@ -24,6 +28,7 @@ class FotocasaScraper(HouseScraper):
         url : str
             URL to scrape
         
+
         Returns
         -------
         Dictionary with all the info from the house
@@ -53,10 +58,12 @@ class FotocasaScraper(HouseScraper):
                     # read photo data and download them 
                     photo_list = []
                     num_img = 1
-                    resultSet = driver.find_element(by=By.CSS_SELECTOR, value='#App > div.re-Page > main > section')
+                    resultSet = driver.find_element(
+                        by=By.CSS_SELECTOR, value='#App > div.re-Page > main > section')
                     image_list = resultSet.find_elements_by_tag_name("figure")
                     for image in image_list:
-                        img_src = image.find_element(by=By.CSS_SELECTOR, value='img').get_attribute('src')
+                        img_src = image.find_element(
+                            by=By.CSS_SELECTOR, value='img').get_attribute('src')
                         photo_list.append(img_src)
                         utils.download_image(img_src, f"{download_dir}/{num_img}.jpg")
                         num_img = num_img +1
@@ -65,7 +72,8 @@ class FotocasaScraper(HouseScraper):
                     main_content = self.try_page(driver, lambda: driver.find_element(by=By.CSS_SELECTOR, value='#App > div.re-Page > main > div.re-LayoutContainer.re-LayoutContainer--large > div.re-ContentDetail-topContainer'))
                     house['id'] = id
                     house['url'] = driver.current_url
-                    house['title'] = main_content.find_element(by=By.CSS_SELECTOR, value='div > section:nth-child(1) > div > div.re-DetailHeader-header > div.re-DetailHeader-propertyTitleContainer > h1').text
+                    house['title'] = main_content.find_element(
+                        by=By.CSS_SELECTOR, value='div > section:nth-child(1) > div > div.re-DetailHeader-header > div.re-DetailHeader-propertyTitleContainer > h1').text
                     house['location'] = location
                     house['price'] = main_content.find_element(by= By.CSS_SELECTOR, value='div > section:nth-child(1) > div > div.re-DetailHeader-header > div.re-DetailHeader-userActionContainer > div.re-DetailHeader-priceContainer > span').text.replace(' €', '')
                     house['description'] = main_content.find_element(by=By.CSS_SELECTOR, value='div > section:nth-child(1) > div > div.fc-DetailDescriptionContainer > div.sui-MoleculeCollapsible.sui-MoleculeCollapsible--withGradient.is-collapsed > div > div > p').text.strip()                                                                 
@@ -79,11 +87,12 @@ class FotocasaScraper(HouseScraper):
                     house['home-staging'] = 0
 
                     try:
-                        driver.find_element(by=By.CSS_SELECTOR, value='#App > div.re-Page > main > ul > li:nth-child(2) > button')
+                        driver.find_element(
+                            by=By.CSS_SELECTOR, value='#App > div.re-Page > main > ul > li:nth-child(2) > button')
                         house['view3d'] = 1
                     except NoSuchElementException:
                         house['view3d'] = 0
-                    
+
                     house['photo_urls'] = photo_list
 
                     # scrolls down action and waits
@@ -92,7 +101,7 @@ class FotocasaScraper(HouseScraper):
 
                 utils.mini_wait()
                 return house
-            
+
             except NoSuchElementException as e:
                 utils.error(f'[{self.id}] Something happened!')
                 utils.error(f'Exception: {e.msg}')
@@ -152,17 +161,17 @@ class FotocasaScraper(HouseScraper):
         The result of executing fn() and if the request was successful
         """
         madeit = False
-        while not madeit:   
+        while not madeit:
             try:
                 result = fn()
                 madeit = True
 
             except NoSuchElementException:
                 utils.error(NoSuchElementException)
-                madeit=False
+                madeit = False
         return result
 
-    def _scrape_navigation(self, url : str, location : str) -> list:
+    def _scrape_navigation(self, url: str, location: str) -> list:
         """
         Scrapes the navigation pages for a location (given in the starting url).
 
@@ -170,10 +179,10 @@ class FotocasaScraper(HouseScraper):
         ----------
         url : str
             URL to start the scraping
-        
+
         location : str
             literal name of the location to scrape
-        
+
         Returns
         -------
             List of the URL of the houses that are present in the navigation pages to scrape one by one
@@ -206,23 +215,28 @@ class FotocasaScraper(HouseScraper):
 
                 # scrolls down and reads each house
                 for scroll_i in range(config.FOTOCASA_SCROLL_LOCATION_PAGE):
-                    ActionChains(driver).key_down(Keys.PAGE_DOWN).key_up(Keys.PAGE_DOWN).perform()
+                    ActionChains(driver).key_down(
+                        Keys.PAGE_DOWN).key_up(Keys.PAGE_DOWN).perform()
                     utils.scroll_wait()
 
                     # evaluates the page number and reads the container to get house's urls
                     if num_page == 1:
                         main_content = driver.find_element(by=By.CSS_SELECTOR,value='#App > div.re-Page > div.re-SearchPage > main > div > div.re-SearchResult-wrapper > section')
                         try:
-                            articles = main_content.find_elements(by=By.CSS_SELECTOR, value='article.re-CardPackPremium')
+                            articles = main_content.find_elements(
+                                by=By.CSS_SELECTOR, value='article.re-CardPackPremium')
                         except Exception as e:
-                            articles = main_content.find_elements(by=By.CSS_SELECTOR, value='article.re-CardPackAdvance')
-                        
+                            articles = main_content.find_elements(
+                                by=By.CSS_SELECTOR, value='article.re-CardPackAdvance')
+
                         for article in articles:
                             # gets each article url
                             try:
-                                house_urls = article.find_element(by=By.CSS_SELECTOR, value='a.re-CardPackPremium-carousel').get_attribute('href')
+                                house_urls = article.find_element(
+                                    by=By.CSS_SELECTOR, value='a.re-CardPackPremium-carousel').get_attribute('href')
                                 houses_to_visit.append(house_urls)
-                                self.__urls.update(dict.fromkeys(house_urls, location))
+                                self.__urls.update(
+                                    dict.fromkeys(house_urls, location))
                             except Exception as e:
                                 utils.error(e)
 
@@ -232,9 +246,11 @@ class FotocasaScraper(HouseScraper):
                         
                         for article in articles:
                             try:
-                                house_urls = article.find_element(by=By.CSS_SELECTOR, value='a.re-CardPackAdvance-slider').get_attribute('href')
+                                house_urls = article.find_element(
+                                    by=By.CSS_SELECTOR, value='a.re-CardPackAdvance-slider').get_attribute('href')
                                 houses_to_visit.append(house_urls)
-                                self.__urls.update(dict.fromkeys(house_urls, location))
+                                self.__urls.update(
+                                    dict.fromkeys(house_urls, location))
                             except Exception as e:
                                 utils.error(e)
 
@@ -245,11 +261,13 @@ class FotocasaScraper(HouseScraper):
                             
                             for article in articles:
                                 try:
-                                    house_urls = article.find_element(by=By.CSS_SELECTOR, value='a.re-CardPackMinimal-slider').get_attribute('href')
+                                    house_urls = article.find_element(
+                                        by=By.CSS_SELECTOR, value='a.re-CardPackMinimal-slider').get_attribute('href')
                                     houses_to_visit.append(house_urls)
-                                    self.__urls.update(dict.fromkeys(house_urls, location))
+                                    self.__urls.update(
+                                        dict.fromkeys(house_urls, location))
                                 except Exception as e:
-                                    utils.error(e)  
+                                    utils.error(e)
                         except Exception as e:
                             utils.log(e)
             
@@ -257,23 +275,27 @@ class FotocasaScraper(HouseScraper):
             elif location == 'barrio-de-salamanca':
 
                 for scroll_i in range(config.FOTOCASA_SCROLL_LOCATION_PAGE):
-                    ActionChains(driver).key_down(Keys.PAGE_DOWN).key_up(Keys.PAGE_DOWN).perform()
+                    ActionChains(driver).key_down(
+                        Keys.PAGE_DOWN).key_up(Keys.PAGE_DOWN).perform()
                     utils.scroll_wait()
 
                     if num_page == 1 or num_page == 2 or num_page == 3:
                         main_content = driver.find_element(by=By.CSS_SELECTOR,value='#App > div.re-Page > div.re-SearchPage > main > div > div.re-SearchResult-wrapper > section')
                         
                         try:
-                            articles = main_content.find_elements(by=By.CSS_SELECTOR, value='article.re-CardPackPremium')
+                            articles = main_content.find_elements(
+                                by=By.CSS_SELECTOR, value='article.re-CardPackPremium')
                         except Exception as e:
                             utils.error(e)
-                        
+
                         for article in articles:
                             # get each article url
                             try:
-                                house_urls = article.find_element(by=By.CSS_SELECTOR, value='a.re-CardPackPremium-carousel').get_attribute('href')
+                                house_urls = article.find_element(
+                                    by=By.CSS_SELECTOR, value='a.re-CardPackPremium-carousel').get_attribute('href')
                                 houses_to_visit.append(house_urls)
-                                self.__urls.update(dict.fromkeys(house_urls, location))
+                                self.__urls.update(
+                                    dict.fromkeys(house_urls, location))
                             except Exception as e:
                                 utils.error(e)
 
@@ -284,13 +306,15 @@ class FotocasaScraper(HouseScraper):
                             articles = main_content.find_elements(by=By.CSS_SELECTOR, value='article.re-CardPackAdvance')
                         except Exception as e:
                             utils.error(e)
-                        
+
                         for article in articles:
                             # get each article url
                             try:
-                                house_urls = article.find_element(by=By.CSS_SELECTOR, value='a.re-CardPackAdvance-slider').get_attribute('href')
+                                house_urls = article.find_element(
+                                    by=By.CSS_SELECTOR, value='a.re-CardPackAdvance-slider').get_attribute('href')
                                 houses_to_visit.append(house_urls)
-                                self.__urls.update(dict.fromkeys(house_urls, location))
+                                self.__urls.update(
+                                    dict.fromkeys(house_urls, location))
                             except Exception as e:
                                 utils.error(e)
     
@@ -301,13 +325,15 @@ class FotocasaScraper(HouseScraper):
                             articles = main_content.find_elements(by=By.CSS_SELECTOR, value='article.re-CardPackMinimal')
                         except Exception as e:
                             utils.error(e)
-                        
+
                         for article in articles:
                             # get each article url
                             try:
-                                house_urls = article.find_element(by=By.CSS_SELECTOR, value='a.re-CardPackMinimal-slider').get_attribute('href')
+                                house_urls = article.find_element(
+                                    by=By.CSS_SELECTOR, value='a.re-CardPackMinimal-slider').get_attribute('href')
                                 houses_to_visit.append(house_urls)
-                                self.__urls.update(dict.fromkeys(house_urls, location))
+                                self.__urls.update(
+                                    dict.fromkeys(house_urls, location))
                             except Exception as e:
                                 utils.error(e)
 
@@ -318,7 +344,8 @@ class FotocasaScraper(HouseScraper):
             # when finishes, checks next page
             try:
                 utils.mini_wait()
-                items = driver.find_elements(by=By.CSS_SELECTOR, value='#App > div.re-Page > div.re-SearchPage.re-SearchPage--withMap > main > div > div.re-Pagination > ul > li.sui-MoleculePagination-item')
+                items = driver.find_elements(
+                    by=By.CSS_SELECTOR, value='#App > div.re-Page > div.re-SearchPage.re-SearchPage--withMap > main > div > div.re-Pagination > ul > li.sui-MoleculePagination-item')
                 for item in items:
                     url_next = item.find_element(by=By.CSS_SELECTOR, value='a')
                 driver.get(url_next.get_attribute('href'))
@@ -335,8 +362,7 @@ class FotocasaScraper(HouseScraper):
         utils.log(f"Num of houses_to_visit: {len(houses_to_visit)}")
         return houses_to_visit
 
-
-    def scrape(self, urls : list = None):
+    def scrape(self, urls: list = None):
         """
         Scrapes the entire Fotocasa website or just a subset of it
         Creates a thread for navigation scraping and a thread for 
@@ -369,9 +395,9 @@ class FotocasaScraper(HouseScraper):
 
         # creates dataframe and stores houses data
         utils.log('Merging the data')
-        house_fields = ['id', 'url', 'title', 'location', 'price', 
-        'm2', 'rooms', 'floor', 'num-photos', 'floor-plan', 'view3d', 'video', 
-        'home-staging', 'description','photo_urls']
+        house_fields = ['id', 'url', 'title', 'location', 'price',
+                        'm2', 'rooms', 'floor', 'num-photos', 'floor-plan', 'view3d', 'video',
+                        'home-staging', 'description', 'photo_urls']
         utils.debug(f"Writing dataframe")
         df = pd.DataFrame(houses, columns=house_fields).drop_duplicates('id')
 
