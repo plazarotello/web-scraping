@@ -45,7 +45,7 @@ class FotocasaScraper(HouseScraper):
                 id = re.findall('\d+', url)[0]
                 
                 # checking if download directory exists
-                download_dir = f"{config.FOTOCASA_IMG_DIR}-imgs/{id}"
+                download_dir = f"{config.FOTOCASA_IMG_DIR}-{location}-imgs/{id}"
                 if utils.directory_exists(download_dir) == False:
                     utils.create_directory(download_dir)
 
@@ -152,7 +152,7 @@ class FotocasaScraper(HouseScraper):
         """
 
         # checking if download directory exists
-        download_dir = f"{config.FOTOCASA_IMG_DIR}-imgs"
+        download_dir = f"{config.FOTOCASA_IMG_DIR}-{location}-imgs"
         if utils.directory_exists(download_dir) == False:
             utils.create_directory(download_dir)
 
