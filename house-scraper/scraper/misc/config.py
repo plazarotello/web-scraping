@@ -29,7 +29,7 @@ FOTOCASA_URL = 'https://www.fotocasa.es/es/'
 # Directory to save downloaded images
 FOTOCASA_IMG_DIR = os.path.join(DATASET_DIR, FOTOCASA_ID+'-imgs')
 # Directory to save data
-FOTOCASA_FILE = os.path.join(DATASET_DIR, FOTOCASA_ID)
+FOTOCASA_FILE = os.path.join(DATASET_DIR, FOTOCASA_ID + '.csv')
 # number of iteractions for scrolling in location pages
 FOTOCASA_SCROLL_LOCATION_PAGE = 20
 # number of iteractions for scrolling in house pages
@@ -38,9 +38,10 @@ FOTOCASA_SCROLL_HOUSE_PAGE = 3
 FOTOCASA_NUM_PAGES_TO_READ = 100
 
 # name of merged dataframe
-MERGED_FILE = os.path.join(DATASET_DIR, 'merged.csv')
+MERGED_FILE = os.path.join(DATASET_DIR, 'fotocasa_idealista_merged.csv')
 # name of zip merged dataframe
-MERGED_ZIP_FILE = os.path.join(DATASET_DIR, 'merged.zip')
+MERGED_ZIP_FILE = os.path.join(
+    DATASET_DIR, 'fotocasa_idealista-villaverde_salamanca-2022_04.zip')
 
 # ---------------------------------------------------------
 

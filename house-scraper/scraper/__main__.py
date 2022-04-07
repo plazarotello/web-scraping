@@ -62,6 +62,10 @@ def join_results():
     """
     merge_datasets.merge_idealista_files()
     merge_datasets.merge_idealista_folders()
+
+    merge_datasets.merge_fotocasa_files()
+    merge_datasets.merge_fotocasa_folders()
+
     merge_datasets.merge_fotocasa_idealista()
     merge_datasets.zip_everything()
 
