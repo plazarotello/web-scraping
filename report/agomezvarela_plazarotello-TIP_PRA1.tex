@@ -257,16 +257,38 @@ Los datos se han obtenido mediante \textit{web scraping}; se ha utilizado princi
 
 Para optimizar los tiempos de ejecución se han utilizado las \textbf{características multihilo} que ofrece Python: por un lado, cada \textit{scraper} se lanza en su propio hilo \textemdash es decir, el \textit{scraper} de Fotocasa y el de Idealista se ejecutarán en paralelo \textemdash y a su vez, cada \textit{scraper} utiliza varios hilos para paralelizar el trabajo.
 
+\begin{figure}[h]
+	\centering
+	\captionsetup{font={normalsize}}
+	\fbox{\includegraphics[width=\linewidth]{multithread}}
+	\caption{\vspace{1.5em}Hilos de ejecución del programa y \textit{scrapers}}
+	\vspace{-2em}
+\end{figure}
+
 Por otro lado, se han utilizado esperas activas, resolución automática de \textit{captchas} y técnicas de camuflaje mediante \textit{proxies} y cambios de \textit{user agent} del navegador de Selenium.
 
+\newpage
 Respecto a las \textbf{esperas activas}, esta ha sido la técnica que mejor ha funcionado para evitar ser bloqueados por Fotocasa e Idealista, pero como punto negativo añade retardos considerables al tiempo de ejecución de los \textit{scrapers} y no es efectiva al 100\% en Idealista.
 
 Dada la limitada efectividad de las esperas activas en Idealista, se ha utilizado una \textbf{extensión gratuita para Google Chrome de resolución automática de \textit{captchas}} (\textit{Buster: Captcha Solver for Humans}), tampoco 100\% efectiva. Una alternativa consistente sería utilizar una extensión de pago de resolución de \textit{captchas}, pero no se ha considerado por estar fuera del presupuesto del proyecto.
 
-También se han llevado a cabo acciones para camuflar las peticiones tan repetitivas del \textit{scraper}, con efectividad muy limitada. Por un lado, los \textbf{cambios de \textit{user agent}} no produjeron ningún efecto en Idealista para evitar la aparición de \textit{captchas} dado que este portal utiliza la IP del navegador para el conteo de peticiones. Sin embargo, la definición de un \textit{user agent} válido evitó ser bloqueados en la primera petición a los protales.
+También se han llevado a cabo acciones para camuflar las peticiones tan repetitivas del \textit{scraper}, con efectividad muy limitada. Por un lado, los \textbf{cambios de \textit{user agent}} no produjeron ningún efecto en Idealista para evitar la aparición de \textit{captchas} dado que este portal utiliza la IP del navegador para el conteo de peticiones. Sin embargo, la definición de un \textit{user agent} válido y la \textbf{desactivación de la opción \textit{headless}} en el navegador de Selenium evitó ser bloqueados en la primera petición a los protales.
 
 Por otro lado, se probó la \textbf{utilización de \textit{proxies}} para evitar los bloqueos en Idealista, utilizando \textit{proxies} gratuitos disponibles en internet. Esta técnica, sin embargo, no terminó de ocultar la IP de la petición, por lo que no surtió ningún efecto en Idealista. Sin embargo, es posible que con \textit{proxies} de mayor calidad y por tanto, de pago, se hubiera conseguido un resultado mucho más favorable. Finalmente se optó por no utilizar \textit{proxies} debido al retardo añadido a las peticiones del servidor.
 
+\vspace{-1.5em}\subsection*{Detalles del \textit{scraper} de Fotocasa}\vspace{-1em}
+
+explicar el lazy load
+
+\vspace{-1.5em}\subsection*{Detalles del \textit{scraper} de Idealista}\vspace{-1em}
+
+explicar el sistema de backups
+
+\vspace{-1.5em}\subsection*{Descripción de los campos del \textit{dataset}}\vspace{-1em}
+
+descripción de los campos del dataset
+
+\newpage
 \vspace{-1.5em}\section{Agradecimientos}\vspace{-1.0em}
 
 A continuación se aborda el apartado de agradecimientos divido en tres bloques debido a la complejidad del proyecto planteado y la necesidad de diferenciar claramente entre ellos. 
@@ -331,7 +353,8 @@ Además, se hace extensible este agradecimiento a las personas mencionadas en \t
 
 Por último, se agradece también a Armin Sebastian, creador de la extensión \href{https://chrome.google.com/webstore/detail/buster-captcha-solver-for/mpbjkejclgfgadiemmefgebjfooflfhl}{Buster: Captcha Solver for Humans}, que ha hecho factible realizar \textit{web scrapping} sobre Idealista; y al sitio web \href{https://hidemy.name/proxy-list/}{hidemy.name} por su base de datos de \textit{proxies}.
 
-\vspace{-1.5em}\section{Inspiración}\vspace{-1.5em}
+\newpage
+\vspace{-1.5em}\section{Inspiración}\vspace{-1em}
 
 Conocer la \textbf{situación del mercado inmobiliario} es siempre interesante debido a que es un sector muy importante en España. Por ello, en muchos momentos ha servido de \textbf{termómetro} sobre la situación económica e incluso ha llegado a desencadenar la mayor crisis que se ha vivido en lo que llevamos de siglo, tanto en este país como en el mundo. 
 
@@ -371,7 +394,8 @@ Teniendo en cuenta esta información, las preguntas que se pretenden resolver en
 
 Por último, cabe destacar que gracias a la capacidad de generalización del proyecto desarrollado, estas preguntas se pueden responder sobre \textbf{cualquier zona de España}, comparándolas tanto de la misma localidad como de dos diferentes simplemente cambiando las URL de inicio en las llamadas al programa. Por ejemplo, se podría haber hecho sobre el distrito más caro de Madrid y el de Barcelona, o incluso sobre todos los distritos de todas las ciudades de España.
 
-\vspace{-1.5em}\section{Licencia }\vspace{-1.5em}
+\newpage
+\vspace{-1.5em}\section{Licencia }\vspace{-1em}
 
 La licencia seleccionada es\textbf{ Atribución-NoComercial-CompartirIgual 4.0 Internacional (CC BY-NC-SA 4.0)} debido a que es la que más se ajusta a las necesidades de este proyecto y las preferencias de las integrantes del equipo de trabajo por los siguientes motivos:
 
@@ -385,13 +409,20 @@ La licencia seleccionada es\textbf{ Atribución-NoComercial-CompartirIgual 4.0 I
 
 Como se puede observar, el mayor interés a la hora de seleccionar esta licencia, por tanto, es favorecer el \textbf{flujo de conocimiento} con fines exclusivamente académicos a la vez que preservar la \textbf{voluntad de los propietarios} de los datos originales. 
 
-\vspace{-1.5em}\section{Código}\vspace{-1.5em}
+\newpage
+\vspace{-1.5em}\section{Código}\vspace{-1em}
 
 El \textbf{código} para el desarrollo de este proyecto se puede consultar al completo dentro de la carpeta \textit{house-scraper} en el siguiente repositorio de Github: 
 
 \vspace{-1em}\begin{center}\url{https://github.com/plazarotello/web-scraping}\end{center}\vspace{-1em}
 
-\vspace{-1.5em}\section{Dataset}\vspace{-1.5em}
+\begin{center}
+	\vspace{-0.5cm}
+	{\color{uocblue}\rule{0.75\linewidth}{1pt}}
+	\vspace{-0.5cm}
+\end{center}
+
+\vspace{-1.5em}\section{Dataset}\vspace{-1em}
 
 El \textit{dataset} con los datos de las 3.545 viviendas descritas por 16 campos en formato CSV se ha publicado en Zenodo y se puede acceder a él a partir del siguiente enlace del DOI: 
 
@@ -401,7 +432,13 @@ Además, como se ha especificado a lo largo del proyecto, se han descargado las 
 
 Para facilitar que se valore la gestión de este \textbf{contenido audiovisual} en el proyecto, se ha compartido el enlace privado de Google Drive con Mireia Calvo González, profesora colaboradora a cargo del aula 2 de la asignatura Tipología y ciclo de vida de los datos de la Universitat Oberta de Catalunya (UOC). 
 
-\vspace{-1.5em}\section*{Tabla de contribuciones}\vspace{-1.5em}
+\begin{center}
+	\vspace{-0.5cm}
+	{\color{uocblue}\rule{0.75\linewidth}{1pt}}
+	\vspace{-0.5cm}
+\end{center}
+
+\vspace{-1.5em}\section*{Tabla de contribuciones}\vspace{-1em}
 
 \begin{table}[h]
 	\centering
