@@ -154,12 +154,13 @@ showtabs=false, tabsize=4}
 	\textbf{\underline{Houses for sale in the Salamanca and Villaverde district of Madrid in April 2022}}
 	\begin{multicols}{2}
 		\begin{itemize}[topsep=0cm,partopsep=0cm,label={},wide]
+			\item \textbf{DOI}: \href{https://doi.org/10.5281/zenodo.6423459}{10.5281/zenodo.6418974}
 			\item \textbf{Licencia}: CC BY-NC-SA 4.0
-			\item \textbf{Número de campos}: 16
 			\item \textbf{Número de registros}: 3.545
 			\columnbreak
-			\item \textbf{DOI}: \href{https://doi.org/10.5281/zenodo.6423459}{10.5281/zenodo.6418974}
-			\item \textbf{Fecha de extracción}: primera semana de abril de 2022
+			\item \includegraphics[height=0.6cm]{zenodo.6423459}
+			\item \textbf{Extracción}: 4-7 de abril de 2022
+			\item \textbf{Número de campos}: 16
 		\end{itemize}
 	\end{multicols}
 \end{framed}
@@ -176,9 +177,21 @@ Asimismo, cabe destacar que el mercado inmobiliario en España se ha caracteriza
 
 Teniendo presente esta situación de cambios económicos y normativos, y no existiendo un registro público de viviendas en venta actualizado, se ha decidido obtener la información de las viviendas en venta de los portales inmobiliarios de \textbf{Idealista} y \textbf{Fotocasa}. Esta decisión se fundamenta en que son los portales \textbf{más visitados} en España, según los datos de febrero de \href{https://www.similarweb.com/top-websites/spain/category/business-and-consumer-services/real-estate/}{\textit{similarweb}}, que publica las métricas oficiales de los sitios web de todo el mundo. Además, esta clasificación de visitas se mantiene en los últimos años, por lo que no se prevé que varíe en un corto periodo de tiempo. Asimismo, es interesante que estos portales trabajan tanto con \textbf{inmobiliarias} como con \textbf{particulares} que desean vender inmuebles, por lo que proporcionan una información amplia sobre el tema de interés del proyecto.
 
+\begin{center}
+	\vspace{-0.5cm}
+	{\color{uocblue}\rule{0.75\linewidth}{1pt}}
+	\vspace{-0.5cm}
+\end{center}
+
 \vspace{-1.5em}\section{Houses for sale in the Salamanca and Villaverde district of Madrid in April 2022}\vspace{-1.0em}
 
 Debido a la gran cantidad de conjuntos de datos existentes sobre la temática seleccionada, para el \textit{dataset} resultante se ha optado por un título \textbf{muy descriptivo} a la par que \textbf{concreto}, de modo que solo con él se pueda saber el contenido del mismo. Además, debido a la volatilidad del mercado inmobiliario, se ha decidido incluir el mes de extracción de los datos.
+
+\begin{center}
+	\vspace{-0.5cm}
+	{\color{uocblue}\rule{0.75\linewidth}{1pt}}
+	\vspace{-0.5cm}
+\end{center}
 
 \vspace{-1.5em}\section{Descripción del \textit{dataset}}\vspace{-1.0em}
 
@@ -186,16 +199,32 @@ El conjunto de datos obtenido a partir de los \textit{scrapers} hace referencia 
 
 Se trata por tanto de una \textit{snapshot} del mercado inmobiliario en el distrito con el precio/m\textsuperscript{2} más bajo (Villaverde) y más alto (Salamanca) en Madrid. Con esta selección de distritos se busca descubrir las características que poseen los pisos de cada distrito, y si existe alguna otra razón, además del distrito en que se encuentra cada vivienda, que justifique su precio.
 
+Cabe destacar que el conjunto de datos resultante no ha pasado por un proceso de limpieza, por lo que pueden existir inconsistencias en algunos campos; por ejemplo, los registros correspondientes a Fotocasa presentan el piso con un único número, mientras que en Idealista se muestran siguiendo el formato \verb|Planta {X}| (por ejemplo, ``Planta 1ª interior sin ascensor''). Otro ejemplo es el precio de los inmuebles, que en algunos casos se encuentra como \textit{string} con signos de puntuación.
+
+El \textit{dataset} está guardado con codificación \textbf{UTF-8}, y cada registro se puede identificar inequívocamente mediante el par \verb|{id, source}|.
+
 \vspace{-1.5em}\section{Representación gráfica}\vspace{-1.0em}
 
-Dibujar un esquema o diagrama que identifique el
-dataset visualmente y el proyecto elegido
+A continuación se muestra el flujo económico analizado en este proyecto; el objetivo del \textit{dataset} es reunir la información pertinente a los anuncios de Fotocasa e Idealista.
+
+\begin{figure}[h]
+	\centering
+	\captionsetup{font={normalsize}}
+	\fbox{\includegraphics[width=\linewidth]{graphical-representation}}
+	\caption{Representación gráfica del \textit{dataset} y proyecto}
+\end{figure}
+
+Los anunciantes, que pueden ser tanto propietarios particulares como inmobiliarias, utilizan los portales de compraventa en el mercado inmobiliario para difundir sus anuncios de inmuebles en venta. Por la creación de un anuncio, los portales cobran una tasa; también obtienen dinero por ocultar la dirección concreta en el caso de Fotocasa, y por último, cobran una cantidad para promocionar o destacar el anuncio.
+
+Los portales inmobiliarios ponen a disposición de los compradores dichos anuncios y ayudan a ponerles en contacto con los anunciantes, con los que cerrarán el trato fuera del portal.
+
+\newpage
 
 \vspace{-1.5em}\section{Contenido}\vspace{-1.0em}
 
-Explicar los campos que incluye el dataset, el periodo de tiempo de los datos y cómo se han recogido
+%Explicar los campos que incluye el dataset, el periodo de tiempo de los datos y cómo se han recogido
 
-Los datos han sido obtenidos durante la primera semana de abril de 2022 (del 4 al 10 de abril) de los portales inmobiliarios Idealista y Fotocasa. Los registros obtenidos representan la mayor parte de las viviendas en venta en los distritos Villaverde y Salamanca en la ciudad de Madrid.
+Los datos han sido obtenidos durante la primera semana de abril de 2022 (del 4 al 7 de abril) de los portales inmobiliarios Idealista y Fotocasa. Los registros obtenidos representan la mayor parte de las viviendas en venta en los distritos Villaverde y Salamanca en la ciudad de Madrid.
 
 \begin{figure}[h]
 	\centering
@@ -222,7 +251,21 @@ Para obtener los datos se ha utilizado las siguientes tecnologías:
 		\item Selenium 4.1.3
 		\item BeautifulSoup 4.10.0
 	\end{itemize}
-\end{multicols}
+\end{multicols}\vspace{-10pt}
+
+Los datos se han obtenido mediante \textit{web scraping}; se ha utilizado principalmente \textbf{Selenium} por ser la tecnología que mejor imita el comportamiento humano al navegar por la web, aunque también se ha utilizado \textbf{BeautifulSoup} para comprobar los códigos de error cuando la página no cargaba según lo previsto.
+
+Para optimizar los tiempos de ejecución se han utilizado las \textbf{características multihilo} que ofrece Python: por un lado, cada \textit{scraper} se lanza en su propio hilo \textemdash es decir, el \textit{scraper} de Fotocasa y el de Idealista se ejecutarán en paralelo \textemdash y a su vez, cada \textit{scraper} utiliza varios hilos para paralelizar el trabajo.
+
+Por otro lado, se han utilizado esperas activas, resolución automática de \textit{captchas} y técnicas de camuflaje mediante \textit{proxies} y cambios de \textit{user agent} del navegador de Selenium.
+
+Respecto a las \textbf{esperas activas}, esta ha sido la técnica que mejor ha funcionado para evitar ser bloqueados por Fotocasa e Idealista, pero como punto negativo añade retardos considerables al tiempo de ejecución de los \textit{scrapers} y no es efectiva al 100\% en Idealista.
+
+Dada la limitada efectividad de las esperas activas en Idealista, se ha utilizado una \textbf{extensión gratuita para Google Chrome de resolución automática de \textit{captchas}} (\textit{Buster: Captcha Solver for Humans}), tampoco 100\% efectiva. Una alternativa consistente sería utilizar una extensión de pago de resolución de \textit{captchas}, pero no se ha considerado por estar fuera del presupuesto del proyecto.
+
+También se han llevado a cabo acciones para camuflar las peticiones tan repetitivas del \textit{scraper}, con efectividad muy limitada. Por un lado, los \textbf{cambios de \textit{user agent}} no produjeron ningún efecto en Idealista para evitar la aparición de \textit{captchas} dado que este portal utiliza la IP del navegador para el conteo de peticiones. Sin embargo, la definición de un \textit{user agent} válido evitó ser bloqueados en la primera petición a los protales.
+
+Por otro lado, se probó la \textbf{utilización de \textit{proxies}} para evitar los bloqueos en Idealista, utilizando \textit{proxies} gratuitos disponibles en internet. Esta técnica, sin embargo, no terminó de ocultar la IP de la petición, por lo que no surtió ningún efecto en Idealista. Sin embargo, es posible que con \textit{proxies} de mayor calidad y por tanto, de pago, se hubiera conseguido un resultado mucho más favorable. Finalmente se optó por no utilizar \textit{proxies} debido al retardo añadido a las peticiones del servidor.
 
 \vspace{-1.5em}\section{Agradecimientos}\vspace{-1.0em}
 
@@ -286,6 +329,8 @@ Debido a todo lo expuesto en apartados anteriores, se agradece tanto a \textbf{I
 
 Además, se hace extensible este agradecimiento a las personas mencionadas en \textbf{trabajos anteriores} por haber hecho público el conocimiento que han adquirido y que ha servido de punto de partida para este proyecto o para solventar obstáculos que nos hemos encontrado. 
 
+Por último, se agradece también a Armin Sebastian, creador de la extensión \href{https://chrome.google.com/webstore/detail/buster-captcha-solver-for/mpbjkejclgfgadiemmefgebjfooflfhl}{Buster: Captcha Solver for Humans}, que ha hecho factible realizar \textit{web scrapping} sobre Idealista; y al sitio web \href{https://hidemy.name/proxy-list/}{hidemy.name} por su base de datos de \textit{proxies}.
+
 \vspace{-1.5em}\section{Inspiración}\vspace{-1.5em}
 
 Conocer la \textbf{situación del mercado inmobiliario} es siempre interesante debido a que es un sector muy importante en España. Por ello, en muchos momentos ha servido de \textbf{termómetro} sobre la situación económica e incluso ha llegado a desencadenar la mayor crisis que se ha vivido en lo que llevamos de siglo, tanto en este país como en el mundo. 
@@ -303,38 +348,60 @@ Por otro lado, a pesar de no haber fuentes oficiales actualizadas, \href{https:/
 Una vez seleccionados los distritos, se verifica que no es útil el Anuario Estadístico de la Comunidad de Madrid (1985-2022) ni otros estudios oficiales, desactualizados o que no abordan este tipo de estudios, por lo que permitirá aportar conocimiento sobre este campo de estudio. 
 
 Teniendo en cuenta esta información, las preguntas que se pretenden resolver en este proyecto van en dos direcciones:
-\begin{enumerate}
-	\item \textbf{Comparativa entre distritos}. Cuáles son las diferencias entre las viviendas de ambos distritos además de la ubicación como, por ejemplo, los metros cuadrados, el número de baños o de habitaciones, el tipo de vivienda, el año de construcción, los precios, si los anuncios son más completos en uno de los distritos, etc. También se puede hacer un análisis textual de las descripciones para comparar los anuncios de cada zona.
-	\item \textbf{Comparativa dentro de cada distrito}. La amplitud de precios y la heterogeneidad y homogeneidad en cuanto a características como, por ejemplo, los metros cuadrados, el número de baños o de habitaciones, el tipo de vivienda, el año de construcción, etc. Al igual que en el apartado anterior, un análisis textual permitiría completar este estudio. 
+\begin{enumerate}[topsep=0cm,partopsep=0cm,wide]
+	\item \textbf{Comparativa entre distritos}: 
+		\begin{itemize}[topsep=0cm,partopsep=0cm]
+			\item Obviando su geolocalización, ¿Cuáles son las diferencias entre las viviendas de ambos distritos? Entre las características a estudiar se encontrarían los m\textsuperscript{2}, el número de baños, el número de habitaciones, el tipo de vivienda, el año de construcción o los precios.
+			
+			\item ¿Son los anuncios en un distrito por norma general más completos que en el otro? La respuesta a esta pregunta puede arrojar luz sobre si en un distrito es más sencillo vender un inmueble y, por tanto, no es necesario crear anuncios con todo tipo de detalle.
+			
+			\item ¿Qué diferencias hay entre las características de cada distrito? Un análisis textual de las descripciones de los anuncios de los inmuebles de cada distrito puede ofrecer una fotografía del distrito y mostrar las características más notables del mismo.
+		\end{itemize}
+	
+	\item \textbf{Comparativa dentro de cada distrito}:
+		\begin{itemize}[topsep=0cm,partopsep=0cm]
+			\item ¿Qué características comparten los inmuebles de cada distrito? Entre las propiedades a analizar se hallarían los m\textsuperscript{2}, el número de baños, el número de habitaciones, el tipo de vivienda o el año de construcción.
+			
+			\item ¿Qué características son más heterogéneas entre los inmuebles de cada distrito? Las propiedades a analizar serían las mismas que en la pregunta anterior, ya que se tratan de cuestiones complementarias.
+			
+			\item ¿Qué características hacen resaltar un anuncio entre los anuncios del distrito? Es decir, qué propiedad del inmueble es más cotizada o preciada en el distrito. Un análisis textual permitiría obtener más información sobre características ocultas.
+		\end{itemize}
+
 \end{enumerate}
 
-Por último, cabe destacar que gracias al proyecto desarrollado, estas preguntas se pueden responder sobre \textbf{cualquier zona de España}, comparándolas tanto de la misma localidad como de dos diferentes simplemente cambiando las URL de inicio en el código. Por ejemplo, se podría haber hecho sobre el distrito más caro de Madrid y el de Barcelona, siempre con fines educativos.
+Por último, cabe destacar que gracias a la capacidad de generalización del proyecto desarrollado, estas preguntas se pueden responder sobre \textbf{cualquier zona de España}, comparándolas tanto de la misma localidad como de dos diferentes simplemente cambiando las URL de inicio en las llamadas al programa. Por ejemplo, se podría haber hecho sobre el distrito más caro de Madrid y el de Barcelona, o incluso sobre todos los distritos de todas las ciudades de España.
 
 \vspace{-1.5em}\section{Licencia }\vspace{-1.5em}
 
-La licencia seleccionada es\textbf{ Atribución-NoComercial-CompartirIgual 4.0 Internacional (CC BY-NC-SA 4.0)}, debido a que es la que más se ajusta a las necesidades de este proyecto y las preferencias de las integrantes del equipo de trabajo por los siguientes motivos:
+La licencia seleccionada es\textbf{ Atribución-NoComercial-CompartirIgual 4.0 Internacional (CC BY-NC-SA 4.0)} debido a que es la que más se ajusta a las necesidades de este proyecto y las preferencias de las integrantes del equipo de trabajo por los siguientes motivos:
 
-\begin{itemize}
-	\item \textbf{Atribución}. Aunque el proyecto se puede compartir y adaptar, se debe atribuir a las creadoras del mismo, con un enlace a la licencia e indicando los cambios que se han realizado. El objetivo es que se reconozca el trabajo realizado en esta fase y las modificaciones respecto al original sin que, en ningún caso, se sugiera que este uso tenga el apoyo de las licenciantes.  
+\begin{itemize}[topsep=0cm,partopsep=0cm]
+	\item \textbf{Atribución}: Aunque el proyecto se puede compartir y adaptar, se debe atribuir a las creadoras del mismo, con un enlace a la licencia e indicando los cambios que se han realizado. El objetivo es que se reconozca el trabajo realizado en esta fase y las modificaciones respecto al original sin que, en ningún caso, se sugiera que este uso tenga el apoyo de las licenciantes.  
 	
-	\item \textbf{NoComercial}. Este punto ha sido el más relevante a la hora de seleccionar la licencia porque no está autorizado el \textit{scrapeo} de los portales web de Idealista y Fotocasa. Por esta razón, este proyecto se ha desarrollado exclusivamente con fines académicos y, por tanto, queda terminantemente prohibido que se emplee el material con propósitos comerciales. 
+	\item \textbf{NoComercial}: Este punto ha sido el más relevante a la hora de seleccionar la licencia porque no está autorizado el \textit{scrapeo} de los portales web de Idealista y Fotocasa. Por esta razón, este proyecto se ha desarrollado exclusivamente con fines académicos y, por tanto, queda terminantemente prohibido que se emplee el material con propósitos comerciales. 
 	
-	\item \textbf{CompartirIgual}. Por el mismo motivo que no se permite una explotación comercial ni del proyecto ni de las modificaciones que se pudieran trabajar sobre él, cualquier contribución en el que esté involucrado debe tener la licencia CC BY-NC-SA 4.0. De esta manera, se evitará un uso no deseado de cualquier transformación.
+	\item \textbf{CompartirIgual}: Por el mismo motivo que no se permite una explotación comercial del proyecto ni de las modificaciones que se pudieran trabajar sobre él, cualquier contribución en el que esté involucrado debe tener la licencia CC BY-NC-SA 4.0. De esta manera, se evitará un uso no deseado de cualquier transformación.
 \end{itemize}
 
-Como se puede observar, el mayor interés a la hora de seleccionar esta licencia, por tanto, es favorecer el \textbf{flujo de conocimiento} con fines exclusivamente académicos a la vez que preservar la\textbf{ voluntad de los propietarios} de los datos originales. 
+Como se puede observar, el mayor interés a la hora de seleccionar esta licencia, por tanto, es favorecer el \textbf{flujo de conocimiento} con fines exclusivamente académicos a la vez que preservar la \textbf{voluntad de los propietarios} de los datos originales. 
 
-\vspace{-1.5em}\section{Código }\vspace{-1.5em}
+\vspace{-1.5em}\section{Código}\vspace{-1.5em}
 
-El \textbf{código} para el desarrollo de este proyecto se puede consultar al completo dentro de \textit{house-scraper} en: \url{https://github.com/plazarotello/web-scraping}
+El \textbf{código} para el desarrollo de este proyecto se puede consultar al completo dentro de la carpeta \textit{house-scraper} en el siguiente repositorio de Github: 
 
-\vspace{-1.5em}\section{Dataset }\vspace{-1.5em}
+\vspace{-1em}\begin{center}\url{https://github.com/plazarotello/web-scraping}\end{center}\vspace{-1em}
 
-El dataset con los datos de las 3.545 viviendas descritas por 16 campos en formato CSV se ha publicado en Zenodo y se puede acceder a él a partir del siguiente enlace del DOI: \url{https://doi.org/10.5281/zenodo.6423459} 
+\vspace{-1.5em}\section{Dataset}\vspace{-1.5em}
 
-Además, como se ha especificado a lo largo del proyecto, se han descargado las fotografías de los anuncios de Fotocasa y los planos de las casas de Idealista, contenido que no ha podido compartirse en público por motivos de \textit{copyright}. Para facilitar que se valore la gestión de este \textbf{contenido audiovisual }en el proyecto, se ha compartido el enlace privado de Google Drive con Mireia Calvo González, profesora colaboradora a cargo del aula 2 de la asignatura Tipología y ciclo de vida de los datos de la Universitat Oberta de Catalunya (UOC). 
+El \textit{dataset} con los datos de las 3.545 viviendas descritas por 16 campos en formato CSV se ha publicado en Zenodo y se puede acceder a él a partir del siguiente enlace del DOI: 
 
-\section*{ Tabla de contribuciones }\vspace{-1.5em}
+\vspace{-1em}\begin{center}\url{https://doi.org/10.5281/zenodo.6423459}\end{center}\vspace{-1em}
+
+Además, como se ha especificado a lo largo del proyecto, se han descargado las fotografías de los anuncios de Fotocasa y los planos de las casas de Idealista, contenido que no ha podido compartirse en público por motivos de \textit{copyright}.
+
+Para facilitar que se valore la gestión de este \textbf{contenido audiovisual} en el proyecto, se ha compartido el enlace privado de Google Drive con Mireia Calvo González, profesora colaboradora a cargo del aula 2 de la asignatura Tipología y ciclo de vida de los datos de la Universitat Oberta de Catalunya (UOC). 
+
+\vspace{-1.5em}\section*{Tabla de contribuciones}\vspace{-1.5em}
 
 \begin{table}[h]
 	\centering
