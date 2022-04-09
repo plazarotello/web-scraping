@@ -296,6 +296,10 @@ Una consecuencia de que la ejecución completa del programa se extienda tanto en
 
 Teniendo estas consideraciones en mente, se ha decidido implementar un sistema de recuperación (\textit{backup}) y reanudación del \textit{scraping} mediante una sincronización cada \verb|X| \textit{links} visitados.
 
+El \textbf{proceso de sincronización} utiliza un sistema de semáforos y eventos para controlar el número de páginas visitadas por el \textit{scraper} de navegación los \textit{scrapers} de inmuebles; para poder obtener una nueva página que visitar, los procesos tienen que pedir turno primero al semáforo, que solo tiene \verb|X| huecos disponibles. Una vez los huecos del semáforo se acaban, los procesos avisan al evento y se ponen a la cola para poder obtener un nuevo \textit{link} cuando haya hueco disponible.
+
+El proceso principal espera a que se lance el evento para comenzar su procedimiento de sincronización: primero espera a que los procesos en curso queden a la espera de nuevos turnos en el semáforo, luego lanza el sistema de recuperación y reanudación, y finalmente libera los huecos del semáforo y da el evento como proesado y terminado.
+
 Este \textbf{sistema de recuperación y reanudación} funciona de tal manera que se guardan en disco y se recuperan unos objetos de estado, concretamente una lista de los \textit{links} de navegación que quedan por visitar, una lista de los \textit{links} de inmuebles por visitar y una lista de la información de los inmuebles que hay que guardar en disco en la próxima sincronización.
 
 Para evitar que la memoria RAM se llene antes de que el \textit{scraping} se haya completado \textemdash este es uno de los errores que pueden suceder, que la máquina se quede sin memoria para cargar más páginas \textemdash, solo se guarda la información de los inmuebles que no se encuentra ya salvada en disco en el fichero CSV. Cuando se realiza la sincronización, además de guardar un \textit{pickle} de los objetos de estado se actualiza también el fichero CSV volcando la nueva información y liberando la memoria RAM asociada.
