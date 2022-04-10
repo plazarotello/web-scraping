@@ -218,7 +218,7 @@ Los \textbf{anunciantes}, que pueden ser tanto propietarios particulares como in
 
 Los portales inmobiliarios ponen a disposición de los \textbf{compradores} dichos anuncios y ayudan a ponerles en contacto con los anunciantes, con los que cerrarán el trato fuera del portal.
 
-En \textbf{este proyecto} se analizan dichos portales inmobiliarios y se vuelcan en el \textit{dataset} final la información de los anuncios sobre \textbf{viviendas en venta} en F\textbf{otocasa e Idealista}, en concreto de los distritos de \textbf{Villaverde} y \textbf{Salamanca} de Madrid, como ya se ha explicado en apartados anteriores. El resultado es un \textbf{CSV} con un registro por cada una de dichas viviendas y sus \textbf{planos} incluidos en los anuncios de Idealista, mientras que si el anuncio es de Fotocasa se han descargado todas las \textbf{fotografías} al carecer de la opción específica del plano. 
+En \textbf{este proyecto} se analizan dichos portales inmobiliarios y se vuelca en el \textit{dataset} final la información de los anuncios sobre \textbf{viviendas en venta} en F\textbf{otocasa e Idealista}, en concreto de los distritos de \textbf{Villaverde} y \textbf{Salamanca} de Madrid, como ya se ha explicado en apartados anteriores. El resultado es un \textbf{CSV} con un registro por cada una de dichas viviendas y sus \textbf{planos} incluidos en los anuncios de Idealista, mientras que si el anuncio es de Fotocasa se han descargado todas las \textbf{fotografías} al carecer de la opción específica del plano. 
 
 \vspace{-1.5em}\section{Contenido}\vspace{-1.0em}
 
@@ -243,7 +243,7 @@ Los datos han sido obtenidos durante la primera semana de abril de 2022 (del 4 a
 	\vspace{-2.5em}
 \end{figure}
 
-Para obtener los datos se ha utilizado las siguientes tecnologías:
+Para obtener los datos se han utilizado las siguientes tecnologías:
 
 \begin{multicols}{3}
 	\begin{itemize}[topsep=0cm,partopsep=0cm,wide]
@@ -253,9 +253,9 @@ Para obtener los datos se ha utilizado las siguientes tecnologías:
 	\end{itemize}
 \end{multicols}\vspace{-10pt}
 
-Los datos se han obtenido mediante \textit{web scraping}; se ha utilizado principalmente \textbf{Selenium} por ser la tecnología que mejor imita el comportamiento humano al navegar por la web, aunque también se ha utilizado \textbf{BeautifulSoup} para comprobar los códigos de error cuando la página no cargaba según lo previsto.
+Los datos se han obtenido mediante \textit{web scraping}. Se ha empleado principalmente \textbf{Selenium} por ser la tecnología que mejor imita el comportamiento humano al navegar por la web, aunque también se ha utilizado \textbf{BeautifulSoup} para comprobar los códigos de error cuando la página no cargaba según lo previsto.
 
-Para optimizar los tiempos de ejecución se han utilizado las \textbf{características multihilo} que ofrece Python: por un lado, cada \textit{scraper} se lanza en su propio hilo \textemdash es decir, el \textit{scraper} de Fotocasa y el de Idealista se ejecutarán en paralelo \textemdash y a su vez, cada \textit{scraper} utiliza varios hilos para paralelizar el trabajo.
+Para optimizar los tiempos de ejecución, el proyecto se beneficia de las \textbf{características multihilo} que ofrece Python: por un lado, cada \textit{scraper} se lanza en su propio hilo \textemdash es decir, el \textit{scraper} de Fotocasa y el de Idealista se ejecutarán en paralelo \textemdash y a su vez, cada \textit{scraper} utiliza varios hilos para paralelizar el trabajo.
 
 \begin{figure}[h]
 	\centering
@@ -272,19 +272,21 @@ Respecto a las \textbf{esperas activas}, esta ha sido la técnica que mejor ha f
 
 Dada la limitada efectividad de las esperas activas en Idealista, se ha utilizado una \textbf{extensión gratuita para Google Chrome de resolución automática de \textit{captchas}} (\textit{Buster: Captcha Solver for Humans}), tampoco 100\% efectiva. Una alternativa consistente sería utilizar una extensión de pago de resolución de \textit{captchas}, pero no se ha considerado por estar fuera del presupuesto del proyecto.
 
-También se han llevado a cabo acciones para camuflar las peticiones tan repetitivas del \textit{scraper}, con efectividad muy limitada. Por un lado, los \textbf{cambios de \textit{user agent}} no produjeron ningún efecto en Idealista para evitar la aparición de \textit{captchas} dado que este portal utiliza la IP del navegador para el conteo de peticiones. Sin embargo, la definición de un \textit{user agent} válido y la \textbf{desactivación de la opción \textit{headless}} en el navegador de Selenium evitó ser bloqueados en la primera petición a los protales.
+También se han llevado a cabo acciones para camuflar las peticiones tan repetitivas del \textit{scraper}, con efectividad muy limitada. Por un lado, los \textbf{cambios de \textit{user agent}} no produjeron ningún efecto en Idealista para evitar la aparición de \textit{captchas} dado que este portal utiliza la IP del navegador para el conteo de peticiones. Sin embargo, la definición de un \textit{user agent} válido y la \textbf{desactivación de la opción \textit{headless}} en el navegador de Selenium evitó ser bloqueados en la primera petición a los portales.
 
-Por otro lado, se probó la \textbf{utilización de \textit{proxies}} para evitar los bloqueos en Idealista, utilizando \textit{proxies} gratuitos disponibles en internet. Esta técnica, sin embargo, no terminó de ocultar la IP de la petición, por lo que no surtió ningún efecto en Idealista. Sin embargo, es posible que con \textit{proxies} de mayor calidad y por tanto, de pago, se hubiera conseguido un resultado mucho más favorable. Finalmente se optó por no utilizar \textit{proxies} debido al retardo añadido a las peticiones del servidor.
+Por otro lado, se probó la \textbf{utilización de \textit{proxies}} para evitar los bloqueos en Idealista, utilizando \textit{proxies} gratuitos disponibles en internet. Esta técnica, sin embargo, no terminó de ocultar la IP de la petición, por lo que no surtió ningún efecto. Sin embargo, es posible que con \textit{proxies} de mayor calidad y, por tanto, de pago, se hubiera conseguido un resultado mucho más favorable. Finalmente, se optó por no utilizar \textit{proxies} debido al retardo añadido a las peticiones del servidor, aunque se ha dejado esta posibilidad en el proyecto por si se quisiera retomar como opción en el futuro.
 
 \vspace{-1.5em}\subsection*{Detalles del \textit{scraper} de Fotocasa}\vspace{-1em}
 
-El portal inmobiliario \textbf{Fotocasa} cuenta con un sistema de carga perezosa o \textit{\textbf{lazy load}} en las páginas de navegación. Concretamente, el estilo de las \textit{cards} que representan los inmuebles se va cargando a medida que aparecen en la sección visible del navegador; es decir, a medida que el usuario va navegando por la página (\textit{scroll}).
+El primer reto solventado en el portal inmobiliario \textbf{Fotocasa} es el de la aceptación de las \textit{\textbf{cookies}}, sin lo cual no se puede navegar libremente por el portal. Por ejemplo, no permite cambiar de página y, por tanto, extraer la URL de todos los inmuebles en venta en una zona. Para saltar esta barrera, y gracias a Selenium, tras cargar la página con las viviendas por ubicación se simula el clic sobre la opción de aceptar dichas \textit{cookies}. Por otro lado, como al abrir cada URL de cada inmueble no afecta en nada no aceptar estas condiciones, en este otro caso no se hace para no añadir retardos al proceso de \textit{scraping}.
 
-Esta carga perezosa supuso un reto a la hora de obtener la información general de cada inmueble mediante el \textit{scraping} de las páginas de navegación, ya que las clases a las que pertenecía cada inmueble cambiaban con el tiempo.
+Además, Fotocasa cuenta con un sistema de \textbf{carga diferida} o \textit{\textbf{lazy loading}} tanto en las páginas que ofrecen los listados de los inmuebles como en las URL de las casas en sí mismas. Esto se traduce en que los contenedores o \textit{div} con la información de cada página se van cargando a medida que aparecen en la sección visible del navegador, es decir, conforme el usuario va navegando hacia abajo por la página (\textit{scroll}).
 
-A este respecto, se presentaron 2 desafíos: por un lado, identificar el \textit{lazy load}, ya que el portal lo manejaba de forma transparente al usuario y solo se encontró la carga perezosa mediante depuración en un navegador aparte; por otro lado, encontrar la forma de evitar la carga perezosa.
+Así, esta carga diferida supuso un reto a la hora de obtener la información general de cada inmueble mediante el \textit{scraping} de las páginas de navegación y de las fotografías en las URL de las casas, ya que la información no se puede descargar tras la carga. El desafío, en este sentido, fue identificar el problema ya que el portal lo maneja de forma transparente el usuario y solo se encontró  mediante depuración en un navegador aparte. Se soluciona empleando Selenium para emular el comportamiento humano de hacer \textit{scroll} hacia abajo, de manera que se puedan cargar de forma asíncrona todos los elementos de dicha página.
 
-Para solucionar este problema, se utilizó la \textbf{ejecución de \textit{scripts} de JavaScript} en el navegador Selenium para imitar el comportamiento de navegación por la página, realizando la acción de \textit{scroll down} hasta llegar a la última \textit{card} de inmueble de la página.
+Otro obstáculo solventado es que \textbf{las clases} y, en ocasiones, los \textbf{\textit{div}} en los que se aloja la información de cada inmueble en las páginas que muestran los listados de resultados según la ubicación no son los mismos. Esto quiere decir que la estructura del portal cambia a medida que se avanza por estos listados a través de las diferentes páginas de una misma ubicación, progresión que también se hace simulando un clic sobre el botón de \textit{página siguiente} emulando el comportamiento humano con Selenium. 
+
+Para saltar la traba de la estructura diferente, que provocaba que solo se pudiera almacenar información del 8\% de los inmuebles, se opta por evaluar la ubicación a \textit{scrapear} en cada caso, de manera que el programa ya detecta cuál es la estructura prevista debido a que se ha adaptado el código a cada una de ellas.
 
 \vspace{-1.5em}\subsection*{Detalles del \textit{scraper} de Idealista}\vspace{-1em}
 
@@ -292,7 +294,7 @@ El portal inmobiliario \textbf{Idealista} cuenta con un sistema de bloqueos para
 
 Debido a todas las salvaguardas para evitar la detección de Idealista, el \textit{scraper} de este portal inmobiliario dedica mucho tiempo a las esperas activas, dilatando en gran medida el tiempo requerido para obtener toda la información del sitio web. 
 
-Una consecuencia de que la ejecución completa del programa se extienda tanto en el tiempo es que la fase de pruebas es muy costosa. Así mismo, si sucede un error inesperado (dentro o fuera del programa) y el \textit{scraper} se bloquea, el coste también es muy grande.
+Una consecuencia de que la ejecución completa del programa se extienda tanto en el tiempo es que la fase de pruebas es muy costosa. Así mismo, si sucede un error inesperado (dentro o fuera del programa) y el \textit{scraper} se bloquea, con el coste que esto supone.
 
 Teniendo estas consideraciones en mente, se ha decidido implementar un sistema de recuperación (\textit{backup}) y reanudación del \textit{scraping} mediante una sincronización cada \verb|X| \textit{links} visitados.
 
