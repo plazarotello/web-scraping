@@ -28,7 +28,9 @@ def merge_idealista_folders():
     folders = [folder for folder in utils.get_directories(
         config.DATASET_DIR) if regex.match(folder)]
     if not utils.directory_exists(config.IDEALISTA_MAPS):
-        [utils.duplicate_folder(dir=folder, dest=config.IDEALISTA_MAPS) for folder in folders]
+        [utils.duplicate_folder(dir=folder, dest=config.IDEALISTA_MAPS)
+         for folder in folders]
+
 
 def merge_fotocasa_files():
     """
@@ -40,7 +42,8 @@ def merge_fotocasa_files():
     if len(dfs) > 0:
         fotocasa_csv = pd.concat(dfs).drop_duplicates('id')
         fotocasa_csv.to_csv(config.FOTOCASA_FILE, encoding='utf-8',
-                             index=False, header=True)
+                            index=False, header=True)
+
 
 def merge_fotocasa_folders():
     """
@@ -50,7 +53,9 @@ def merge_fotocasa_folders():
     folders = [folder for folder in utils.get_directories(
         config.DATASET_DIR) if regex.match(folder)]
     if not utils.directory_exists(config.FOTOCASA_IMG_DIR):
-        [utils.duplicate_folder(dir=folder, dest=config.FOTOCASA_IMG_DIR) for folder in folders]
+        [utils.duplicate_folder(dir=folder, dest=config.FOTOCASA_IMG_DIR)
+         for folder in folders]
+
 
 def merge_fotocasa_idealista():
     """
@@ -72,20 +77,25 @@ def zip_everything():
     Compresses resulting files
     """
     zip_file = ZipFile(config.MERGED_ZIP_FILE, 'w')
-    zip_file.write(filename=config.MERGED_FILE, arcname=os.path.basename(config.MERGED_FILE))
-    zip_file.write(filename=config.IDEALISTA_MAPS, arcname=os.path.basename(config.IDEALISTA_MAPS))
-    zip_file.write(filename=config.FOTOCASA_IMG_DIR, arcname=os.path.basename(config.FOTOCASA_IMG_DIR))
+    zip_file.write(filename=config.MERGED_FILE,
+                   arcname=os.path.basename(config.MERGED_FILE))
+    zip_file.write(filename=config.IDEALISTA_MAPS,
+                   arcname=os.path.basename(config.IDEALISTA_MAPS))
+    zip_file.write(filename=config.FOTOCASA_IMG_DIR,
+                   arcname=os.path.basename(config.FOTOCASA_IMG_DIR))
 
     for folder_name, _, files in os.walk(config.IDEALISTA_MAPS):
         for file in files:
             file_name = os.path.join(folder_name, file)
-            arc_name = os.path.relpath(file_name, os.path.join(config.IDEALISTA_MAPS, '..'))
+            arc_name = os.path.relpath(
+                file_name, os.path.join(config.IDEALISTA_MAPS, '..'))
             zip_file.write(filename=file_name, arcname=arc_name)
-            
+
     for folder_name, _, files in os.walk(config.FOTOCASA_IMG_DIR):
         for file in files:
             file_name = os.path.join(folder_name, file)
-            arc_name = os.path.relpath(file_name, os.path.join(config.FOTOCASA_IMG_DIR, '..'))
+            arc_name = os.path.relpath(
+                file_name, os.path.join(config.FOTOCASA_IMG_DIR, '..'))
             zip_file.write(filename=file_name, arcname=arc_name)
 
     zip_file.close()

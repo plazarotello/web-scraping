@@ -33,7 +33,7 @@ class IdealistaScraper(HouseScraper):
     __houses_visited = list()
 
     # config for the periodic backup
-    __urls_before_cleanup = 10
+    __urls_before_cleanup = config.IDEALISTA_BACKUP_AFTER
     __cleaner_semaphore = threading.Semaphore(value=__urls_before_cleanup)
     __cleaner_signal = threading.Event()
 
@@ -110,7 +110,7 @@ class IdealistaScraper(HouseScraper):
                         return None, False
                     else:
                         retries += 1
-                        if retries > 3:
+                        if retries > config.IDEALISTA_MAX_RETRIES:
                             return None, False
                         utils.mega_wait()
                         driver.refresh()
@@ -118,7 +118,7 @@ class IdealistaScraper(HouseScraper):
                     utils.error(
                         f'[{self.id}] Error retrieving {driver.current_url}')
                     retries += 1
-                    if retries > 3:
+                    if retries > config.IDEALISTA_MAX_RETRIES:
                         return None, False
                     utils.mega_wait()
                     driver.refresh()

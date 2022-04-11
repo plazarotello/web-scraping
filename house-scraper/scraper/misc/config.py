@@ -23,6 +23,8 @@ IDEALISTA_FILE = os.path.join(
 IDEALISTA_MAPS = os.path.join(DATASET_DIR, IDEALISTA_ID + '-maps')
 # Directory to save temporary files
 IDEALISTA_TMP = os.path.join(TMP_DIR, IDEALISTA_ID)
+IDEALISTA_BACKUP_AFTER = 10  # URLs to visit before saving the progress
+IDEALISTA_MAX_RETRIES = 3   # Max. retries before giving up on URL
 
 FOTOCASA_ID = 'fotocasa'
 FOTOCASA_URL = 'https://www.fotocasa.es/es/'
