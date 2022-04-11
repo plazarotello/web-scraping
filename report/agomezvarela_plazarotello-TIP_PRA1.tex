@@ -13,7 +13,7 @@
 \usepackage{xcolor}
 \usepackage{graphicx}
 \usepackage[font=footnotesize,labelfont=bf]{caption}
-\usepackage[allbordercolors=orange]{hyperref}
+\usepackage[hidelinks]{hyperref}
 \usepackage{fontspec}
 \usepackage{fancyhdr}
 \usepackage{titling}
@@ -31,6 +31,8 @@
 \addbibresource{TIPPRA1.bib}
 
 \definecolor{uocblue}{HTML}{000078}
+\colorlet{uocresalt}{white!93!uocblue}
+\sethlcolor{uocresalt}
 \colorlet{main}{uocblue}
 \setmainfont{Arial}[Color = uocblue]
 \renewcommand{\labelitemi}{$\textcolor{uocblue}{\bullet}$}
@@ -154,7 +156,7 @@ showtabs=false, tabsize=4}
 	\textbf{\underline{Houses for sale in the Salamanca and Villaverde district of Madrid in April 2022}}
 	\begin{multicols}{2}
 		\begin{itemize}[topsep=0cm,partopsep=0cm,label={},wide]
-			\item \textbf{DOI}: \href{https://doi.org/10.5281/zenodo.6423459}{10.5281/zenodo.6418974}
+			\item \textbf{DOI}: \href{https://doi.org/10.5281/zenodo.6423459}{\hl{10.5281/zenodo.6418974}}
 			\item \textbf{Licencia}: CC BY-NC-SA 4.0
 			\item \textbf{Número de registros}: 3.545
 			\columnbreak
@@ -175,7 +177,7 @@ Además de cambios en la normativa del mercado inmobiliario, la \textbf{invasió
 
 Asimismo, cabe destacar que el mercado inmobiliario en España se ha caracterizado desde hace décadas por las \textbf{diferencias en el precio} de la vivienda, tanto según las zonas del territorio nacional como dentro de las propias localidades. 
 
-Teniendo presente esta situación de cambios económicos y normativos, y no existiendo un registro público de viviendas en venta actualizado, se ha decidido obtener la información de las viviendas en venta de los portales inmobiliarios de \textbf{Idealista} y \textbf{Fotocasa}. Esta decisión se fundamenta en que son los portales \textbf{más visitados} en España, según los datos de febrero de \href{https://www.similarweb.com/top-websites/spain/category/business-and-consumer-services/real-estate/}{\textit{\underline{similarweb}}}, que publica las métricas oficiales de los sitios web de todo el mundo. Además, esta clasificación de visitas se mantiene en los últimos años, por lo que no se prevé que varíe en un corto periodo de tiempo. Asimismo, es interesante que estos portales trabajan tanto con \textbf{inmobiliarias} como con \textbf{particulares} que desean vender inmuebles, por lo que proporcionan una información amplia sobre el tema de interés del proyecto.
+Teniendo presente esta situación de cambios económicos y normativos, y no existiendo un registro público de viviendas en venta actualizado, se ha decidido obtener la información de las viviendas en venta de los portales inmobiliarios de \textbf{Idealista} y \textbf{Fotocasa}. Esta decisión se fundamenta en que son los portales \textbf{más visitados} en España, según los datos de febrero de \href{https://www.similarweb.com/top-websites/spain/category/business-and-consumer-services/real-estate/}{\hl{\textit{similarweb}}}, que publica las métricas oficiales de los sitios web de todo el mundo. Además, esta clasificación de visitas se mantiene en los últimos años, por lo que no se prevé que varíe en un corto periodo de tiempo. Asimismo, es interesante que estos portales trabajan tanto con \textbf{inmobiliarias} como con \textbf{particulares} que desean vender inmuebles, por lo que proporcionan una información amplia sobre el tema de interés del proyecto.
 
 %\begin{center}
 %	\vspace{-0.5cm}
@@ -340,13 +342,13 @@ A continuación, se aborda el apartado de agradecimientos divido en tres bloques
 
 Como se ha indicado en otros apartados, este es un proyecto en el que se integran \textbf{dos fuentes de datos} diferentes, con sus respectivos propietarios de los datos. 
 
-Por un lado, sobre el portal web \href{http://www.idealista.com}{\textbf{\underline{Idealista}}}, cuyo fundador y CEO es Jesús Encinar, es importante destacar que la empresa está registrada como una Sociedad Anónima Unipersonal (Idealista S.A.U.) fundada en el año 2000, aunque en la actualidad está participada mayoritariamente por los fondos gestionados por EQT. En estos momentos, opera además en Portugal e Italia, países en los que no se centra este proyecto, pero cuya estructura de la web es idéntica, con todo lo que esto implica. 
+Por un lado, sobre el portal web \href{http://www.idealista.com}{\textbf{\hl{Idealista}}}, cuyo fundador y CEO es Jesús Encinar, es importante destacar que la empresa está registrada como una Sociedad Anónima Unipersonal (Idealista S.A.U.) fundada en el año 2000, aunque en la actualidad está participada mayoritariamente por los fondos gestionados por EQT. En estos momentos, opera además en Portugal e Italia, países en los que no se centra este proyecto, pero cuya estructura de la web es idéntica, con todo lo que esto implica. 
 
 Explorando el dominio mediante \textit{whois} de python, se obtienen otros datos del mismo, como que su fecha de creación fue el 21 de agosto de 1999 y otra información irrelevante en este punto.
 
 Por otro lado, según explican ellos mismos y se puede verificar en gran medida en el desarrollo del código, el \textbf{desarrollo de software} de Idealista usa como base el sistema de arquitectura LEMP (Linux, Nginx, MySql, PHP) además de otras herramientas, como bases de datos (Oracle y SQLite), motores de búsqueda fulltext (Sphinxsearch y Solr), lenguajes de programación PHP en sus versiones 5.6 y 7.1 ó JavaScript, y Laravel y Lumen como frameworks para el desarrollo de aplicaciones.
 
-En cuanto al portal web \href{https://www.fotocasa.es/es/}{\textbf{\underline{Fotocasa}}}, pertenece a Adevinta Spain S.L.U., empresa que también es propietaria del portal inmobiliario \href{https://www.habitaclia.com/madrid}{\underline{Habitaclia}}, y se fundó en 1999. Al contrario que con Idealista, la estructura de los portales de los que Adevinta es propietaria es diferente en cada caso. Con Fotocasa no se obtiene ningún tipo de información del dominio mediante \textit{whois}. 
+En cuanto al portal web \href{https://www.fotocasa.es/es/}{\textbf{\hl{Fotocasa}}}, pertenece a Adevinta Spain S.L.U., empresa que también es propietaria del portal inmobiliario \href{https://www.habitaclia.com/madrid}{\hl{Habitaclia}}, y se fundó en 1999. Al contrario que con Idealista, la estructura de los portales de los que Adevinta es propietaria es diferente en cada caso. Con Fotocasa no se obtiene ningún tipo de información del dominio mediante \textit{whois}. 
 
 En este sentido, la empresa es menos transparente en cuanto a cómo está \textbf{desarrollado} el portal, aunque sí que se ha detectado el uso de bases de datos, motores de búsquedas y lenguajes de programación PHP y JavaScript.
 
@@ -356,21 +358,21 @@ Idealista y Fotocasa han sido objeto de análisis en varias ocasiones, y los que
 
 La razón de esto reside en que el corazón de su negocio son los datos y cualquiera que se haga con ellos puede obtener una ventaja competitiva indeseable para ambos portales. Es por este motivo por el que sus equipos de desarrolladores son especialmente conocidos por intentar poner trabas a estas prácticas que, como se verá en el siguiente apartado, de manera explícita ellos prohíben realizar.
 
-En el contexto del Máster en Inteligencia Artificial aplicada a los Mercados Financieros (mIA-X) del Instituto BME, David Carrasco Cuñado desarrolló un proyecto para \textit{scrapear} \textbf{Idealista}, cuyo código se puede encontrar en \href{https://github.com/David-Carrasco/Scrapy-Idealista}{\underline{este repositorio}} de GitHub y tiene como última actualización octubre de 2020. 
+En el contexto del Máster en Inteligencia Artificial aplicada a los Mercados Financieros (mIA-X) del Instituto BME, David Carrasco Cuñado desarrolló un proyecto para \textit{scrapear} \textbf{Idealista}, cuyo código se puede encontrar en \href{https://github.com/David-Carrasco/Scrapy-Idealista}{\hl{este repositorio}} de GitHub y tiene como última actualización octubre de 2020. 
 
 Este repositorio es el más completo que se ha encontrado que se aproxime a los objetivos del proyecto descrito en este informe y únicamente permite registrar la información de cada uno de los inmuebles que aparecen en la \textbf{primera página de una URL} dada con una ubicación en concreto, extrayendo los datos únicamente de esta dirección sin entrar a ver los detalles en las páginas correspondientes de cada una de las viviendas. 
 
-El tutorial \textbf{más completo} es el ofrecido por el usuario de YouTube Code Monkey King, que se puede ver en \href{https://www.youtube.com/watch?v=4Tv73KuqgVo}{\underline{este vídeo}}. El punto de entrada son códigos postales y enseña a descargar todos los datos tanto de las páginas de localización en las que se encuentran los listados de inmuebles como de las URL con cada uno de ellos. Por tanto, aunque no proporcione el código ejecutable de una forma directa, se trata de una pieza completa e interesante. 
+El tutorial \textbf{más completo} es el ofrecido por el usuario de YouTube Code Monkey King, que se puede ver en \href{https://www.youtube.com/watch?v=4Tv73KuqgVo}{\hl{este vídeo}}. El punto de entrada son códigos postales y enseña a descargar todos los datos tanto de las páginas de localización en las que se encuentran los listados de inmuebles como de las URL con cada uno de ellos. Por tanto, aunque no proporcione el código ejecutable de una forma directa, se trata de una pieza completa e interesante. 
 
-Por su parte, Miguel Ángel Gisbert publicó en junio de 2021 un tutorial sobre cómo \textit{scrapear} los datos de una vivienda dada la URL de la misma, que se puede consultar en \href{https://www.youtube.com/watch?v=2UyJv5oe570}{\underline{este vídeo}}. Al igual que el proyecto anterior, no realiza ningún análisis una vez obtenidos los datos. 
+Por su parte, Miguel Ángel Gisbert publicó en junio de 2021 un tutorial sobre cómo \textit{scrapear} los datos de una vivienda dada la URL de la misma, que se puede consultar en \href{https://www.youtube.com/watch?v=2UyJv5oe570}{\hl{este vídeo}}. Al igual que el proyecto anterior, no realiza ningún análisis una vez obtenidos los datos. 
 
-En cuanto a Idealista, ya no destacan más ejemplos que merezcan una especial mención puesto que no se acercan remotamente a los objetivos de este proyecto. Por ejemplo, se ha encontrado \href{https://medium.com/@rubenmarcos/crear-una-base-de-datos-de-la-evoluci%C3%B3n-del-mercado-inmobiliario-con-idealista-y-r-y-sin-scraping-1d5025a9d47e}{\underline{una alternativa}} al \textit{scraping} directo del portal mediante el análisis con R de la propia bandeja de entrada del \textbf{correo electrónico}, al que llega información de los pisos que cumplen los requisitos a los que el usuario se ha suscrito.
+En cuanto a Idealista, ya no destacan más ejemplos que merezcan una especial mención puesto que no se acercan remotamente a los objetivos de este proyecto. Por ejemplo, se ha encontrado \href{https://medium.com/@rubenmarcos/crear-una-base-de-datos-de-la-evoluci%C3%B3n-del-mercado-inmobiliario-con-idealista-y-r-y-sin-scraping-1d5025a9d47e}{\hl{una alternativa}} al \textit{scraping} directo del portal mediante el análisis con R de la propia bandeja de entrada del \textbf{correo electrónico}, al que llega información de los pisos que cumplen los requisitos a los que el usuario se ha suscrito.
 
-Respecto a \textbf{Fotocasa}, los compañeros Irene Fernández Molina y Héctor Hernández Membiela en el contexto académico de esta misma asignatura en abril de 2019 desarrollaron un proyecto de \textit{web scraping} en el que este era uno de los dos sitios web del que realizaban la captura de datos. Como se puede observar en \href{https://github.com/EdelBlau/PEC_TPC}{\underline{su repositorio}}, sin embargo, toda la información que se extrae se encuentra en las páginas en las que se muestra el \textbf{listado de inmuebles} y no se propone una extracción de la información que contiene cada una de las páginas de los mismos. 
+Respecto a \textbf{Fotocasa}, los compañeros Irene Fernández Molina y Héctor Hernández Membiela en el contexto académico de esta misma asignatura en abril de 2019 desarrollaron un proyecto de \textit{web scraping} en el que este era uno de los dos sitios web del que realizaban la captura de datos. Como se puede observar en \href{https://github.com/EdelBlau/PEC_TPC}{\hl{su repositorio}}, sin embargo, toda la información que se extrae se encuentra en las páginas en las que se muestra el \textbf{listado de inmuebles} y no se propone una extracción de la información que contiene cada una de las páginas de los mismos. 
 
-También en el ámbito académico, el Trabajo de Fin de Máster (TFM) de Álvaro Torrente Patiño del Máster de Ciberseguridad de la Universidade da Coruña trabajaba sobre el \textit{web scraping} de portales inmobiliarios, entre los que se encontraba Fotocasa según ha explicado él mismo en LinkedIn, pero el portal de la facultad en el que está colgado \href{http://castor.det.uvigo.es:8080/xmlui/bitstream/handle/123456789/575/TorrentePatino_Alvaro_TFM_2021.pdf?sequence=1&isAllowed=y}{\underline{dicho trabajo}} ha estado caído durante todo el desarrollo de este proyecto, por lo que no se ha podido estudiar su trabajo previo. 
+También en el ámbito académico, el Trabajo de Fin de Máster (TFM) de Álvaro Torrente Patiño del Máster de Ciberseguridad de la Universidade da Coruña trabajaba sobre el \textit{web scraping} de portales inmobiliarios, entre los que se encontraba Fotocasa según ha explicado él mismo en LinkedIn, pero el portal de la facultad en el que está colgado \href{http://castor.det.uvigo.es:8080/xmlui/bitstream/handle/123456789/575/TorrentePatino_Alvaro_TFM_2021.pdf?sequence=1&isAllowed=y}{\hl{dicho trabajo}} ha estado caído durante todo el desarrollo de este proyecto, por lo que no se ha podido estudiar su trabajo previo. 
 
-Por otro lado, el usuario de YouTube Fpred publicó en octubre de 2020 un \textbf{pequeño tutorial} en el que explica cómo enfrentarse al \textit{lazy loading} de la web de Fotocasa para obtener los precios de todas las viviendas que aparecen en cada página del listado cuando se busca una localización, como se puede ver en \href{https://www.youtube.com/watch?v=WMjV7rF3oX8}{\underline{este vídeo}}, pero no profundiza en ningún otro aspecto adicional. 
+Por otro lado, el usuario de YouTube Fpred publicó en octubre de 2020 un \textbf{pequeño tutorial} en el que explica cómo enfrentarse al \textit{lazy loading} de la web de Fotocasa para obtener los precios de todas las viviendas que aparecen en cada página del listado cuando se busca una localización, como se puede ver en \href{https://www.youtube.com/watch?v=WMjV7rF3oX8}{\hl{este vídeo}}, pero no profundiza en ningún otro aspecto adicional. 
 
 En relación a \textbf{análisis} en sí mismos, no se ha encontrado ninguno relevante ni con datos descargados de Idealista ni de Fotocasa más allá que los que ellos publican en sus respectivos portales web. Así, cabe destacar, por último, que es probable que existan \textbf{empresas} que hayan realizado proyectos para obtener la información de estos dos portales web, pero no se han hecho públicos y, por tanto, no se han podido tener en cuenta para esta fase del proyecto. 
 
@@ -378,9 +380,9 @@ En relación a \textbf{análisis} en sí mismos, no se ha encontrado ninguno rel
 
 Este es uno de los apartados \textbf{más complejos} del proyecto y que se ha tratado con especial sensibilidad.
 
-Según se recoge en el fichero \href{https://www.idealista.com/robots.txt}{\underline{robots.txt}} de \textbf{Idealista}, están específicamente no permitidas algunas de las acciones contempladas en este proyecto, como la navegación a través de la \textbf{paginación} (\verb|Disallow: /*/pagina-*.htm|) o el empleo de más de dos \textbf{filtros} (\verb|Disallow: /venta-*,*,*,| o \verb|Disallow: /venta-*,|), cuando en este caso se están empleando tres: viviendas + Madrid + distrito. 
+Según se recoge en el fichero \href{https://www.idealista.com/robots.txt}{\hl{robots.txt}} de \textbf{Idealista}, están específicamente no permitidas algunas de las acciones contempladas en este proyecto, como la navegación a través de la \textbf{paginación} (\verb|Disallow: /*/pagina-*.htm|) o el empleo de más de dos \textbf{filtros} (\verb|Disallow: /venta-*,*,*,| o \verb|Disallow: /venta-*,|), cuando en este caso se están empleando tres: viviendas + Madrid + distrito. 
 
-Según se recoge en el fichero \href{https://www.fotocasa.es/robots.txt}{\underline{robots.txt}} de \textbf{Fotocasa}, por su parte, este portal es mucho menos restrictivo. Sin embargo, también está especificado que no se permite la navegación a través de la \textbf{paginación} a partir de la cuarta incluida (\verb|Disallow: */l/4*| hasta \verb|Disallow: */l/39*|), condición necesaria para el proyecto planteado.
+Según se recoge en el fichero \href{https://www.fotocasa.es/robots.txt}{\hl{robots.txt}} de \textbf{Fotocasa}, por su parte, este portal es mucho menos restrictivo. Sin embargo, también está especificado que no se permite la navegación a través de la \textbf{paginación} a partir de la cuarta incluida (\verb|Disallow: */l/4*| hasta \verb|Disallow: */l/39*|), condición necesaria para el proyecto planteado.
 
 No obstante, para la búsqueda de las viviendas de cada distrito no se incumple ninguna restricción ya que, según la construcción de la URL no está especificada como tal. Por ejemplo, el archivo indica \verb|Disallow: /*filter=*| pero la URL de Villaverde es \verb|/es/comprar/viviendas/madrid-capital/villaverde/l?sortType=scoring|. Este tipo de \textit{sortType} es el único permitido, por lo que tampoco entra en conflicto con las indicaciones del propietario. 
 
@@ -394,7 +396,7 @@ Debido a todo lo expuesto en apartados anteriores, se agradece tanto a \textbf{I
 
 Además, se hace extensible este agradecimiento a las personas mencionadas en \textbf{trabajos anteriores} por haber hecho público el conocimiento que han adquirido y que ha servido de punto de partida para este proyecto o para solventar obstáculos encontrados durante el desarrollo. 
 
-Por último, se agradece también a \textbf{Armin Sebastian}, creador de la extensión \href{https://chrome.google.com/webstore/detail/buster-captcha-solver-for/mpbjkejclgfgadiemmefgebjfooflfhl}{\underline{Buster: Captcha Solver for Humans}}, que ha hecho factible realizar \textit{web scrapping} sobre Idealista, y al sitio web \href{https://hidemy.name/proxy-list/}{\underline{\textbf{hidemy.name}}} por su base de datos de \textit{proxies}.
+Por último, se agradece también a \textbf{Armin Sebastian}, creador de la extensión \href{https://chrome.google.com/webstore/detail/buster-captcha-solver-for/mpbjkejclgfgadiemmefgebjfooflfhl}{\hl{Buster: Captcha Solver for Humans}}, que ha hecho factible realizar \textit{web scrapping} sobre Idealista, y al sitio web \href{https://hidemy.name/proxy-list/}{\hl{\textbf{hidemy.name}}} por su base de datos de \textit{proxies}.
 
 \vspace{-1.5em}\section{Inspiración}\vspace{-1em}
 
@@ -404,11 +406,11 @@ En este sentido, no es necesario extenderse mucho más puesto que en la sección
 
 El conjunto de datos resultante de este proyecto da un paso en esta dirección porque la captura se ha realizado de los dos portales inmobiliarios más empleados en España, por lo que los datos se pueden considerar suficientemente \textbf{representativos} para los análisis posteriores. 
 
-Así, en ningún proyecto publicado hasta la fecha (o por lo menos al que haya llegado en la fase de investigación) se integra información de Idealista y de Fotocasa. En este sentido, tampoco existen informes que aborden las diferencias de las viviendas en venta en los \textbf{dos barrios o distritos} con los precios más extremos dentro de una localidad, lo cual es interesante justo en un momento en el que la crisis provocada por la pandemia de coronavirus ha potenciado la desigualdad, tal y como concluyen los informes de 2022 de \href{https://www.foessa.es/blog/foessa-presenta-la-primera-radiografia-social-completa-de-la-crisis-de-la-covid-19-en-toda-espana/}{\underline{FOESSA}}, \href{https://oxfamilibrary.openrepository.com/bitstream/handle/10546/621341/bp-inequality-kills-170122-es.pdf}{\underline{Oxfam International}} y \href{https://elobservatoriosocial.fundacionlacaixa.org/documents/22890/492074/T01_ID_ES_AyalaCant%C3%B3.pdf/a0746431-109f-e009-6c77-296c378f0438?t=1642072938395}{\underline{Observatorio Social de La Caixa}}.
+Así, en ningún proyecto publicado hasta la fecha (o por lo menos al que haya llegado en la fase de investigación) se integra información de Idealista y de Fotocasa. En este sentido, tampoco existen informes que aborden las diferencias de las viviendas en venta en los \textbf{dos barrios o distritos} con los precios más extremos dentro de una localidad, lo cual es interesante justo en un momento en el que la crisis provocada por la pandemia de coronavirus ha potenciado la desigualdad, tal y como concluyen los informes de 2022 de \href{https://www.foessa.es/blog/foessa-presenta-la-primera-radiografia-social-completa-de-la-crisis-de-la-covid-19-en-toda-espana/}{\hl{FOESSA}}, \href{https://oxfamilibrary.openrepository.com/bitstream/handle/10546/621341/bp-inequality-kills-170122-es.pdf}{\hl{Oxfam International}} y \href{https://elobservatoriosocial.fundacionlacaixa.org/documents/22890/492074/T01_ID_ES_AyalaCant%C3%B3.pdf/a0746431-109f-e009-6c77-296c378f0438?t=1642072938395}{\hl{Observatorio Social de La Caixa}}.
 
 La ciudad de \textbf{Madrid} ha sido la elegida para la captura de datos porque se trata de la más poblada de España, 3.305.408 personas a 1 de enero de 2022 según los datos del INE. Sin embargo, no existe consenso sobre si es la más cara en cuanto a la media de precio por metro cuadrado de vivienda en venta, situándose por detrás de San Sebastián y Barcelona dependiendo de la fuente consultada. 
 
-Por otro lado, a pesar de no haber fuentes oficiales actualizadas, \href{https://www.fotocasa.es/fotocasa-life/compraventa/conoce-el-precio-de-la-vivienda-en-venta-este-mes/}{\underline{Fotocasa}} e \href{https://www.idealista.com/sala-de-prensa/informes-precio-vivienda/venta/madrid-comunidad/madrid-provincia/madrid/}{\underline{Idealista}} coinciden en sus informes en que el distrito más caro de la capital es el de \textbf{Salamanca} y el más barato el de \textbf{Villaverde}, por lo que estos son los que serán objeto del análisis final tras la captura realizada en esta fase del proyecto.
+Por otro lado, a pesar de no haber fuentes oficiales actualizadas, \href{https://www.fotocasa.es/fotocasa-life/compraventa/conoce-el-precio-de-la-vivienda-en-venta-este-mes/}{\hl{Fotocasa}} e \href{https://www.idealista.com/sala-de-prensa/informes-precio-vivienda/venta/madrid-comunidad/madrid-provincia/madrid/}{\hl{Idealista}} coinciden en sus informes en que el distrito más caro de la capital es el de \textbf{Salamanca} y el más barato el de \textbf{Villaverde}, por lo que estos son los que serán objeto del análisis final tras la captura realizada en esta fase del proyecto.
 
 Una vez seleccionados los distritos, se verifica que no es útil el Anuario Estadístico de la Comunidad de Madrid (1985-2022) ni otros estudios oficiales, desactualizados o que no abordan este tipo de estudios, por lo que permitirá aportar conocimiento sobre este campo de estudio. 
 
@@ -454,7 +456,7 @@ Como se puede observar, el mayor interés a la hora de seleccionar esta licencia
 
 El \textbf{código} para el desarrollo de este proyecto se puede consultar al completo dentro de la carpeta \textit{house-scraper} en el siguiente repositorio de Github: 
 
-\vspace{-1em}\begin{center}\url{https://github.com/plazarotello/web-scraping}\end{center}\vspace{-1em}
+\vspace{-1em}\begin{center}\href{https://github.com/plazarotello/web-scraping}{\hl{https://github.com/plazarotello/web-scraping}}\end{center}\vspace{-1em}
 
 %\begin{center}
 %	\vspace{-0.5cm}
@@ -466,7 +468,7 @@ El \textbf{código} para el desarrollo de este proyecto se puede consultar al co
 
 El \textit{dataset} con los datos de las 3.545 viviendas descritas por 16 campos en formato CSV se ha publicado en Zenodo y se puede acceder a él a partir del siguiente enlace del DOI: 
 
-\vspace{-1em}\begin{center}\url{https://doi.org/10.5281/zenodo.6423459}\end{center}\vspace{-1em}
+\vspace{-1em}\begin{center}\href{https://doi.org/10.5281/zenodo.6423459}{\hl{https://doi.org/10.5281/zenodo.6423459}}\end{center}\vspace{-1em}
 
 Además, como se ha especificado a lo largo del proyecto, se han descargado las fotografías de los anuncios de Fotocasa y los planos de las casas de Idealista, contenido que no ha podido compartirse en público por motivos de \textit{copyright}.
 
@@ -478,6 +480,7 @@ Para facilitar que se valore la gestión de este \textbf{contenido audiovisual} 
 %	\vspace{-0.5cm}
 %\end{center}
 
+\newpage
 \vspace{-1.5em}\section*{Tabla de contribuciones}\vspace{-1em}
 
 \begin{table}[h]
